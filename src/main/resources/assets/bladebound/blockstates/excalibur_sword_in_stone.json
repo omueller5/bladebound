@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "has_sword=true": { "model": "bladebound:block/excalibur_sword_in_stone" },
+    "has_sword=false": { "model": "bladebound:block/empty_sword_stone" }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "parent": "bladebound:collect_first_blade",
+  "display": {
+    "icon": { "id": "bladebound:excalibur" },
+    "title": {"text" : "Legendary Arsenal"},
+    "description": {"text" : "Collect every LEGENDARY BladeBound blade."},
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "sends_telemetry_event": false
+  },
+  "criteria": {
+    "has_excalibur": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": { "items": [ { "items": [ "bladebound:excalibur" ] } ] }
+    },
+    "has_murasame": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": { "items": [ { "items": [ "bladebound:murasame" ] } ] }
+    }
+  },
+  "requirements": [
+    ["collect_excalibur"],
+    ["collect_murasame"]
+  ]
+}

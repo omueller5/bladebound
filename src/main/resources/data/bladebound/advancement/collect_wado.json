@@ -1,0 +1,22 @@
+{
+  "parent": "bladebound:root",
+  "display": {
+    "icon": { "id": "bladebound:wado_ichimonji" },
+    "title": { "text": "Collect Wado" },
+    "description": { "text": "Obtain Wado Ichimonji." },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "get_wado": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          { "items": [ "bladebound:wado_ichimonji" ] }
+        ]
+      }
+    }
+  }
+}

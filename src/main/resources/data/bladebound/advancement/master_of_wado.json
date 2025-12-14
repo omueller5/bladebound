@@ -1,0 +1,15 @@
+{
+  "parent": "bladebound:perfect_form",
+  "display": {
+    "icon": { "id": "bladebound:wado_ichimonji" },
+    "title": { "text": "Master of Wado" },
+    "description": { "text": "Master the discipline of Wado Ichimonji." },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": { "trigger": "minecraft:impossible" }
+  }
+}

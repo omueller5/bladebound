@@ -1,0 +1,28 @@
+{
+  "parent": "bladebound:root",
+  "display": {
+    "icon": { "id": "bladebound:excalibur" },
+    "title": {"text" : "A Blade Calls"},
+    "description": {"text" : "Obtain any BladeBound blade for the first time."},
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "sends_telemetry_event": false
+  },
+  "criteria": {
+    "first_blade": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "bladebound:wado-ichimonji",
+              "bladebound:excalibur",
+              "bladebound:murasame"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

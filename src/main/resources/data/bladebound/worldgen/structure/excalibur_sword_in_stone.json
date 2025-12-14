@@ -1,0 +1,12 @@
+{
+  "type": "bladebound:excalibur_sword_in_stone",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:meadow",
+    "minecraft:forest",
+    "minecraft:birch_forest"
+  ],
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "spawn_overrides": {}
+}

@@ -1,0 +1,15 @@
+{
+  "parent": "bladebound:collect_wado",
+  "display": {
+    "icon": { "id": "bladebound:wado_ichimonji" },
+    "title": { "text": "Perfect Form" },
+    "description": { "text": "Achieve perfect form with Wado Ichimonji." },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": { "trigger": "minecraft:impossible" }
+  }
+}

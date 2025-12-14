@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " S ",
+    " C ",
+    " I "
+  ],
+  "key": {
+    "S": { "item": "minecraft:string" },
+    "C": { "item": "bladebound:cursed-kitetsu-shard" },
+    "I": { "item": "minecraft:iron_sword" }
+  },
+  "result": {
+    "id": "bladebound:sandai-kitetsu",
+    "count": 1
+  }
+}

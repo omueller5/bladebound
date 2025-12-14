@@ -1,0 +1,22 @@
+{
+  "parent": "bladebound:collect_first_blade",
+  "display": {
+    "icon": { "id": "bladebound:murasame" },
+    "title": {"text" : "Murasame"},
+    "description": {"text" : "Obtain Murasame."},
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "sends_telemetry_event": false
+  },
+  "criteria": {
+    "get_murasame": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          { "items": [ "bladebound:murasame" ] }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "bladebound:murasame_execution_site",
+  "biomes": [
+    "minecraft:dark_forest",
+    "minecraft:windswept_hills",
+    "minecraft:badlands"
+  ],
+  "step": "surface_structures",
+  "terrain_adaptation": "bury",
+  "spawn_overrides": {}
+}

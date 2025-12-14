@@ -1,0 +1,22 @@
+{
+  "parent": "bladebound:collect_first_blade",
+  "display": {
+    "icon": { "id": "bladebound:excalibur" },
+    "title": {"text" : "Excalibur"},
+    "description": {"text" : "Obtain Excalibur."},
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "sends_telemetry_event": false
+  },
+  "criteria": {
+    "get_excalibur": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          { "items": [ "bladebound:excalibur" ] }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "parent": "bladebound:root",
+  "display": {
+    "icon": { "id": "bladebound:excalibur" },
+    "title": { "text": "First Binding" },
+    "description": { "text": "Bind your first blade." },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": { "trigger": "minecraft:impossible" }
+  }
+}

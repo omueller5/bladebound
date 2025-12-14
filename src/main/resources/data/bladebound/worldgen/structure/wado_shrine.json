@@ -1,0 +1,11 @@
+{
+  "type": "bladebound:wado_shrine",
+  "biomes": [
+    "minecraft:cherry_grove",
+    "minecraft:plains",
+    "minecraft:bamboo_jungle"
+  ],
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "spawn_overrides": {}
+}

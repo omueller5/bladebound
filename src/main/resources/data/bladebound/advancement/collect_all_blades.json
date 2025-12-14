@@ -1,0 +1,37 @@
+{
+  "parent": "bladebound:collect_all_legendary",
+  "display": {
+    "icon": { "id": "bladebound:excalibur" },
+    "title": { "text": "Collector" },
+    "description": { "text": "Collect every blade." },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "collect_excalibur": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [ { "items": "bladebound:excalibur" } ]
+      }
+    },
+    "collect_wado": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [ { "items": "bladebound:wado_ichimonji" } ]
+      }
+    },
+    "collect_murasame": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [ { "items": "bladebound:murasame" } ]
+      }
+    }
+  },
+  "requirements": [
+    ["collect_excalibur"],
+    ["collect_wado"],
+    ["collect_murasame"]
+  ]
+}
