@@ -1,11 +1,11 @@
 {
   "structures": [
-    { "structure": "bladebound:excalibur_sword_in_stone", "weight": 1 }
+    { "structure": "bladebound:excalibur_shrine", "weight": 1 }
   ],
   "placement": {
     "type": "minecraft:random_spread",
-    "spacing": 12,
-    "separation": 6,
-    "salt": 18472613
+    "spacing": 34,
+    "separation": 17,
+    "salt": 91620478
   }
 }
