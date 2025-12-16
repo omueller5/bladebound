@@ -154,6 +154,20 @@ public class ModItems {
             )
     );
 
+    public static final Item MURASAME_GAUNTLETS = Registry.register(
+            Registries.ITEM,
+            Identifier.of("bladebound", "murasame-gauntlets"),
+            new Item(new Item.Settings().maxCount(1))
+    );
+
+    public static final Item CODEX = Registry.register(
+            Registries.ITEM,
+            Identifier.of("bladebound", "bladebound-codex"),
+            new BladeboundCodexItem(new Item.Settings().maxCount(1))
+    );
+
+
+
 
     /**
      * Called from Bladebound.onInitialize()

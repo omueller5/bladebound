@@ -1,11 +1,11 @@
 package net.owen.bladebound.item.custom;
 
+import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterials;
@@ -19,6 +19,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.owen.bladebound.BladeboundBind;
 import net.owen.bladebound.BladeboundConfig;
+import net.owen.bladebound.effect.BladeboundEffects;
+import net.owen.bladebound.item.ModItems;
 import org.joml.Vector3f;
 
 import java.util.HashSet;
@@ -27,8 +29,9 @@ import java.util.Set;
 
 public class MurasameItem extends SwordItem {
 
-    private static final int POISON_TICKS = 20 * 4;
-    private static final int WITHER_TICKS = 20 * 3;
+    // Replaces Poison/Wither with your custom curse.
+    // Make this whatever pacing feels right.
+    private static final int CURSE_TICKS_BASE = 20 * 5; // ~5s for “normal” mobs
 
     public MurasameItem(Settings settings) {
         super(ToolMaterials.NETHERITE, settings);
@@ -36,7 +39,7 @@ public class MurasameItem extends SwordItem {
 
     @Override
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
-        tooltip.add(Text.literal("LEGENDARY").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(Text.literal("LEGENDARY").formatted(Formatting.DARK_PURPLE, Formatting.BOLD));
         tooltip.add(Text.literal("A cursed edge that drinks the last heartbeat.").formatted(Formatting.DARK_RED, Formatting.ITALIC));
         tooltip.add(Text.literal("Its mark lingers… and the body follows.").formatted(Formatting.GRAY, Formatting.ITALIC));
 
@@ -88,13 +91,14 @@ public class MurasameItem extends SwordItem {
 
             BladeboundBind.bindIfUnbound(stack, player);
 
-            // If not owner: block poison/wither + particles + durability logic
+            // If not owner: do nothing special
             if (!BladeboundBind.allowUseOrPunish(stack, player)) {
                 return super.postHit(stack, target, attacker);
             }
 
             ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
 
+            // Particles (keep)
             serverWorld.spawnParticles(
                     new DustParticleEffect(new Vector3f(0.6f, 0.0f, 0.0f), 1.2f),
                     target.getX(),
@@ -105,8 +109,17 @@ public class MurasameItem extends SwordItem {
                     0.02
             );
 
-            target.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, POISON_TICKS, 1));
-            target.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, WITHER_TICKS, 0));
+            // --- Apply Murasame Curse instead of poison/wither ---
+            if (!isBossImmune(target) && !isGauntletImmune(target)) {
+                int duration = curseDurationFor(target);
+                target.addStatusEffect(new StatusEffectInstance(
+                        BladeboundEffects.MURASAME_CURSE,
+                        duration,
+                        0,
+                        true,
+                        false
+                ));
+            }
 
             if (BladeboundConfig.DATA.durabilityEnabled) {
                 stack.damage(BladeboundConfig.DATA.durabilityPerHit, attacker, EquipmentSlot.MAINHAND);
@@ -114,5 +127,29 @@ public class MurasameItem extends SwordItem {
         }
 
         return super.postHit(stack, target, attacker);
+    }
+
+    private static boolean isGauntletImmune(LivingEntity entity) {
+        if (!(entity instanceof ServerPlayerEntity player)) return false;
+
+        return TrinketsApi.getTrinketComponent(player)
+                .map(comp -> comp.isEquipped(ModItems.MURASAME_GAUNTLETS))
+                .orElse(false);
+    }
+
+    private static boolean isBossImmune(LivingEntity e) {
+        // Keep your existing “boss immunity” idea.
+        // If you want exact EntityType checks, tell me your exact MC version/mappings.
+        String t = e.getType().toString();
+        return t.contains("wither") || t.contains("ender_dragon") || t.contains("warden");
+    }
+
+    private static int curseDurationFor(LivingEntity e) {
+        // Simple scaling: stronger mobs take longer to die
+        float maxHp = e.getMaxHealth();
+
+        if (maxHp <= 30.0f) return 20 * 5;     // ~5s
+        if (maxHp <= 60.0f) return 20 * 30;    // ~30s
+        return 20 * 60;                        // ~60s (still not bosses)
     }
 }

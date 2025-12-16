@@ -2,45 +2,53 @@ package net.owen.bladebound;
 
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import net.owen.bladebound.block.custom.SwordInStoneBlock;
-import net.owen.bladebound.item.ModItems;
 
 public class BladeboundBlocks {
 
-    public static final Block EMPTY_SWORD_STONE = registerBlock(
-            "empty_sword_stone",
-            new Block(FabricBlockSettings.create().strength(3.0f).requiresTool())
-    );
-
-    public static final Block EXCALIBUR_SWORD_IN_STONE = registerBlock(
-            "excalibur_sword_in_stone",
+    /* =========================================================
+       Excalibur Shrine — FULL (has sword by default)
+       ========================================================= */
+    public static final Block SWORD_IN_STONE = Registry.register(
+            Registries.BLOCK,
+            Identifier.of("bladebound", "sword-in-stone"),
             new SwordInStoneBlock(
-                    FabricBlockSettings.create().strength(3.0f).requiresTool().nonOpaque(),
-                    new ItemStack(ModItems.EXCALIBUR),
-                    EMPTY_SWORD_STONE.getDefaultState()
+                    FabricBlockSettings.copyOf(Blocks.COBBLESTONE),
+                    true // has sword by default
             )
     );
 
-    private static Block registerBlock(String name, Block block) {
-        registerBlockItem(name, block);
-        return Registry.register(Registries.BLOCK, Identifier.of("bladebound", name), block);
-    }
+    public static final Item SWORD_IN_STONE_ITEM = Registry.register(
+            Registries.ITEM,
+            Identifier.of("bladebound", "sword-in-stone"),
+            new BlockItem(SWORD_IN_STONE, new Item.Settings())
+    );
 
-    private static void registerBlockItem(String name, Block block) {
-        Registry.register(
-                Registries.ITEM,
-                Identifier.of("bladebound", name),
-                new BlockItem(block, new Item.Settings())
-        );
-    }
+    /* =========================================================
+       Excalibur Shrine — EMPTY (no sword by default)
+       =========================================================
+    public static final Block SWORD_IN_STONE_EMPTY = Registry.register(
+            Registries.BLOCK,
+            Identifier.of("bladebound", "empty-sword-in-stone"),
+            new SwordInStoneBlock(
+                    FabricBlockSettings.copyOf(Blocks.COBBLESTONE),
+                    false // empty by default
+            )
+    );
+
+    public static final Item SWORD_IN_STONE_EMPTY_ITEM = Registry.register(
+            Registries.ITEM,
+            Identifier.of("bladebound", "empty-sword-in-stone"),
+            new BlockItem(SWORD_IN_STONE_EMPTY, new Item.Settings())
+    );*/
 
     public static void init() {
-        // call this from your mod initializer to ensure class loads
+        // call from your mod initializer
     }
 }

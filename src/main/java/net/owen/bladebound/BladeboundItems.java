@@ -5,18 +5,17 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
-import net.owen.bladebound.item.CodexItem;
+import net.owen.bladebound.item.BladeboundCodexItem;
 
 public class BladeboundItems {
 
-    public static final Item BLADEBOUND_CODEX =
-            Registry.register(
-                    Registries.ITEM,
-                    Identifier.of("bladebound", "bladebound_codex"),
-                    new CodexItem(new Item.Settings().maxCount(1))
-            );
+    public static final Item BLADEBOUND_CODEX = Registry.register(
+            Registries.ITEM,
+            Identifier.of("bladebound", "bladebound_codex"),
+            new BladeboundCodexItem(new Item.Settings().maxCount(1))
+    );
 
-    // ✅ FIXED: hyphenated ID to match your naming convention
+
     public static final Item CURSED_KITETSU_SHARD =
             Registry.register(
                     Registries.ITEM,

@@ -22,15 +22,17 @@ public class MurasameExecutionSiteStructure extends Structure {
         int x = context.chunkPos().getStartX() + 8;
         int z = context.chunkPos().getStartZ() + 8;
 
+        // ✅ Better heightmap than WORLD_SURFACE_WG for “true surface”
         int y = context.chunkGenerator().getHeightInGround(
                 x, z,
-                Heightmap.Type.WORLD_SURFACE_WG,
+                Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
                 context.world(),
                 context.noiseConfig()
         );
 
         BlockPos pos = new BlockPos(x, y, z);
 
+        // ✅ The Piece will do the real snap-to-solid-ground using StructureWorldAccess.getBlockState()
         return Optional.of(new StructurePosition(pos, collector -> {
             collector.addPiece(new MurasameExecutionSitePiece(pos));
         }));

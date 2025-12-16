@@ -482,7 +482,7 @@ public class WadoIchimonjiItem extends Item {
     @Override
     public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
         // Lore
-        tooltip.add(Text.literal("RARE").formatted(Formatting.DARK_BLUE, Formatting.BOLD));
+        tooltip.add(Text.literal("RARE").formatted(Formatting.BLUE, Formatting.BOLD));
         tooltip.add(Text.literal("A blade of restraint and discipline.").formatted(Formatting.AQUA, Formatting.ITALIC));
         tooltip.add(Text.literal("Wielded with unwavering resolve.").formatted(Formatting.YELLOW, Formatting.ITALIC));
 

@@ -32,7 +32,7 @@ public class ExcaliburItem extends SwordItem {
 
     @Override
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
-        tooltip.add(Text.literal("LEGENDARY").formatted(Formatting.GOLD, Formatting.BOLD));
+        tooltip.add(Text.literal("LEGENDARY").formatted(Formatting.DARK_PURPLE, Formatting.BOLD));
         tooltip.add(Text.literal("Blessed: Deals bonus damage to undead.").formatted(Formatting.AQUA));
         tooltip.add(Text.literal("A holy blade that answers only the worthy.").formatted(Formatting.YELLOW, Formatting.ITALIC));
         tooltip.add(Text.literal("Its light cuts through shadow and doubt.").formatted(Formatting.GRAY, Formatting.ITALIC));

@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "sword=true":  { "model": "bladebound:block/sword-in-stone" },
+    "sword=false": { "model": "bladebound:block/empty-sword-in-stone" }
+  }
+}

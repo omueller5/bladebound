@@ -19,6 +19,10 @@ repositories {
         name = "Xander Maven"
         url = "https://maven.isxander.dev/releases"
     }
+    maven {
+
+        url = "https://maven.ladysnake.org/releases"
+    }
 }
 
 fabricApi {
@@ -44,6 +48,10 @@ dependencies {
     // EMI (compile against API, but only load EMI at runtime if present)
     modCompileOnly "dev.emi:emi-fabric:${project.emi_version}:api"
     modLocalRuntime "dev.emi:emi-fabric:${project.emi_version}"
+
+    // Trinkets
+    modCompileOnly("dev.emi:trinkets:${trinkets_version}")
+    modLocalRuntime("dev.emi:trinkets:${trinkets_version}")
 }
 
 

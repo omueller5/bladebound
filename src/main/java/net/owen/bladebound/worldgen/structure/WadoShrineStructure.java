@@ -22,15 +22,17 @@ public class WadoShrineStructure extends Structure {
         int x = context.chunkPos().getStartX() + 8;
         int z = context.chunkPos().getStartZ() + 8;
 
+        // ✅ Better surface heightmap for structures (less “plants/water surface” weirdness)
         int y = context.chunkGenerator().getHeightInGround(
                 x, z,
-                Heightmap.Type.WORLD_SURFACE_WG,
+                Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
                 context.world(),
                 context.noiseConfig()
         );
 
         BlockPos pos = new BlockPos(x, y, z);
 
+        // Piece will do the real snap-to-dry-ground with StructureWorldAccess
         return Optional.of(new StructurePosition(pos, collector -> {
             collector.addPiece(new WadoShrinePiece(pos));
         }));

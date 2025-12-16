@@ -7,6 +7,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.owen.bladebound.BladeboundBlocks;
 import net.owen.bladebound.BladeboundItems;
 
 public class ModItemGroups {
@@ -18,19 +19,27 @@ public class ModItemGroups {
                     .icon(() -> new ItemStack(ModItems.EXCALIBUR))
                     .displayName(Text.translatable("itemGroup.bladebound"))
                     .entries((displayContext, entries) -> {
-                        entries.add(BladeboundCodexBook.create());
 
+                        // Codex
+                        entries.add(ModItems.CODEX);                 // NEW codex item
+                        entries.add(ModItems.MURASAME_GAUNTLETS);
+
+                        // Swords
                         entries.add(ModItems.SANDAIKITETSU);
                         entries.add(ModItems.WADOICHIMONJI);
                         entries.add(ModItems.MURASAME);
                         entries.add(ModItems.EXCALIBUR);
 
+                        // Excalibur shrine blocks
+                        entries.add(BladeboundBlocks.SWORD_IN_STONE);
+
+                        // Materials
                         entries.add(BladeboundItems.CURSED_KITETSU_SHARD);
                     })
                     .build()
     );
 
     public static void register() {
-        // Class load triggers static registration
+        // static init
     }
 }

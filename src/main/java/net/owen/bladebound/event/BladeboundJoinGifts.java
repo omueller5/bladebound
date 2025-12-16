@@ -2,32 +2,33 @@ package net.owen.bladebound.event;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.advancement.AdvancementEntry;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.owen.bladebound.item.BladeboundCodexBook;
+import net.owen.bladebound.item.ModItems; // <-- use BladeboundItems if that's your class
 
 public final class BladeboundJoinGifts {
-    // Use a simple tag string (no spaces). Colons usually work, but keeping it simple avoids edge weirdness.
+    // One-time join marker
     private static final String TAG = "bladebound_got_codex";
 
     public static void init() {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.player;
 
-            // ✅ Yarn 1.21+: command tags
-            if (player.getCommandTags().contains(TAG)) return; // :contentReference[oaicite:3]{index=3}
+            // Already received codex
+            if (player.getCommandTags().contains(TAG)) return;
 
-            // Give codex
-            player.giveItemStack(BladeboundCodexBook.create());
+            // ✅ Give NEW codex item (opens CodexScreen)
+            player.giveItemStack(new ItemStack(ModItems.CODEX)); // <-- adjust field name if needed
             player.sendMessage(Text.literal("You received the Bladebound Codex."), false);
 
             // Grant root advancement (no commands)
             grantAdvancement(server, player, Identifier.of("bladebound", "root"));
 
             // Mark as done
-            player.addCommandTag(TAG); // :contentReference[oaicite:4]{index=4}
+            player.addCommandTag(TAG);
         });
     }
 

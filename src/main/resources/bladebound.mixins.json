@@ -1,14 +1,18 @@
 {
-	"required": true,
-	"package": "net.owen.bladebound.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-		"ExampleMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"overwrites": {
-		"requireAnnotations": true
-	}
+  "required": true,
+  "package": "net.owen.bladebound.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ScreenHandlerInvoker",
+    "PlayerEntityAccessoryMixin",
+    "PlayerScreenHandlerMixin"
+  ],
+  "client": [
+    "client.InventoryScreenMixin",
+    "client.HandledScreenFocusedSlotAccessor",
+    "client.InventoryScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

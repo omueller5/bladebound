@@ -1,11 +1,16 @@
 {
   "itemGroup.bladebound": "Bladebound",
 
-  "item.bladebound.bladebound_codex": "Bladebound Codex",
+  "item.bladebound.bladebound-codex": "Bladebound Codex",
+  "block.bladebound.sword-in-stone": "Excalibur — Sword in the Stone",
+  "block.bladebound.empty-sword-in-stone": "Excalibur Shrine (Empty)",
+  "item.bladebound.murasame-gauntlets": "Murasame Gauntlets",
 
-"item.bladebound.murasame": "Murasame",
+  "item.bladebound.murasame": "Murasame",
   "item.bladebound.excalibur": "Excalibur",
   "item.bladebound.wado-ichimonji": "Wado Ichimonji",
   "item.bladebound.sandai-kitetsu": "Sandai Kitetsu",
-  "item.bladebound.cursed-kitetsu-shard": "Cursed Kitetsu Shard"
+  "item.bladebound.cursed-kitetsu-shard": "Cursed Kitetsu Shard",
+
+  "effect.bladebound.murasame_curse": "Murasame Curse"
 }

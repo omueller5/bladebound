@@ -6,6 +6,6 @@
     "minecraft:badlands"
   ],
   "step": "surface_structures",
-  "terrain_adaptation": "bury",
+  "terrain_adaptation": "beard_thin",
   "spawn_overrides": {}
 }

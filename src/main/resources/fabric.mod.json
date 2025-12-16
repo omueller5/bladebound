@@ -3,13 +3,13 @@
   "id": "bladebound",
   "version": "${version}",
   "name": "Bladebound",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "Legendary blades, dangerous curses, and rare structures scattered across the world.",
   "authors": [
     "Owen"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "owenlab.dev",
+    "sources": "https://github.com/omueller5/bladebound"
   },
   "license": "CC0-1.0",
   "icon": "assets/bladebound/icon.png",
@@ -47,6 +47,7 @@
   "suggests": {
     "emi": "*",
     "modmenu": "*",
-    "yet_another_config_lib_v3": "*"
+    "yet_another_config_lib_v3": "*",
+    "trinkets": "*"
   }
 }

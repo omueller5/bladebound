@@ -1,8 +1,10 @@
 package net.owen.bladebound.worldgen.structure;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BarrelBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
@@ -13,6 +15,7 @@ import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.StructureWorldAccess;
 import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
@@ -60,10 +63,20 @@ public class WadoShrinePiece extends StructurePiece {
             ChunkPos chunkPos,
             BlockPos pivot
     ) {
-        // 5x5 calcite floor
+        // ✅ Snap to real DRY ground (not water, not plants-as-surface)
+        BlockPos base = findDryGround(world, origin);
+        if (base == null) return;
+
+        // Update bounding box so chunk culling matches corrected placement
+        this.boundingBox = new BlockBox(
+                base.getX() - 3, base.getY() - 2, base.getZ() - 3,
+                base.getX() + 3, base.getY() + 4, base.getZ() + 3
+        );
+
+        // 5x5 calcite floor (one block below base)
         for (int dx = -2; dx <= 2; dx++) {
             for (int dz = -2; dz <= 2; dz++) {
-                BlockPos p = origin.add(dx, -1, dz);
+                BlockPos p = base.add(dx, -1, dz);
                 if (chunkBox.contains(p)) {
                     world.setBlockState(p, Blocks.CALCITE.getDefaultState(), WG_FLAGS);
                 }
@@ -71,21 +84,21 @@ public class WadoShrinePiece extends StructurePiece {
         }
 
         // pedestal
-        if (chunkBox.contains(origin)) {
-            world.setBlockState(origin, Blocks.POLISHED_DIORITE.getDefaultState(), WG_FLAGS);
+        if (chunkBox.contains(base)) {
+            world.setBlockState(base, Blocks.POLISHED_DIORITE.getDefaultState(), WG_FLAGS);
         }
-        if (chunkBox.contains(origin.up(1))) {
-            world.setBlockState(origin.up(1), Blocks.POLISHED_DIORITE_SLAB.getDefaultState(), WG_FLAGS);
+        if (chunkBox.contains(base.up(1))) {
+            world.setBlockState(base.up(1), Blocks.POLISHED_DIORITE_SLAB.getDefaultState(), WG_FLAGS);
         }
 
         // lantern corners
-        placeLanternPost(world, chunkBox, origin.add(2, 0, 2));
-        placeLanternPost(world, chunkBox, origin.add(2, 0, -2));
-        placeLanternPost(world, chunkBox, origin.add(-2, 0, 2));
-        placeLanternPost(world, chunkBox, origin.add(-2, 0, -2));
+        placeLanternPost(world, chunkBox, base.add(2, 0, 2));
+        placeLanternPost(world, chunkBox, base.add(2, 0, -2));
+        placeLanternPost(world, chunkBox, base.add(-2, 0, 2));
+        placeLanternPost(world, chunkBox, base.add(-2, 0, -2));
 
         // barrel under center with item
-        BlockPos barrelPos = origin.down(1);
+        BlockPos barrelPos = base.down(1);
         if (chunkBox.contains(barrelPos)) {
             placeAndFillBarrel(world, barrelPos);
         }
@@ -114,5 +127,45 @@ public class WadoShrinePiece extends StructurePiece {
 
         barrel.setStack(0, new ItemStack(Registries.ITEM.get(id)));
         barrel.markDirty();
+    }
+
+    /**
+     * Picks a dry ground placement near origin:
+     * - uses surface heightmap
+     * - walks down until: current is air/replaceable AND below is solid
+     * - rejects water (fluid at current or below)
+     */
+    private static BlockPos findDryGround(StructureWorldAccess world, BlockPos approx) {
+        int radius = 12; // search nearby land if the center is water
+
+        for (int r = 0; r <= radius; r++) {
+            for (int dx = -r; dx <= r; dx++) {
+                for (int dz = -r; dz <= r; dz++) {
+                    if (Math.abs(dx) != r && Math.abs(dz) != r) continue; // perimeter scan
+
+                    BlockPos xz = new BlockPos(approx.getX() + dx, 0, approx.getZ() + dz);
+                    BlockPos p = world.getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, xz);
+
+                    while (p.getY() > world.getBottomY() + 2) {
+                        BlockState at = world.getBlockState(p);
+                        BlockState below = world.getBlockState(p.down());
+
+                        boolean atOk = at.isAir() || at.isReplaceable();
+                        boolean belowOk = below.isSolidBlock(world, p.down());
+
+                        if (atOk && belowOk) break;
+                        p = p.down();
+                    }
+
+                    FluidState fluidAt = world.getFluidState(p);
+                    FluidState fluidBelow = world.getFluidState(p.down());
+                    if (!fluidAt.isEmpty() || !fluidBelow.isEmpty()) continue;
+
+                    return p;
+                }
+            }
+        }
+
+        return null;
     }
 }

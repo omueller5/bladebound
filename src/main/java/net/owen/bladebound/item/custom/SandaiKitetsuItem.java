@@ -17,7 +17,7 @@ public class SandaiKitetsuItem extends SwordItem {
 
     @Override
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
-        tooltip.add(Text.literal("Rare Sword").formatted(Formatting.DARK_PURPLE));
+        tooltip.add(Text.literal("RARE").formatted(Formatting.BLUE, Formatting.BOLD));
         tooltip.add(Text.literal(""));
 
         tooltip.add(Text.literal("• A blade from a cursed lineage").formatted(Formatting.DARK_GRAY));
