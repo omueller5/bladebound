@@ -20,21 +20,30 @@ Bladebound is a Fabric mod that adds **named swords with unique effects**, in-ga
   - Fabric API
 
 ---
-
 ## 🗡️ Swords
+## **Sandai Kitetsu (Rare)**
 
-### **Sandai Kitetsu** (Rare)
-A cursed blade from a notorious lineage.  
-This sword **does not generate in the world** and must be crafted using a Nether-earned cursed ingredient.
+A cursed blade from a notorious lineage.
+This sword does not generate in the world and must be crafted using a Nether-earned cursed ingredient.
 
-### **Wado Ichimonji** (Rare)
+## **Wado Ichimonji (Rare)**
+
 A blade that grows stronger through progression and discipline.
 
-### **Excalibur** (Legendary)
-A legendary sword that deals **bonus damage to undead**.
+## **Excalibur (Legendary)**
 
-### **Murasame** (Legendary)
-A cursed blade that inflicts **Poison** and **Wither** on hit.
+A legendary sword that deals bonus damage to undead.
+
+## **Murasame (Legendary)**
+
+A cursed blade that brings inevitable death.
+
+Murasame inflicts a unique lethal curse rather than traditional damage-over-time effects. Any entity struck by the blade will perish after a short delay, regardless of strength.
+Merely holding Murasame is dangerous — those unprotected by special equipment will be consumed by the curse themselves.
+
+## ⚠️ Warning
+The Murasame Curse is unavoidable once applied.
+Without the Murasame Gauntlets, carrying or wielding this blade will eventually result in death.
 
 ---
 
