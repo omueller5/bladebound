@@ -21,20 +21,20 @@ Bladebound is a Fabric mod that adds **named swords with unique effects**, in-ga
 
 ---
 ## 🗡️ Swords
-## **Sandai Kitetsu (Rare)**
+### **Sandai Kitetsu (Rare)**
 
 A cursed blade from a notorious lineage.
 This sword does not generate in the world and must be crafted using a Nether-earned cursed ingredient.
 
-## **Wado Ichimonji (Rare)**
+### **Wado Ichimonji (Rare)**
 
 A blade that grows stronger through progression and discipline.
 
-## **Excalibur (Legendary)**
+### **Excalibur (Legendary)**
 
 A legendary sword that deals bonus damage to undead.
 
-## **Murasame (Legendary)**
+### **Murasame (Legendary)**
 
 A cursed blade that brings inevitable death.
 
