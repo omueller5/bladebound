@@ -4,8 +4,7 @@
 [![Fabric](https://img.shields.io/badge/Mod%20Loader-Fabric-blue)](https://fabricmc.net/)
 [![Fabric API](https://img.shields.io/badge/Requires-Fabric%20API-orange)](https://modrinth.com/mod/fabric-api)
 [![Modrinth Downloads](https://img.shields.io/modrinth/dt/bladebound?logo=modrinth)](https://modrinth.com/project/bladebound)
-[![GitHub Stars](https://img.shields.io/github/stars/omueller5/bladebound?logo=github)](https://github.com/omueller5/bladebound)
-[![GitHub Issues](https://img.shields.io/github/issues/omueller5/bladebound)](https://github.com/omueller5/bladebound/issues)
+[![Modrinth Version](https://img.shields.io/modrinth/v/bladebound?logo=modrinth)](https://modrinth.com/mod/bladebound)
 
 Bladebound is a Fabric mod that adds **named swords with unique effects**, in-game lore, and structured progression designed to feel natural in survival Minecraft.
 
