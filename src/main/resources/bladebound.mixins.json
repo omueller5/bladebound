@@ -10,7 +10,8 @@
   "client": [
     "client.InventoryScreenMixin",
     "client.HandledScreenFocusedSlotAccessor",
-    "client.InventoryScreenMixin"
+    "client.InventoryScreenMixin",
+    "client.InventoryScreenBladeboundSlotIconMixin"
   ],
   "injectors": {
     "defaultRequire": 1

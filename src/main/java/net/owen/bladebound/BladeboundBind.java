@@ -2,8 +2,6 @@ package net.owen.bladebound;
 
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -15,19 +13,23 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Per-sword binding system:
- * - First time a player holds (selected) the sword, it binds to their UUID.
- * - If anyone else tries to use it, they get punished and all special effects/progression are blocked.
+ * Ownership / rejection DISABLED (single-player-friendly),
+ * but we KEEP the "first_binding" advancement trigger.
  *
- * Stored in ItemStack CUSTOM_DATA (1.21+ components).
+ * - No ownerUuid/ownerName is written anymore.
+ * - No one is rejected or punished.
+ * - Still grants: bladebound/first_binding (once) after collect_first_blade is earned.
+ * - Optionally strips legacy owner data if present.
  */
 public final class BladeboundBind {
     private BladeboundBind() {}
 
-    // We reuse the same root used by Wado progression so all blades are consistent.
     private static final String ROOT = "bladebound";
     private static final String KEY_OWNER = "ownerUuid";
     private static final String KEY_OWNER_NAME = "ownerName";
+
+    // New: store a simple per-stack flag for advancement triggering only
+    private static final String KEY_ADV_GRANTED = "firstBindingGranted";
 
     // ---------- core storage ----------
 
@@ -39,7 +41,7 @@ public final class BladeboundBind {
         stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
     }
 
-    private static NbtCompound getRoot(ItemStack stack) {
+    private static NbtCompound getOrCreateRoot(ItemStack stack) {
         NbtCompound data = getCustomData(stack);
         if (!data.contains(ROOT, NbtElement.COMPOUND_TYPE)) {
             data.put(ROOT, new NbtCompound());
@@ -56,78 +58,88 @@ public final class BladeboundBind {
 
     // ---------- public API ----------
 
+    /** Ownership/binding disabled: always false. */
     public static boolean isBound(ItemStack stack) {
-        NbtCompound root = getRoot(stack);
-        return root.containsUuid(KEY_OWNER);
-    }
-
-    public static UUID getOwnerUuid(ItemStack stack) {
-        NbtCompound root = getRoot(stack);
-        return root.containsUuid(KEY_OWNER) ? root.getUuid(KEY_OWNER) : null;
-    }
-
-    public static String getOwnerName(ItemStack stack) {
-        NbtCompound root = getRoot(stack);
-        return root.contains(KEY_OWNER_NAME, NbtElement.STRING_TYPE) ? root.getString(KEY_OWNER_NAME) : "";
-    }
-
-    /**
-     * If the sword is unbound, bind it to this player.
-     * Call this from inventoryTick when selected.
-     */
-    public static void bindIfUnbound(ItemStack stack, ServerPlayerEntity player) {
-        if (isBound(stack)) return;
-
-        NbtCompound root = getRoot(stack);
-        root.putUuid(KEY_OWNER, player.getUuid());
-        root.putString(KEY_OWNER_NAME, player.getName().getString());
-        saveRoot(stack, root);
-
-        // Grant "first_binding" ONLY if they have already collected a blade
-        if (net.owen.bladebound.BladeboundAdvancements.has(player, "bladebound/collect_first_blade")) {
-            net.owen.bladebound.BladeboundAdvancements.grant(player, "bladebound/first_binding");
-        }
-
-        player.sendMessage(Text.literal("§d[BladeBound]§r This blade has bound itself to you."), true);
-    }
-
-    public static boolean isOwner(ItemStack stack, ServerPlayerEntity player) {
-        UUID owner = getOwnerUuid(stack);
-        return owner != null && owner.equals(player.getUuid());
-    }
-
-    /**
-     * Enforces ownership:
-     * - If not owner, apply punishment and return false.
-     * - If owner (or unbound), return true.
-     */
-    public static boolean allowUseOrPunish(ItemStack stack, ServerPlayerEntity player) {
-        if (!isBound(stack)) return true; // will bind elsewhere
-        if (isOwner(stack, player)) return true;
-
-        // Punishment: makes it miserable to use stolen blades.
-        player.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 60, 1, true, false));
-        player.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 60, 1, true, false));
-        player.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 60, 0, true, false));
-
-        player.sendMessage(Text.literal("§cThis blade rejects you.§r").formatted(Formatting.RED), true);
         return false;
     }
 
+    /** Ownership/binding disabled: always null. */
+    public static UUID getOwnerUuid(ItemStack stack) {
+        return null;
+    }
+
+    /** Ownership/binding disabled: always empty. */
+    public static String getOwnerName(ItemStack stack) {
+        return "";
+    }
+
     /**
-     * Tooltip helper (client-safe): shows bound/unbound + owner name if present.
+     * Called from inventoryTick when selected.
+     * No longer binds to a player, but still grants the first_binding advancement once.
      */
-    public static void appendBindTooltip(ItemStack stack, List<Text> tooltip) {
-        if (!isBound(stack)) {
-            tooltip.add(Text.literal("Unbound").formatted(Formatting.DARK_GRAY, Formatting.ITALIC));
-            tooltip.add(Text.literal("First wielder binds this blade.").formatted(Formatting.GRAY));
-            return;
+    public static void bindIfUnbound(ItemStack stack, ServerPlayerEntity player) {
+        // Clean up any legacy owner data (structure-export accidents)
+        stripLegacyOwnerData(stack);
+
+        // Advancement trigger (once per stack)
+        NbtCompound root = getOrCreateRoot(stack);
+        if (root.getBoolean(KEY_ADV_GRANTED)) return;
+
+        // Grant "first_binding" ONLY if they have already collected a blade
+        if (BladeboundAdvancements.has(player, "bladebound/collect_first_blade")) {
+            BladeboundAdvancements.grant(player, "bladebound/first_binding");
+            player.sendMessage(Text.literal("§d[BladeBound]§r Your bond with the blade deepens."), true);
         }
 
-        String name = getOwnerName(stack);
-        if (name == null || name.isBlank()) name = "Unknown";
+        root.putBoolean(KEY_ADV_GRANTED, true);
+        saveRoot(stack, root);
+    }
 
-        tooltip.add(Text.literal("Bound").formatted(Formatting.LIGHT_PURPLE, Formatting.BOLD));
-        tooltip.add(Text.literal("Owner: " + name).formatted(Formatting.GRAY));
+    /** Ownership disabled: always true. */
+    public static boolean isOwner(ItemStack stack, ServerPlayerEntity player) {
+        return true;
+    }
+
+    /**
+     * Enforces nothing now: always allow, no punishment.
+     * Also strips legacy owner data if present.
+     */
+    public static boolean allowUseOrPunish(ItemStack stack, ServerPlayerEntity player) {
+        stripLegacyOwnerData(stack);
+        return true;
+    }
+
+    /**
+     * Tooltip helper: show that ownership is disabled.
+     */
+    public static void appendBindTooltip(ItemStack stack, List<Text> tooltip) {
+        tooltip.add(Text.literal("Unbound").formatted(Formatting.DARK_GRAY, Formatting.ITALIC));
+        tooltip.add(Text.literal("Ownership disabled.").formatted(Formatting.GRAY));
+    }
+
+    // ---------- legacy cleanup ----------
+
+    private static void stripLegacyOwnerData(ItemStack stack) {
+        NbtCompound data = getCustomData(stack);
+        if (!data.contains(ROOT, NbtElement.COMPOUND_TYPE)) return;
+
+        NbtCompound root = data.getCompound(ROOT);
+
+        boolean changed = false;
+
+        if (root.containsUuid(KEY_OWNER)) {
+            root.remove(KEY_OWNER);
+            changed = true;
+        }
+        if (root.contains(KEY_OWNER_NAME, NbtElement.STRING_TYPE)) {
+            root.remove(KEY_OWNER_NAME);
+            changed = true;
+        }
+
+        // Don't delete the whole root, because we store KEY_ADV_GRANTED there now.
+        if (changed) {
+            data.put(ROOT, root);
+            setCustomData(stack, data);
+        }
     }
 }

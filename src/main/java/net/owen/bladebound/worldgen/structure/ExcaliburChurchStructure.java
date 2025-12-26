@@ -8,12 +8,12 @@ import net.minecraft.world.gen.structure.StructureType;
 
 import java.util.Optional;
 
-public class ExcaliburSwordInStoneStructure extends Structure {
+public class ExcaliburChurchStructure extends Structure {
 
-    public static final MapCodec<ExcaliburSwordInStoneStructure> CODEC =
-            Structure.createCodec(ExcaliburSwordInStoneStructure::new);
+    public static final MapCodec<ExcaliburChurchStructure> CODEC =
+            Structure.createCodec(ExcaliburChurchStructure::new);
 
-    public ExcaliburSwordInStoneStructure(Structure.Config config) {
+    public ExcaliburChurchStructure(Structure.Config config) {
         super(config);
     }
 
@@ -23,7 +23,7 @@ public class ExcaliburSwordInStoneStructure extends Structure {
         int x = context.chunkPos().getStartX() + 8;
         int z = context.chunkPos().getStartZ() + 8;
 
-        // ✅ Better surface heightmap for structures
+        // Surface height
         int y = context.chunkGenerator().getHeightInGround(
                 x, z,
                 Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
@@ -31,25 +31,27 @@ public class ExcaliburSwordInStoneStructure extends Structure {
                 context.noiseConfig()
         );
 
-        // Clamp to world bounds
         int bottom = context.world().getBottomY();
         int top = context.world().getTopY();
         y = Math.max(bottom, Math.min(y, top - 1));
 
         BlockPos origin = new BlockPos(x, y, z);
 
-        // ✅ Flatness rules (tune these)
-        int flatRadius = 4;   // how far out must be flat
-        int maxDiff = 0;      // 0 = perfectly flat, 1 = small slope allowed
+        // Looser, realistic flatness rules
+        int flatRadius = 6; // 13x13 area
+        int maxDiff = 1;    // allow gentle slope
 
         if (!isFlatArea(context, origin, flatRadius, maxDiff)) {
             return Optional.empty();
         }
 
-        // Piece will snap to true dry ground using StructureWorldAccess (so no dead bush / water issues)
-        return Optional.of(new StructurePosition(origin, collector ->
-                collector.addPiece(new ExcaliburSwordInStonePiece(origin))
-        ));
+        return Optional.of(
+                new StructurePosition(origin, collector ->
+                        collector.addPiece(
+                                new ExcaliburChurchPiece(origin)
+                        )
+                )
+        );
     }
 
     private static boolean isFlatArea(Context context, BlockPos origin, int radius, int maxDiff) {
@@ -77,6 +79,6 @@ public class ExcaliburSwordInStoneStructure extends Structure {
 
     @Override
     public StructureType<?> getType() {
-        return BladeboundStructures.EXCALIBUR_SWORD_IN_STONE;
+        return BladeboundStructures.EXCALIBUR_CHURCH;
     }
 }

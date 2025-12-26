@@ -1,9 +1,9 @@
 {
-  "type": "bladebound:wado_shrine",
+  "type": "bladebound:excalibur_church",
   "biomes": [
-    "minecraft:cherry_grove",
     "minecraft:plains",
-    "minecraft:bamboo_jungle"
+    "minecraft:meadow",
+    "minecraft:birch_forest"
   ],
   "step": "surface_structures",
   "terrain_adaptation": "beard_thin",

@@ -1,10 +1,9 @@
 {
-  "type": "bladebound:excalibur_sword_in_stone",
+  "type": "bladebound:wado_dojo",
   "biomes": [
+    "minecraft:cherry_grove",
     "minecraft:plains",
-    "minecraft:meadow",
-    "minecraft:forest",
-    "minecraft:birch_forest"
+    "minecraft:bamboo_jungle"
   ],
   "step": "surface_structures",
   "terrain_adaptation": "beard_thin",

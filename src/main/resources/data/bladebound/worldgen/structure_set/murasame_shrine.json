@@ -1,0 +1,11 @@
+{
+  "structures": [
+    { "structure": "bladebound:murasame_shrine", "weight": 1 }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 22,
+    "separation": 10,
+    "salt": 44211803
+  }
+}

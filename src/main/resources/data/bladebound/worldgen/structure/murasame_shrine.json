@@ -1,9 +1,8 @@
 {
-  "type": "bladebound:murasame_execution_site",
+  "type": "bladebound:murasame_shrine",
   "biomes": [
     "minecraft:dark_forest",
-    "minecraft:windswept_hills",
-    "minecraft:badlands"
+    "minecraft:cherry_grove"
   ],
   "step": "surface_structures",
   "terrain_adaptation": "beard_thin",

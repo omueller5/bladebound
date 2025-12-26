@@ -1,0 +1,11 @@
+{
+  "structures": [
+    { "structure": "bladebound:excalibur_church", "weight": 1 }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 22,
+    "separation": 10,
+    "salt": 91238471
+  }
+}

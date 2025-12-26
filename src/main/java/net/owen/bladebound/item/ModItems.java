@@ -14,6 +14,8 @@ import net.owen.bladebound.item.custom.ExcaliburItem;
 import net.owen.bladebound.item.custom.MurasameItem;
 import net.owen.bladebound.item.custom.SandaiKitetsuItem;
 import net.owen.bladebound.item.custom.WadoIchimonjiItem;
+import net.owen.bladebound.item.custom.MurasameGauntletsItem;
+
 
 public class ModItems {
 
@@ -157,8 +159,9 @@ public class ModItems {
     public static final Item MURASAME_GAUNTLETS = Registry.register(
             Registries.ITEM,
             Identifier.of("bladebound", "murasame-gauntlets"),
-            new Item(new Item.Settings().maxCount(1))
+            new MurasameGauntletsItem(new Item.Settings().maxCount(1))
     );
+
 
     public static final Item CODEX = Registry.register(
             Registries.ITEM,
