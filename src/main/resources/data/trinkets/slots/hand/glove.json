@@ -1,6 +1,4 @@
 {
-  "replace": true,
-  "values": [
-    "bladebound:murasame-gauntlets"
-  ]
+  "icon": "trinkets:gui/slots/ring",
+  "amount": 1
 }

@@ -5,6 +5,7 @@ import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
+import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
 import dev.isxander.yacl3.api.controller.IntegerFieldControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
 import dev.isxander.yacl3.api.LabelOption;
@@ -58,6 +59,28 @@ public final class BladeboundYaclScreen {
                                 "Height of the bar in pixels.",
                                 () -> BladeboundConfig.DATA.hudHeight,
                                 v -> BladeboundConfig.DATA.hudHeight = v))
+
+                        // ----------------------------
+                        // Mana HUD (Staff)
+                        // ----------------------------
+                        .option(LabelOption.create(Text.literal(" ")))
+                        .option(LabelOption.create(Text.literal("Mana HUD")))
+
+                        .option(boolOption("Enable Mana HUD",
+                                "Shows the mana bar when Frieren's Staff (or the Creative Staff) is held.",
+                                () -> BladeboundConfig.DATA.manaHudEnabled,
+                                v -> BladeboundConfig.DATA.manaHudEnabled = v))
+
+                        .option(enumOption("Mana Numbers",
+                                "Controls the numbers shown under the mana bar: OFF, CURRENT/MAX, or PERCENT.",
+                                BladeboundConfig.BladeboundConfigData.ManaHudNumbersMode.class,
+                                () -> BladeboundConfig.DATA.manaHudNumbersMode,
+                                v -> BladeboundConfig.DATA.manaHudNumbersMode = v))
+
+                        .option(intOption("Mana Numbers Y Offset",
+                                "How many pixels below the mana bar to draw the numbers.",
+                                () -> BladeboundConfig.DATA.manaHudNumbersYOffset,
+                                v -> BladeboundConfig.DATA.manaHudNumbersYOffset = Math.max(0, v)))
                         .build())
 
                 .category(ConfigCategory.createBuilder()
@@ -113,6 +136,21 @@ public final class BladeboundYaclScreen {
                 .description(OptionDescription.of(Text.literal(desc)))
                 .binding(get.get(), get::get, set::accept)
                 .controller(IntegerFieldControllerBuilder::create)
+                .build();
+    }
+
+    private static <E extends Enum<E>> Option<E> enumOption(
+            String name,
+            String desc,
+            Class<E> enumClass,
+            java.util.function.Supplier<E> get,
+            java.util.function.Consumer<E> set
+    ) {
+        return Option.<E>createBuilder()
+                .name(Text.literal(name))
+                .description(OptionDescription.of(Text.literal(desc)))
+                .binding(get.get(), get::get, set::accept)
+                .controller(opt -> EnumControllerBuilder.create(opt).enumClass(enumClass))
                 .build();
     }
 }

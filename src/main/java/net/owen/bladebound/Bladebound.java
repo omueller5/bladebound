@@ -11,8 +11,12 @@ import net.owen.bladebound.effect.BladeboundEffects;
 import net.owen.bladebound.effect.MurasamePoisonHandler;
 import net.owen.bladebound.event.BladeboundJoinGifts;
 import net.owen.bladebound.event.BladeboundLootInject;
+import net.owen.bladebound.event.BladeboundTrades;
 import net.owen.bladebound.item.ModItemGroups;
 import net.owen.bladebound.item.ModItems;
+import net.owen.bladebound.network.ClientPackets;
+import net.owen.bladebound.network.Payloads;
+import net.owen.bladebound.network.ServerPackets;
 import net.owen.bladebound.worldgen.structure.BladeboundStructures;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +24,6 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 
 
 public class Bladebound implements ModInitializer {
@@ -29,30 +32,18 @@ public class Bladebound implements ModInitializer {
 
 
     private static void debugTrinketsTagSafe(Item gauntletsItem) {
-        // Don’t crash if Trinkets isn’t installed
-        if (!FabricLoader.getInstance().isModLoaded("trinkets")) {
-            LOGGER.info("[Bladebound] Trinkets not installed; skipping glove tag debug.");
-            return;
-        }
 
         Identifier itemId = Registries.ITEM.getId(gauntletsItem);
         TagKey<Item> handGlove = TagKey.of(RegistryKeys.ITEM, Identifier.of("trinkets", "hand/glove"));
 
         boolean inTag = Registries.ITEM.getEntry(gauntletsItem).isIn(handGlove);
-
-        LOGGER.info("[Bladebound] Gauntlets id = {}", itemId);
-        LOGGER.info("[Bladebound] In trinkets:hand/glove tag? {}", inTag);
     }
-
-
-
 
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	@Override
     public void onInitialize() {
         // 1) Items FIRST (prevents the registry crash you had)
-        BladeboundItems.init();
         ModItems.register();
         ModItemGroups.register();
         BladeboundBlocks.init();
@@ -62,7 +53,7 @@ public class Bladebound implements ModInitializer {
         BladeboundConfig.load(FabricLoader.getInstance().getConfigDir());
 
         // 3) Commands (call the correct method name for your class)
-        BladeboundCommands.init(); // <-- change this to whatever your BladeboundCommands actually has
+        BladeboundCommands.init();
 
         // 4) Worldgen + join gifts
         BladeboundStructures.init();
@@ -70,15 +61,14 @@ public class Bladebound implements ModInitializer {
 
         // 5) Loot injection LAST
         BladeboundLootInject.init();
+        BladeboundTrades.init();
         AccessoryCompat.init();
         MurasamePoisonHandler.init();
         BladeboundEffects.init();
 
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            debugTrinketsTagSafe(ModItems.MURASAME_GAUNTLETS);
-        });
-
+        Payloads.register();
+        ClientPackets.register();
+        ServerPackets.register();
 
     }
-
 }

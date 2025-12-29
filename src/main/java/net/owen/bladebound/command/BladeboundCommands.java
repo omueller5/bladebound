@@ -15,7 +15,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 
 import net.owen.bladebound.item.ModItems;
+import net.owen.bladebound.mana.ManaHolder;
 import net.owen.bladebound.worldgen.structure.ExcaliburChurchPiece;
+import net.owen.bladebound.worldgen.structure.FrierenTowerPiece;
 import net.owen.bladebound.worldgen.structure.MurasameShrinePiece;
 import net.owen.bladebound.worldgen.structure.WadoDojoPiece;
 
@@ -50,6 +52,57 @@ public final class BladeboundCommands {
                 )
 
                 /* ===============================
+                   INFINITE MANA (DEBUG)
+                   /bladebound infinitemana [on|off]
+                   =============================== */
+                .then(literal("infinitemana")
+                        .requires(src -> src.hasPermissionLevel(2))
+                        // toggle
+                        .executes(ctx -> {
+                            ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
+                            ManaHolder mana = (ManaHolder) player;
+
+                            boolean newValue = !mana.bladebound$hasInfiniteMana();
+                            mana.bladebound$setInfiniteMana(newValue);
+
+                            ctx.getSource().sendFeedback(
+                                    () -> Text.literal("Bladebound Infinite Mana: " + (newValue ? "ON" : "OFF")),
+                                    false
+                            );
+                            return 1;
+                        })
+                        // explicit on/off
+                        .then(argument("state", StringArgumentType.word())
+                                .suggests((ctx, builder) -> {
+                                    builder.suggest("on");
+                                    builder.suggest("off");
+                                    return builder.buildFuture();
+                                })
+                                .executes(ctx -> {
+                                    ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
+                                    ManaHolder mana = (ManaHolder) player;
+
+                                    String state = StringArgumentType.getString(ctx, "state").toLowerCase();
+                                    boolean value;
+                                    if (state.equals("on")) value = true;
+                                    else if (state.equals("off")) value = false;
+                                    else {
+                                        ctx.getSource().sendError(Text.literal("Usage: /bladebound infinitemana [on|off]"));
+                                        return 0;
+                                    }
+
+                                    mana.bladebound$setInfiniteMana(value);
+
+                                    ctx.getSource().sendFeedback(
+                                            () -> Text.literal("Bladebound Infinite Mana: " + (value ? "ON" : "OFF")),
+                                            false
+                                    );
+                                    return 1;
+                                })
+                        )
+                )
+
+                /* ===============================
                    DEBUG SPAWN
                    =============================== */
                 .then(literal("debugspawn")
@@ -59,6 +112,7 @@ public final class BladeboundCommands {
                                     builder.suggest("excalibur");
                                     builder.suggest("wado");
                                     builder.suggest("murasame");
+                                    builder.suggest("frieren");
                                     return builder.buildFuture();
                                 })
                                 .executes(ctx -> {
@@ -76,10 +130,11 @@ public final class BladeboundCommands {
                                         case "excalibur" -> spawnExcaliburChurch(world, origin);
                                         case "wado" -> spawnWadoDojo(world, origin);
                                         case "murasame" -> spawnMurasameShrine(world, origin);
+                                        case "frieren" -> spawnFrierenTower(world, origin);
 
                                         default -> {
                                             src.sendError(Text.literal(
-                                                    "Unknown option. Use: excalibur, wado, murasame"
+                                                    "Unknown option. Use: excalibur, wado, murasame, frieren"
                                             ));
                                             return 0;
                                         }
@@ -115,11 +170,19 @@ public final class BladeboundCommands {
     }
 
     /* =========================================================
-       MURASAME SHRINE — bladebound:murasame_execution_site (or your new template id)
+       MURASAME SHRINE — bladebound:murasame_shrine
        ========================================================= */
     private static void spawnMurasameShrine(World world, BlockPos origin) {
         if (!(world instanceof ServerWorld serverWorld)) return;
         generatePiece(serverWorld, new MurasameShrinePiece(origin), origin);
+    }
+
+    /* =========================================================
+       FRIEREN TOWER — bladebound:frieren_tower
+       ========================================================= */
+    private static void spawnFrierenTower(World world, BlockPos origin) {
+        if (!(world instanceof ServerWorld serverWorld)) return;
+        generatePiece(serverWorld, new FrierenTowerPiece(origin), origin);
     }
 
     /* =========================================================

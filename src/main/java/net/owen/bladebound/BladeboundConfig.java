@@ -47,21 +47,45 @@ public final class BladeboundConfig {
 
     // All your toggles live here
     public static final class BladeboundConfigData {
-        // HUD
+        // =========================
+        // Wado / Discipline HUD
+        // =========================
         public boolean hudEnabled = true;
         public int hudYOffset = -58;        // relative to bottom of screen (negative = up)
         public int hudWidth = 81;
         public int hudHeight = 8;
         public boolean hudShowText = true;
 
+        // =========================
+        // Mana HUD (Staff)
+        // =========================
+        public boolean manaHudEnabled = true;
+
+        // Optional numeric mana under bar
+        // OFF / CURRENT_MAX / PERCENT
+        public ManaHudNumbersMode manaHudNumbersMode = ManaHudNumbersMode.OFF;
+        public int manaHudNumbersYOffset = 2;
+
+        // =========================
         // Perfect Form visuals
+        // =========================
         public boolean perfectFormEffects = true;
 
+        // =========================
         // Enchant rules
+        // =========================
         public boolean enforceAllowedEnchantments = true;
 
+        // =========================
         // Durability
+        // =========================
         public boolean durabilityEnabled = true;
         public int durabilityPerHit = 1; // how much durability to consume per hit
+
+        public enum ManaHudNumbersMode {
+            OFF,
+            CURRENT_MAX,
+            PERCENT
+        }
     }
 }

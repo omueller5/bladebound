@@ -1,0 +1,11 @@
+{
+  "structures": [
+    { "structure": "bladebound:frieren_tower", "weight": 1 }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 28,
+    "separation": 12,
+    "salt": 71359204
+  }
+}

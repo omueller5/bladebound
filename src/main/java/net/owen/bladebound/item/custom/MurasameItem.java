@@ -39,7 +39,7 @@ public class MurasameItem extends SwordItem {
 
     @Override
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
-        tooltip.add(Text.literal("LEGENDARY").formatted(Formatting.DARK_PURPLE, Formatting.BOLD));
+        tooltip.add(Text.literal("LEGENDARY").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.literal("A cursed edge that drinks the last heartbeat.").formatted(Formatting.DARK_RED, Formatting.ITALIC));
         tooltip.add(Text.literal("Its mark lingers… and the body follows.").formatted(Formatting.GRAY, Formatting.ITALIC));
 

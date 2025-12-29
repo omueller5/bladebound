@@ -1,0 +1,11 @@
+{
+  "type": "bladebound:frieren_tower",
+  "biomes": [
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:birch_forest"
+  ],
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "spawn_overrides": {}
+}

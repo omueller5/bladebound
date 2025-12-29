@@ -78,5 +78,28 @@ public class BladeboundStructures {
                     ExcaliburChurchPiece::new
             );
 
+     /* =========================================================
+       FRIEREN TOWER
+       ========================================================= */
+     public static final StructureType<FrierenTowerStructure> FRIEREN_TOWER =
+             Registry.register(
+                     Registries.STRUCTURE_TYPE,
+                     Identifier.of("bladebound", "frieren_tower"),
+                     new StructureType<>() {
+                         @Override
+                         public com.mojang.serialization.MapCodec<FrierenTowerStructure> codec() {
+                             return FrierenTowerStructure.CODEC;
+                         }
+                     }
+             );
+
+    public static final StructurePieceType FRIEREN_TOWER_PIECE =
+            Registry.register(
+                    Registries.STRUCTURE_PIECE,
+                    Identifier.of("bladebound", "frieren_tower_piece"),
+                    FrierenTowerPiece::new
+            );
+
+
     public static void init() {}
 }

@@ -12,18 +12,16 @@ import net.owen.bladebound.block.custom.SwordInStoneBlock;
 
 public class BladeboundBlocks {
 
-    /* =========================================================
-       Excalibur Shrine — FULL (has sword by default)
-       ========================================================= */
     public static final Block SWORD_IN_STONE = Registry.register(
             Registries.BLOCK,
             Identifier.of("bladebound", "sword-in-stone"),
             new SwordInStoneBlock(
                     FabricBlockSettings.copyOf(Blocks.COBBLESTONE),
-                    true // has sword by default
+                    true
             )
     );
 
+    // THIS is what makes it show up safely in creative + /give
     public static final Item SWORD_IN_STONE_ITEM = Registry.register(
             Registries.ITEM,
             Identifier.of("bladebound", "sword-in-stone"),
@@ -31,6 +29,6 @@ public class BladeboundBlocks {
     );
 
     public static void init() {
-        // call from your mod initializer
+        // Force class loading so static fields register
     }
 }

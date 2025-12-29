@@ -5,7 +5,10 @@
   "mixins": [
     "ScreenHandlerInvoker",
     "PlayerEntityAccessoryMixin",
-    "PlayerScreenHandlerMixin"
+    "PlayerScreenHandlerMixin",
+    "SmallFireballNoGriefMixin",
+    "PlayerEntityManaMixin",
+    "PlayerEntitySpellMixin"
   ],
   "client": [
     "client.InventoryScreenMixin",

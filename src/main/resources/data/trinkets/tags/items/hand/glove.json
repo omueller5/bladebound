@@ -1,6 +1,7 @@
 {
-  "replace": true,
+  "replace": false,
   "values": [
-    "bladebound:murasame-gauntlets"
+    "bladebound:murasame-gauntlets",
+    "bladebound:cooldown_bracelet"
   ]
 }

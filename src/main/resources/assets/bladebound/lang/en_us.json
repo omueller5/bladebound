@@ -3,14 +3,28 @@
 
   "item.bladebound.bladebound-codex": "Bladebound Codex",
   "block.bladebound.sword-in-stone": "Excalibur — Sword in the Stone",
-  "block.bladebound.empty-sword-in-stone": "Excalibur Shrine (Empty)",
-  "item.bladebound.murasame-gauntlets": "Murasame Gauntlets",
 
   "item.bladebound.murasame": "Murasame",
   "item.bladebound.excalibur": "Excalibur",
   "item.bladebound.wado-ichimonji": "Wado Ichimonji",
   "item.bladebound.sandai-kitetsu": "Sandai Kitetsu",
-  "item.bladebound.cursed-kitetsu-shard": "Cursed Kitetsu Shard",
 
-  "effect.bladebound.murasame_curse": "Murasame Curse"
+  "item.bladebound.frieren-staff": "Frieren's Staff",
+  "item.bladebound.frieren-staff-creative": "Frieren's Staff (Creative)",
+
+  "item.bladebound.cursed-kitetsu-shard": "Cursed Kitetsu Shard",
+  "item.bladebound.murasame-gauntlets": "Murasame Gauntlets",
+  "item.bladebound.cooldown_bracelet": "Cooldown Bracelet",
+  "item.bladebound.fixed_cooldown_bracelet": "Cooldown Bracelet",
+
+
+  "effect.bladebound.murasame_curse": "Murasame Curse",
+  "item.bladebound.lightning_spell": "Lightning Spell Grimoire",
+  "item.bladebound.zoltraak_spell": "Zoltraak Spell Grimoire",
+  "item.bladebound.perfect_heal_spell": "Perfect Heal Spell Grimoire",
+  "item.bladebound.mana_apple": "Mana Apple",
+  "item.bladebound.greater_mana_apple": "Greater Mana Apple",
+
+  "key.bladebound.open_spells": "Open Spells",
+  "category.bladebound": "Bladebound"
 }

@@ -1,8 +1,0 @@
-{
-  "replace": false,
-  "entities": ["player"],
-  "slots": [
-    "hand/glove",
-    "offhand/glove"
-  ]
-}
