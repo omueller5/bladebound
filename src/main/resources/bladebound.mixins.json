@@ -8,7 +8,10 @@
     "PlayerScreenHandlerMixin",
     "SmallFireballNoGriefMixin",
     "PlayerEntityManaMixin",
-    "PlayerEntitySpellMixin"
+    "PlayerEntitySpellMixin",
+    "PlayerEntityBarrierDamageMixin",
+    "PlayerDropAccessoryInventoryMixin",
+    "PlayerDropAccessoriesMixin"
   ],
   "client": [
     "client.InventoryScreenMixin",
