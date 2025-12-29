@@ -1,97 +1,94 @@
-# ⚔️ Bladebound
+# ⚔️ **Bladebound**
 
 [![Minecraft 1.21.1](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Mod%20Loader-Fabric-blue)](https://fabricmc.net/)
 [![Fabric API](https://img.shields.io/badge/Requires-Fabric%20API-orange)](https://modrinth.com/mod/fabric-api)
-[![Modrinth Downloads](https://img.shields.io/modrinth/dt/bladebound?logo=modrinth)](https://modrinth.com/project/bladebound)
 [![Modrinth Version](https://img.shields.io/modrinth/v/bladebound?logo=modrinth)](https://modrinth.com/mod/bladebound)
+[![CurseForge](https://img.shields.io/badge/CurseForge-Bladebound-orange?logo=curseforge)](https://legacy.curseforge.com/minecraft/mc-mods/bladebound)
 
-Bladebound is a Fabric mod that adds **named swords with unique effects**, in-game lore, and structured progression designed to feel natural in survival Minecraft.
-
----
-
-## 🔧 Requirements
-
-- **Minecraft:** 1.21.1  
-- **Mod Loader:** Fabric  
-- **Java:** 21  
-- **Required Mods:**  
-  - Fabric API
-
----
-## 🗡️ Swords
-### **Sandai Kitetsu (Rare)**
-
-A cursed blade from a notorious lineage.
-This sword does not generate in the world and must be crafted using a Nether-earned cursed ingredient.
-
-### **Wado Ichimonji (Rare)**
-
-A blade that grows stronger through progression and discipline.
-
-### **Excalibur (Legendary)**
-
-A legendary sword that deals bonus damage to undead.
-
-### **Murasame (Legendary)**
-
-A cursed blade that brings inevitable death.
-
-Murasame inflicts a unique lethal curse rather than traditional damage-over-time effects. Any entity struck by the blade will perish after a short delay, regardless of strength.
-Merely holding Murasame is dangerous — those unprotected by special equipment will be consumed by the curse themselves.
-
-## ⚠️ Warning
-The Murasame Curse is unavoidable once applied.
-Without the Murasame Gauntlets, carrying or wielding this blade will eventually result in death.
+Bladebound is a Fabric mod focused on **named legendary weapons**, **world-based discovery**, and **light progression mechanics** that integrate naturally into survival Minecraft. Powerful items are earned through exploration rather than shortcuts, encouraging players to uncover ancient structures and hidden knowledge.
 
 ---
 
-## 🌍 World Generation & Spawns
+## 🗡️ **Featured Weapons & Artifacts**
 
-Most rare and legendary swords are obtained through **world generation** rather than crafting.
+**_Sandai Kitetsu_** — <span style="color:#2dc26b;">Uncommon</span>  
+A cursed blade from a dangerous lineage.  
+This sword **does not generate in the world** and must be crafted using a Nether-obtained cursed component.
 
-- **Excalibur**, **Wado Ichimonji**, and **Murasame** spawn in special structures or shrine-like locations throughout the world.
-- These locations are intended to reward exploration and discovery.
-- **Sandai Kitetsu** is excluded from world generation and must be forged manually.
+**_Wado Ichimonji_** — <span style="color:#3598db;">Rare</span>  
+A disciplined blade that grows stronger through mastery and consistent use.  
+
+_Found inside the Wado Ichimonji Dojo_
+
+**_Excalibur_** — <span style="color:#843fa1;">Legendary</span>  
+A legendary holy sword that deals **bonus damage to undead** enemies.  
+
+_Spawns in the Excalibur Church_
+
+**_Murasame_** — <span style="color:#843fa1;">Legendary</span>  
+A cursed blade that inflicts the deadly **Murasame Curse** on hit.  
+Without proper protection, this curse will kill both enemies and the wielder.  
+
+_Spawns in the Murasame Shrine_
+
+**_Frieren’s Staff_** — <span style="color:#843fa1;">Legendary</span>  
+The staff of one of the greatest mages to ever live, enabling spellcasting and magical progression.  
+
+_Spawns in Frieren’s Tower_
 
 ---
 
-## 🧪 Cursed Kitetsu Shard
+## 🌍 **World Generation & Exploration**
 
-A cursed crafting component used to forge Sandai Kitetsu.
+Most rare and legendary items in Bladebound are obtained through **exploration**, not crafting.  
+Ancient structures are scattered throughout the world, each tied to specific weapons or magical progression paths.  
+_Sandai Kitetsu_ is excluded from world generation and must always be crafted.
 
-- Drops from **Wither Skeletons** (high chance)
+---
+
+## 🧪 **Artifacts & Magical Components**
+
+**Cursed Kitetsu Shard**  
+A cursed crafting material used to forge **Sandai Kitetsu**.  
+- Dropped by **Wither Skeletons**  
 - Rarely obtainable through **Piglin bartering**
 
----
+**Murasame Gauntlets**  
+Protective gauntlets designed to shield the wielder from powerful curses.  
+- Required to safely wield **Murasame**  
+- Crafted rather than found
 
-## 📘 Bladebound Codex
-
-Bladebound includes an in-game **Codex** that documents each sword, its effects, and lore.
-
-The Codex is provided directly to players and serves as a reference for all Bladebound weapons.
-
----
-
-## 📦 Installation
-
-1. Install **Fabric Loader** for Minecraft 1.21.1  
-2. Install **Fabric API**  
-3. Place the Bladebound `.jar` into your `mods` folder  
-4. Launch the game  
+**Cooldown Bracelet**  
+A magical bracelet that alters how spells are cast.  
+- Influences spellcasting behavior when worn  
+- Obtained through exploration or villager trades
 
 ---
 
-## 🐛 Issues & Feedback
+## 🪄 **Magic & Progression**
 
-- GitHub Issues:  
-  https://github.com/omueller5/bladebound/issues
-- Modrinth page:  
-  https://modrinth.com/project/bladebound
+Bladebound introduces a light magic system centered around staves, mana, and spell discovery.  
+Spells are learned through exploration and ancient knowledge rather than crafting tables, keeping progression immersive and deliberate.
 
 ---
 
-## 🔖 Credits
+## 📘 **Bladebound Codex**
 
-Made by **Owen / Bladebound**  
-Minecraft is © Mojang AB.
+Bladebound includes an in-game **Codex** that documents weapons, magic, and progression rules.  
+It serves as a natural reference for learning how items work and where they can be obtained.
+
+---
+
+## ⚙️ **Requirements**
+
+- Minecraft **1.21.1**
+- **Fabric Loader**
+- **Fabric API**
+
+---
+
+## 🔖 **Credits**
+
+Made by Owen / Bladebound 
+Minecraft is © Mojang AB
