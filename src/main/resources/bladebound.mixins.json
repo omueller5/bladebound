@@ -11,18 +11,13 @@
     "PlayerEntitySpellMixin",
     "PlayerEntityBarrierDamageMixin",
     "PlayerDropAccessoryInventoryMixin",
-    "PlayerDropAccessoriesMixin",
-    "client.BipedEntityModelArmPoseAccessor",
-    "client.BipedEntityModelBarrierPoseMixin",
-    "client.PlayerEntityRendererBarrierPoseMixin",
-    "PlayerEntityCooldownTickMixin",
-    "EnderDragonAncientDropMixin"
+    "PlayerDropAccessoriesMixin"
   ],
   "client": [
     "client.InventoryScreenMixin",
     "client.HandledScreenFocusedSlotAccessor",
-    "client.InventoryScreenBladeboundSlotIconMixin",
-    "client.ClientPlayerInteractionManagerMixin"
+    "client.InventoryScreenMixin",
+    "client.InventoryScreenBladeboundSlotIconMixin"
   ],
   "injectors": {
     "defaultRequire": 1
