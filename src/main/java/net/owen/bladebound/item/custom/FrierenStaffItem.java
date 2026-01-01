@@ -2,6 +2,7 @@ package net.owen.bladebound.item.custom;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -10,12 +11,12 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.*;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import net.owen.bladebound.BladeboundBind;
 import net.owen.bladebound.item.ModItems;
+import net.owen.bladebound.magic.SpellCooldowns;
 import net.owen.bladebound.mana.ManaHolder;
 import net.owen.bladebound.magic.SpellHolder;
 import net.owen.bladebound.magic.StaffSpell;
@@ -41,9 +42,73 @@ public class FrierenStaffItem extends Item {
     }
 
     @Override
+    public int getMaxUseTime(ItemStack stack, LivingEntity user) {
+        return 72000;
+    }
+
+    @Override
+    public UseAction getUseAction(ItemStack stack) {
+        // Toggle-mode barrier: no shield animation
+        return UseAction.NONE;
+    }
+
+    @Override
+    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+        super.usageTick(world, user, stack, remainingUseTicks);
+    }
+
+    @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
 
+        // =========================================================
+        // Barrier (Mana Barrier): CLICK TO TOGGLE ON/OFF (ID-based)
+        // =========================================================
+        if (user instanceof SpellHolder sh) {
+            Identifier selId = sh.bladebound$getSelectedSpellId();
+            StaffSpell selSpell = (selId == null) ? null : StaffSpell.fromId(selId);
+
+            if (selSpell == StaffSpell.MANA_BARRIER) {
+                if (!world.isClient) {
+                    boolean creativeStaff = stack.isOf(ModItems.FRIEREN_STAFF_CREATIVE);
+
+                    // Normal staff: require mana to turn ON (but always allow turning OFF)
+                    if (!creativeStaff) {
+                        if (!(user instanceof ManaHolder mh)) {
+                            return TypedActionResult.fail(stack);
+                        }
+
+                        boolean turningOn = !sh.bladebound$isBarrierActive();
+                        if (turningOn && mh.bladebound$getMana() <= 0) {
+                            user.sendMessage(Text.literal("Not enough mana!"), true);
+                            return TypedActionResult.fail(stack);
+                        }
+                    }
+
+                    boolean nowActive = !sh.bladebound$isBarrierActive();
+                    sh.bladebound$setBarrierActive(nowActive);
+
+                    world.playSound(
+                            null,
+                            user.getBlockPos(),
+                            SoundEvents.UI_BUTTON_CLICK.value(),
+                            SoundCategory.PLAYERS,
+                            0.6f,
+                            nowActive ? 1.2f : 0.9f
+                    );
+
+                    if (user instanceof ServerPlayerEntity sp && user instanceof ManaHolder) {
+                        ModPackets.sendMana(sp);
+                    }
+                }
+
+                return TypedActionResult.success(stack, world.isClient);
+            }
+        }
+
+        // =========================================================
+        // Existing click-to-cast behavior for other spells
+        // =========================================================
         if (user.isSneaking()) {
             if (!world.isClient) {
                 user.sendMessage(Text.literal("Use the spell menu to select spells."), true);
@@ -53,32 +118,50 @@ public class FrierenStaffItem extends Item {
             return TypedActionResult.success(stack, world.isClient);
         }
 
-        if (user.getItemCooldownManager().isCoolingDown(this)) {
-            return TypedActionResult.fail(stack);
-        }
-
         if (!world.isClient) {
             boolean creativeStaff = stack.isOf(ModItems.FRIEREN_STAFF_CREATIVE);
 
-            SpellHolder spells = (SpellHolder) user;
-            int idx = spells.bladebound$getSelectedSpell();
+            if (!(user instanceof SpellHolder spells)) {
+                return TypedActionResult.fail(stack);
+            }
 
-            int maxIdx = StaffSpell.values().length - 1;
-            if (idx < 0) idx = 0;
-            if (idx > maxIdx) idx = 0;
+            if (!(user instanceof ManaHolder mana)) {
+                return TypedActionResult.fail(stack);
+            }
 
-            StaffSpell spell = StaffSpell.fromIndex(idx);
+            // Selected spell (ID-based)
+            Identifier selectedId = spells.bladebound$getSelectedSpellId();
+            if (selectedId == null) {
+                user.sendMessage(Text.literal("No spell selected."), true);
+                return TypedActionResult.fail(stack);
+            }
 
-            ManaHolder mana = (ManaHolder) user;
+            StaffSpell spell = StaffSpell.fromId(selectedId);
+            if (spell == null) {
+                user.sendMessage(Text.literal("Unknown spell selected."), true);
+                return TypedActionResult.fail(stack);
+            }
 
-            // If holding creative staff: force infinite mana behavior (server-side)
+            // =========================================================
+            // Spell-based cooldowns (key = StaffSpell.id)
+            // =========================================================
+            Identifier spellId = spell.id;
+
+            // Creative staff bypasses cooldowns
+            if (!creativeStaff && spells.bladebound$getSpellCooldown(spellId) > 0) {
+                return TypedActionResult.fail(stack);
+            }
+
+            // =========================================================
+            // Mana rules
+            // =========================================================
+
+            // Creative staff: force "infinite" mana server-side
             if (creativeStaff) {
                 int maxMana = mana.bladebound$getMaxMana();
-                if (maxMana > 0) {
-                    mana.bladebound$setMana(maxMana);
-                }
+                if (maxMana > 0) mana.bladebound$setMana(maxMana);
             } else {
-                // Normal staff: consume mana normally (static-cost spells)
+                // Normal staff: consume static-cost spells
                 if (spell.manaCost > 0) {
                     if (!mana.bladebound$tryConsumeMana(spell.manaCost)) {
                         user.sendMessage(Text.literal("Not enough mana!"), true);
@@ -91,10 +174,12 @@ public class FrierenStaffItem extends Item {
                 ModPackets.sendMana(sp);
             }
 
+            // =========================================================
             // Cast (may override cooldown in seconds)
+            // =========================================================
             int cdSecondsOverride = spell.cast(world, user, FIREBALL_SPEED);
 
-            int defaultCdSeconds = spell.cooldownTicks; // your field stores "seconds"
+            int defaultCdSeconds = SpellCooldowns.getBaseCooldownSeconds(spell.id);
             int cdSeconds = (cdSecondsOverride > 0) ? cdSecondsOverride : defaultCdSeconds;
 
             // Creative staff: ALWAYS 0 cooldown
@@ -113,22 +198,21 @@ public class FrierenStaffItem extends Item {
                             user.getRandom()
                     );
                 }
-
             }
 
-            user.getItemCooldownManager().set(this, cooldownTicks);
+            // Apply spell cooldown (per-spell id), not item cooldown
+            spells.bladebound$setSpellCooldown(spellId, cooldownTicks);
 
             // Send cooldown to client for the HUD countdown
             if (user instanceof ServerPlayerEntity sp) {
-                ServerPlayNetworking.send(sp, new Payloads.StaffCooldownS2C(cooldownTicks));
+                ServerPlayNetworking.send(sp, new Payloads.SpellCooldownS2C(spell.id, cooldownTicks));
             }
 
-            // If creative staff: re-fill mana after cast (covers Perfect Heal draining it)
+            // Creative staff: refill mana after cast (covers Perfect Heal draining it)
             if (creativeStaff) {
                 int maxMana = mana.bladebound$getMaxMana();
-                if (maxMana > 0) {
-                    mana.bladebound$setMana(maxMana);
-                }
+                if (maxMana > 0) mana.bladebound$setMana(maxMana);
+
                 if (user instanceof ServerPlayerEntity sp) {
                     ModPackets.sendMana(sp);
                 }
@@ -144,6 +228,7 @@ public class FrierenStaffItem extends Item {
         return TypedActionResult.success(stack, world.isClient);
     }
 
+    // === DO NOT REMOVE: Frieren Staff Lore ===
     @Override
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.literal("LEGENDARY").formatted(Formatting.GOLD, Formatting.BOLD));
@@ -155,5 +240,4 @@ public class FrierenStaffItem extends Item {
         tooltip.add(Text.literal(" "));
         BladeboundBind.appendBindTooltip(stack, tooltip);
     }
-
 }

@@ -21,7 +21,6 @@ public class BladeboundBlocks {
             )
     );
 
-    // THIS is what makes it show up safely in creative + /give
     public static final Item SWORD_IN_STONE_ITEM = Registry.register(
             Registries.ITEM,
             Identifier.of("bladebound", "sword-in-stone"),

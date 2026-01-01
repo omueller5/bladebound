@@ -8,10 +8,12 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import net.owen.bladebound.magic.SpellHolder;
 import net.owen.bladebound.magic.StaffSpell;
+import net.owen.bladebound.network.ModPackets;
 
 import java.util.List;
 
@@ -23,6 +25,7 @@ public class FrierenStaffCreativeItem extends FrierenStaffItem {
     public FrierenStaffCreativeItem(Settings settings) {
         super(settings);
     }
+    private static final Identifier CREATIVE_STAFF_ID = Identifier.of("bladebound", "creative_staff");
 
     @Override
     public boolean hasGlint(ItemStack stack) {
@@ -41,17 +44,37 @@ public class FrierenStaffCreativeItem extends FrierenStaffItem {
         // If you only want unlock-all while HOLDING the staff, uncomment:
         // if (!selected) return;
 
-        if (spells.bladebound$getLearnedMask() != ALL_SPELLS_MASK) {
-            spells.bladebound$setLearnedMask(ALL_SPELLS_MASK);
+        // Learn every registered spell by ID (no masks/indices)
+        boolean changed = false;
+        for (StaffSpell s : StaffSpell.values()) {
+            Identifier id = s.id; // if your enum uses getter, replace with s.getId()
+            if (id == null) continue;
 
-            // Optional: if you want to auto-select something valid, set it here
-            // (keeping it simple: don't force selection unless you want it)
-            // spells.bladebound$setSelectedSpell(0);
+            if (!spells.bladebound$hasLearnedSpell(id)) {
+                spells.bladebound$learnSpell(id);
+                changed = true;
+            }
+        }
 
-            // If your UI needs a sync packet, uncomment:
-            // ModPackets.sendSpellState(sp);
+        // Ensure a valid selection exists
+        if (spells.bladebound$getSelectedSpellId() == null) {
+            for (StaffSpell s : StaffSpell.values()) {
+                Identifier id = s.id;
+                if (id == null) continue;
+                if (spells.bladebound$hasLearnedSpell(id)) {
+                    spells.bladebound$setSelectedSpellId(id);
+                    changed = true;
+                    break;
+                }
+            }
+        }
+
+        // Sync UI/client if anything changed
+        if (changed) {
+            ModPackets.sendSpellState(sp);
         }
     }
+
 
     @Override
     public TypedActionResult<ItemStack> use(World world, net.minecraft.entity.player.PlayerEntity user, Hand hand) {

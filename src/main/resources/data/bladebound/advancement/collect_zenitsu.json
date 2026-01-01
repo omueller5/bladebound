@@ -1,0 +1,20 @@
+{
+  "parent": "bladebound:collect_first_blade",
+  "display": {
+    "icon": { "id": "bladebound:zenitsu-nichirin" },
+    "title": { "text": "Thunder Breathing" },
+    "description": { "text": "Obtain Zenitsu's Nichirin blade." },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "collect_zenitsu": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [ { "items": "bladebound:zenitsu-nichirin" } ]
+      }
+    }
+  }
+}

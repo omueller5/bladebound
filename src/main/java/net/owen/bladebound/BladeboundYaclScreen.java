@@ -2,13 +2,13 @@ package net.owen.bladebound;
 
 import dev.isxander.yacl3.api.ButtonOption;
 import dev.isxander.yacl3.api.ConfigCategory;
+import dev.isxander.yacl3.api.LabelOption;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
 import dev.isxander.yacl3.api.controller.IntegerFieldControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
-import dev.isxander.yacl3.api.LabelOption;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
@@ -81,6 +81,50 @@ public final class BladeboundYaclScreen {
                                 "How many pixels below the mana bar to draw the numbers.",
                                 () -> BladeboundConfig.DATA.manaHudNumbersYOffset,
                                 v -> BladeboundConfig.DATA.manaHudNumbersYOffset = Math.max(0, v)))
+
+                        // ----------------------------
+                        // Mob Health Indicator
+                        // ----------------------------
+                        .option(LabelOption.create(Text.literal(" ")))
+                        .option(LabelOption.create(Text.literal("Mob Health Indicator")))
+
+                        .option(enumOption("Mob Health Mode",
+                                "OFF disables it. TEXT ONLY shows numbers. BAR ONLY shows a bar. HYBRID shows bar + numbers.",
+                                BladeboundConfig.BladeboundConfigData.MobHealthHudMode.class,
+                                () -> BladeboundConfig.DATA.mobHealthHudMode,
+                                v -> BladeboundConfig.DATA.mobHealthHudMode = v))
+
+                        .option(boolOption("Smooth Mob Health Bar",
+                                "Animates the bar smoothly instead of snapping each hit.",
+                                () -> BladeboundConfig.DATA.mobHealthSmooth,
+                                v -> BladeboundConfig.DATA.mobHealthSmooth = v))
+
+                        .option(intOption("Mob Health Hold Time (ticks)",
+                                "How long to keep showing the last target after you stop aiming at it. 20 ticks = 1 second.",
+                                () -> BladeboundConfig.DATA.mobHealthHoldTicks,
+                                v -> BladeboundConfig.DATA.mobHealthHoldTicks = Math.max(0, v)))
+
+                        // Damage popups
+                        .option(boolOption("Damage Popups",
+                                "Shows a damage number when the target loses health.",
+                                () -> BladeboundConfig.DATA.mobHealthDamagePopups,
+                                v -> BladeboundConfig.DATA.mobHealthDamagePopups = v))
+
+                        .option(intOption("Damage Popup Duration (ticks)",
+                                "How long the damage number stays visible. 20 ticks = 1 second.",
+                                () -> BladeboundConfig.DATA.mobHealthDamagePopupTicks,
+                                v -> BladeboundConfig.DATA.mobHealthDamagePopupTicks = Math.max(0, v)))
+
+                        .option(boolOption("Boss Styling",
+                                "Special colors for bosses (Warden/Wither/Dragon/Elder Guardian).",
+                                () -> BladeboundConfig.DATA.mobHealthBossStyle,
+                                v -> BladeboundConfig.DATA.mobHealthBossStyle = v))
+
+                        .option(boolOption("Hit Confirm Sound",
+                                "Plays a subtle click when damage is detected (client-side).",
+                                () -> BladeboundConfig.DATA.mobHealthHitSound,
+                                v -> BladeboundConfig.DATA.mobHealthHitSound = v))
+
                         .build())
 
                 .category(ConfigCategory.createBuilder()

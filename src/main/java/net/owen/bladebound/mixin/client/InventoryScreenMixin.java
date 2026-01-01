@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin {
 
-    @Inject(method = "render", at = @At("HEAD"))
+    @Inject(method = "render", at = @At("TAIL"))
     private void bladebound$updateAccessoryHoverState(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         Slot focused = ((HandledScreenFocusedSlotAccessor) this).bladebound$getFocusedSlot();
 

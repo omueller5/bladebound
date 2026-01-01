@@ -1,7 +1,7 @@
 {
   "parent": "bladebound:root",
   "display": {
-    "icon": { "id": "bladebound:wado_ichimonji" },
+    "icon": { "id": "bladebound:wado-ichimonji" },
     "title": { "text": "Collect Wado" },
     "description": { "text": "Obtain Wado Ichimonji." },
     "frame": "task",
@@ -14,7 +14,7 @@
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
-          { "items": [ "bladebound:wado_ichimonji" ] }
+          { "items": [ "bladebound:wado-ichimonji" ] }
         ]
       }
     }

@@ -1,0 +1,20 @@
+{
+  "parent": "bladebound:collect_first_blade",
+  "display": {
+    "icon": { "id": "bladebound:stark-axe" },
+    "title": { "text": "Stark's Axe" },
+    "description": { "text": "Obtain Stark's Axe." },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "collect_stark": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [ { "items": "bladebound:stark-axe" } ]
+      }
+    }
+  }
+}

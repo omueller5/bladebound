@@ -1,0 +1,22 @@
+{
+  "parent": "bladebound:get_staff",
+  "display": {
+    "icon": { "id": "bladebound:frieren-staff" },
+    "title": { "text": "Frieren's Staff" },
+    "description": { "text": "Obtain Frieren's Staff" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "get_frieren": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          { "items": "bladebound:frieren-staff" }
+        ]
+      }
+    }
+  }
+}

@@ -12,26 +12,30 @@
   "criteria": {
     "collect_excalibur": {
       "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [ { "items": "bladebound:excalibur" } ]
-      }
+      "conditions": { "items": [ { "items": ["bladebound:excalibur"] } ] }
     },
     "collect_wado": {
       "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [ { "items": "bladebound:wado_ichimonji" } ]
-      }
+      "conditions": { "items": [ { "items": ["bladebound:wado-ichimonji"] } ] }
     },
     "collect_murasame": {
       "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [ { "items": "bladebound:murasame" } ]
-      }
+      "conditions": { "items": [ { "items": ["bladebound:murasame"] } ] }
+    },
+    "collect_stark": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": { "items": [ { "items": ["bladebound:stark-axe"] } ] }
+    },
+    "collect_zenitsu": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": { "items": [ { "items": ["bladebound:zenitsu-nichirin"] } ] }
     }
   },
   "requirements": [
     ["collect_excalibur"],
     ["collect_wado"],
-    ["collect_murasame"]
+    ["collect_murasame"],
+    ["collect_stark"],
+    ["collect_zenitsu"]
   ]
 }

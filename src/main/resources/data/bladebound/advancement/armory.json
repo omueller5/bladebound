@@ -1,0 +1,46 @@
+{
+  "parent": "bladebound:collect_all_legendary",
+  "display": {
+    "icon": { "id": "bladebound:frieren-staff" },
+    "title": { "text": "Armory" },
+    "description": { "text": "Collect every Bladebound blade and every staff." },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "collect_excalibur": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": { "items": [ { "items": "bladebound:excalibur" } ] }
+    },
+    "collect_wado": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": { "items": [ { "items": "bladebound:wado-ichimonji" } ] }
+    },
+    "collect_murasame": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": { "items": [ { "items": "bladebound:murasame" } ] }
+    },
+    "collect_stark": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": { "items": [ { "items": "bladebound:stark-axe" } ] }
+    },
+    "collect_zenitsu": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": { "items": [ { "items": "bladebound:zenitsu-nichirin" } ] }
+    },
+    "collect_frieren": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": { "items": [ { "items": "bladebound:frieren-staff" } ] }
+    }
+  },
+  "requirements": [
+    ["collect_excalibur"],
+    ["collect_wado"],
+    ["collect_murasame"],
+    ["collect_stark"],
+    ["collect_zenitsu"],
+    ["collect_frieren"]
+  ]
+}

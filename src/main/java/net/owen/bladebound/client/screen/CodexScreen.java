@@ -14,6 +14,7 @@ import net.minecraft.util.Identifier;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class CodexScreen extends Screen {
 
     private static final Identifier BG = Identifier.of("bladebound", "textures/gui/codex.png");
@@ -365,6 +366,7 @@ public class CodexScreen extends Screen {
     private Text coloredName(String name, Rarity rarity) {
         if (name == null) return Text.literal("");
         return switch (rarity) {
+            case UNCOMMON -> Text.literal(name).formatted(Formatting.YELLOW);
             case RARE -> Text.literal(name).formatted(Formatting.DARK_AQUA);
             case LEGENDARY -> Text.literal(name).formatted(Formatting.DARK_PURPLE);
             default -> Text.literal(name);
@@ -439,6 +441,20 @@ public class CodexScreen extends Screen {
                 Rarity.RARE
         ));
 
+        // Steel Ingot
+        s.add(Spread.item(
+                stack("bladebound:steel_ingot"),
+                "Steel Ingot",
+                "A refined metal forged through heat and patience.\n" +
+                        "• What it is: A stronger, purified form of iron\n" +
+                        "• How to get it: Smelt or blast Iron Ingots in a furnace\n" +
+                        "• What it’s used for: Craft advanced weapons and equipment\n" +
+                        "• Notes: Serves as a foundation for blades beyond diamond",
+                "Steel Ingot",
+                Rarity.UNCOMMON
+        ));
+
+
         // Murasame Gauntlets
         s.add(Spread.item(
                 stack("bladebound:murasame-gauntlets"),
@@ -471,10 +487,17 @@ public class CodexScreen extends Screen {
                 "Magic in Bladebound is learned from grimoires and cast with staves.\n" +
                         "• How to switch spells: Press R (default) while holding a staff\n" +
                         "• Casting: Uses mana and respects cooldowns\n" +
+                        "Starter spells are found in:\n" +
+                        "• Dungeon/Minshaft chests\n" +
+                        "\n" +
+                        "Rare spells are found in:\n" +
+                        "• Nether Fortress and Bastion Chests\n" +
                         "\n" +
                         "Legendary spells are found only in:\n" +
                         "• Ancient City chests\n" +
                         "\n" +
+                        "Ancient spells are found only in:\n" +
+                        "• World Rewrite is found by killing the Ender Dragon\n" +
                         "More grimoires will be added in future updates.",
                 "Grimoires",
                 Rarity.LEGENDARY
@@ -488,6 +511,32 @@ public class CodexScreen extends Screen {
                         "• How to obtain: Can only be obtained through crafting\n" +
                         "• Balance notes: An early game sword on the same level as iron",
                 "Sandai Kitetsu",
+                Rarity.UNCOMMON
+        ));
+
+        // Stark's Axe
+        s.add(Spread.item(
+                stack("bladebound:stark-axe"),
+                "Stark's Axe",
+                "A brutal weapon built for a single purpose: to end fights.\n" +
+                        "• Heavy cleave: Wide swings punish groups at close range\n" +
+                        "• Boss hunter: Performs best against enemies with enormous vitality\n" +
+                        "• How to obtain: Can only be obtained through crafting\n" +
+                        "• Notes: Rare-tier weapon on the level of diamond, designed to feel slow, heavy, and decisive",
+                "Stark's Axe",
+                Rarity.RARE
+        ));
+
+        // Zenitsu's Sword
+        s.add(Spread.item(
+                stack("bladebound:zenitsu-nichirin"),
+                "Zenitsu's Nichirin Sword",
+                "A blade that turns hesitation into lightning.\n" +
+                        "• Thunder Clap and Flash: A burst-step technique used for rapid engagement or escape\n" +
+                        "• Momentum strike: Best used with precise timing and positioning\n" +
+                        "• How to obtain: Can only be obtained through crafting \n" +
+                        "• Notes: Rare-tier weapon on the level of diamond, focused on speed and burst movement",
+                "Zenitsu's Nichirin Sword",
                 Rarity.RARE
         ));
 
@@ -554,7 +603,7 @@ public class CodexScreen extends Screen {
         return false;
     }
 
-    private enum Rarity { NORMAL, RARE, LEGENDARY }
+    private enum Rarity { NORMAL, UNCOMMON, RARE, LEGENDARY }
 
     private static final class Line {
         final OrderedText text;

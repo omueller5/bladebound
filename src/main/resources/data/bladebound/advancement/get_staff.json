@@ -1,0 +1,20 @@
+{
+  "parent": "bladebound:collect_first_blade",
+  "display": {
+    "icon": { "id": "bladebound:frieren-staff" },
+    "title": { "text": "A Mage's Staff" },
+    "description": { "text": "Obtain a staff capable of casting magic." },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "get_staff": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [ { "items": ["bladebound:frieren-staff"] } ]
+      }
+    }
+  }
+}

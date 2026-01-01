@@ -1,15 +1,32 @@
 {
-  "parent": "bladebound:collect_wado",
+  "parent": "bladebound:wado_halfway",
   "display": {
-    "icon": { "id": "bladebound:wado_ichimonji" },
+    "icon": { "id": "bladebound:wado-ichimonji" },
     "title": { "text": "Perfect Form" },
-    "description": { "text": "Achieve perfect form with Wado Ichimonji." },
-    "frame": "goal",
+    "description": { "text": "Achieve the perfect discipline of Wado Ichimonji." },
+    "frame": "challenge",
     "show_toast": true,
     "announce_to_chat": true,
     "hidden": false
   },
   "criteria": {
-    "done": { "trigger": "minecraft:impossible" }
+    "perfect": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": ["bladebound:wado-ichimonji"],
+            "components": {
+              "minecraft:custom_data": {
+                "bladebound": {
+                  "wado_binding": 1,
+                  "discipline": 100
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
   }
 }

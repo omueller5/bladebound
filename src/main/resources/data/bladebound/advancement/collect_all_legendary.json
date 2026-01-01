@@ -2,25 +2,30 @@
   "parent": "bladebound:collect_first_blade",
   "display": {
     "icon": { "id": "bladebound:excalibur" },
-    "title": {"text" : "Legendary Arsenal"},
-    "description": {"text" : "Collect every LEGENDARY BladeBound blade."},
+    "title": { "text": "Legendary Arsenal" },
+    "description": { "text": "Collect every LEGENDARY Bladebound item." },
     "frame": "challenge",
     "show_toast": true,
     "announce_to_chat": true,
-    "sends_telemetry_event": false
+    "hidden": false
   },
   "criteria": {
-    "has_excalibur": {
+    "collect_excalibur": {
       "trigger": "minecraft:inventory_changed",
-      "conditions": { "items": [ { "items": [ "bladebound:excalibur" ] } ] }
+      "conditions": { "items": [ { "items": ["bladebound:excalibur"] } ] }
     },
-    "has_murasame": {
+    "collect_murasame": {
       "trigger": "minecraft:inventory_changed",
-      "conditions": { "items": [ { "items": [ "bladebound:murasame" ] } ] }
+      "conditions": { "items": [ { "items": ["bladebound:murasame"] } ] }
+    },
+    "collect_frieren": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": { "items": [ { "items": ["bladebound:frieren-staff"] } ] }
     }
   },
   "requirements": [
     ["collect_excalibur"],
-    ["collect_murasame"]
+    ["collect_murasame"],
+    ["collect_frieren"]
   ]
 }

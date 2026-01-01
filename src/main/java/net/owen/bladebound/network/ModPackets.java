@@ -7,6 +7,9 @@ import net.owen.bladebound.magic.SpellHolder;
 import net.owen.bladebound.magic.StaffSpell;
 import net.owen.bladebound.mana.ManaHolder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ModPackets {
     public static final Identifier MANA_SYNC = Identifier.of("bladebound", "mana_sync");
 
@@ -18,22 +21,34 @@ public class ModPackets {
         ));
     }
 
+    /**
+     * NEW: ID-based spell state sync.
+     * Sends:
+     *  - selected spell Identifier (nullable)
+     *  - list of learned spell Identifiers
+     */
     public static void sendSpellState(ServerPlayerEntity player) {
         SpellHolder spells = (SpellHolder) player;
 
-        int count = StaffSpell.values().length;
-        int validMask = (count >= 32) ? -1 : ((1 << count) - 1);
+        // Selected
+        Identifier selected = spells.bladebound$getSelectedSpellId();
 
-        // Ensure only valid bits can ever be sent
-        int learned = spells.bladebound$getLearnedMask() & validMask;
+        // Learned list: use StaffSpell enum as the authoritative list of "known" spells,
+        // but DO NOT use ordinal/index. We only send IDs that are actually learned.
+        List<Identifier> learned = new ArrayList<>();
+        for (StaffSpell s : StaffSpell.values()) {
+            Identifier id = s.id; // if your enum uses a getter, replace with s.getId()
+            if (id == null) continue;
+            if (spells.bladebound$hasLearnedSpell(id)) {
+                learned.add(id);
+            }
+        }
 
-        // Ensure starter spells are always learned (0,1,2)
-        learned |= 0b0111;
+        // If selected isn't learned, clear it (client can fall back)
+        if (selected != null && !spells.bladebound$hasLearnedSpell(selected)) {
+            selected = null;
+        }
 
-        int sel = spells.bladebound$getSelectedSpell();
-        if (sel < 0 || sel >= count) sel = 0;
-        if (((learned >> sel) & 1) == 0) sel = 0;
-
-        ServerPlayNetworking.send(player, new SpellStateSyncPayload(learned, sel));
+        ServerPlayNetworking.send(player, new SpellStateSyncPayload(selected, learned));
     }
 }

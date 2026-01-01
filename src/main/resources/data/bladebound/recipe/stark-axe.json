@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "combat",
+  "pattern": [
+    "SSS",
+    "SAS",
+    " S "
+  ],
+  "key": {
+    "S": { "item": "bladebound:steel_ingot" },
+    "A": { "item": "minecraft:diamond_axe" }
+  },
+  "result": {
+    "id": "bladebound:stark-axe",
+    "count": 1
+  }
+}

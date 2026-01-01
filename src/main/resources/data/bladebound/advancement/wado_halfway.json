@@ -1,0 +1,32 @@
+{
+  "parent": "bladebound:collect_wado",
+  "display": {
+    "icon": { "id": "bladebound:wado-ichimonji" },
+    "title": { "text": "Wado Discipline" },
+    "description": { "text": "Reach halfway mastery with Wado Ichimonji." },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "halfway": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": ["bladebound:wado-ichimonji"],
+            "components": {
+              "minecraft:custom_data": {
+                "bladebound": {
+                  "wado_binding": 1,
+                  "discipline": 50
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

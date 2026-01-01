@@ -8,13 +8,21 @@
     "PlayerScreenHandlerMixin",
     "SmallFireballNoGriefMixin",
     "PlayerEntityManaMixin",
-    "PlayerEntitySpellMixin"
+    "PlayerEntitySpellMixin",
+    "PlayerEntityBarrierDamageMixin",
+    "PlayerDropAccessoryInventoryMixin",
+    "PlayerDropAccessoriesMixin",
+    "client.BipedEntityModelArmPoseAccessor",
+    "client.BipedEntityModelBarrierPoseMixin",
+    "client.PlayerEntityRendererBarrierPoseMixin",
+    "PlayerEntityCooldownTickMixin",
+    "EnderDragonAncientDropMixin"
   ],
   "client": [
     "client.InventoryScreenMixin",
     "client.HandledScreenFocusedSlotAccessor",
-    "client.InventoryScreenMixin",
-    "client.InventoryScreenBladeboundSlotIconMixin"
+    "client.InventoryScreenBladeboundSlotIconMixin",
+    "client.ClientPlayerInteractionManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

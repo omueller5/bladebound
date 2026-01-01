@@ -15,7 +15,7 @@ public class ModItemGroups {
             Registries.ITEM_GROUP,
             Identifier.of("bladebound", "bladebound"),
             FabricItemGroup.builder()
-                    .icon(() -> new ItemStack(ModItems.FRIEREN_STAFF)) // must be a 1-count stack (this is)
+                    .icon(() -> new ItemStack(ModItems.EXCALIBUR))
                     .displayName(Text.translatable("itemGroup.bladebound"))
                     .entries((displayContext, entries) -> {
 
@@ -28,6 +28,8 @@ public class ModItemGroups {
                         // Swords
                         entries.add(ModItems.SANDAIKITETSU);
                         entries.add(ModItems.WADOICHIMONJI);
+                        entries.add(ModItems.STARKAXE);
+                        entries.add(ModItems.ZENITSUSWORD);
                         entries.add(ModItems.MURASAME);
                         entries.add(ModItems.EXCALIBUR);
 
@@ -35,20 +37,27 @@ public class ModItemGroups {
                         entries.add(ModItems.FRIEREN_STAFF);
                         entries.add(ModItems.FRIEREN_STAFF_CREATIVE);
 
-                        // Blocks (add the *item* form)
-                        entries.add(BladeboundBlocks.SWORD_IN_STONE_ITEM);
-
-                        //Spells
+                        // Spells
+                        entries.add(ModItems.FIREBOLT_SPELL);
+                        entries.add(ModItems.FROST_RAY_SPELL);
+                        entries.add(ModItems.HEAL_SPELL);
+                        entries.add(ModItems.STONE_DART_SPELL);
                         entries.add(ModItems.LIGHTNING_SPELL);
+                        entries.add(ModItems.MANA_BARRIER_SPELL);
                         entries.add(ModItems.ZOLTRAAK_SPELL);
                         entries.add(ModItems.PERFECT_HEAL_SPELL);
+                        entries.add(ModItems.WORLD_REWRITE_SPELL);
 
                         // Materials
                         entries.add(ModItems.CURSED_KITETSU_SHARD);
+                        entries.add(ModItems.STEEL_INGOT);
 
                         // Foods
                         entries.add(ModItems.MANA_APPLE);
                         entries.add(ModItems.GREATER_MANA_APPLE);
+
+                        // Blocks (add the *item* form)
+                        entries.add(BladeboundBlocks.SWORD_IN_STONE_ITEM);
                     })
                     .build()
     );

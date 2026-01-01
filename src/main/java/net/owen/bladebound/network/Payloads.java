@@ -1,5 +1,6 @@
 package net.owen.bladebound.network;
 
+import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
@@ -9,14 +10,21 @@ import net.minecraft.util.Identifier;
 
 public class Payloads {
 
-    // Staff cooldown started (server -> client)
-    public record StaffCooldownS2C(int cooldownTicks) implements CustomPayload {
-        public static final Id<StaffCooldownS2C> ID =
-                new Id<>(Identifier.of("bladebound", "staff_cooldown_s2c"));
+    // Spell cooldown started/updated (server -> client)
+    public record SpellCooldownS2C(Identifier spellId, int cooldownTicks) implements CustomPayload {
+        public static final Id<SpellCooldownS2C> ID =
+                new Id<>(Identifier.of("bladebound", "spell_cooldown_s2c"));
 
-        // FIX: use VAR_INT (INT isn't available in your version)
-        public static final PacketCodec<RegistryByteBuf, StaffCooldownS2C> CODEC =
-                PacketCodec.tuple(PacketCodecs.VAR_INT, StaffCooldownS2C::cooldownTicks, StaffCooldownS2C::new);
+        // Your version doesn't have PacketCodecs.IDENTIFIER, so encode the identifier as a string.
+        private static final PacketCodec<ByteBuf, Identifier> IDENTIFIER_AS_STRING =
+                PacketCodecs.STRING.xmap(Identifier::of, Identifier::toString);
+
+        public static final PacketCodec<RegistryByteBuf, SpellCooldownS2C> CODEC =
+                PacketCodec.tuple(
+                        IDENTIFIER_AS_STRING, SpellCooldownS2C::spellId,
+                        PacketCodecs.VAR_INT,  SpellCooldownS2C::cooldownTicks,
+                        SpellCooldownS2C::new
+                );
 
         @Override
         public Id<? extends CustomPayload> getId() {
@@ -33,8 +41,9 @@ public class Payloads {
         PayloadTypeRegistry.playS2C().register(ManaSyncPayload.ID, ManaSyncPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(SetStaffSpellPayload.ID, SetStaffSpellPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(SpellStateSyncPayload.ID, SpellStateSyncPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(BarrierBreakPayload.ID, BarrierBreakPayload.CODEC);
 
-        // Staff cooldown timer
-        PayloadTypeRegistry.playS2C().register(StaffCooldownS2C.ID, StaffCooldownS2C.CODEC);
+        // New per-spell cooldown packet
+        PayloadTypeRegistry.playS2C().register(SpellCooldownS2C.ID, SpellCooldownS2C.CODEC);
     }
 }

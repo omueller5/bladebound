@@ -8,20 +8,29 @@
   "item.bladebound.excalibur": "Excalibur",
   "item.bladebound.wado-ichimonji": "Wado Ichimonji",
   "item.bladebound.sandai-kitetsu": "Sandai Kitetsu",
+  "item.bladebound.stark-axe": "Stark's Axe",
+  "item.bladebound.zenitsu-nichirin": "Zenitu's Nichirin",
 
   "item.bladebound.frieren-staff": "Frieren's Staff",
   "item.bladebound.frieren-staff-creative": "Frieren's Staff (Creative)",
 
   "item.bladebound.cursed-kitetsu-shard": "Cursed Kitetsu Shard",
+  "item.bladebound.steel_ingot": "Steel Ingot",
   "item.bladebound.murasame-gauntlets": "Murasame Gauntlets",
   "item.bladebound.cooldown_bracelet": "Cooldown Bracelet",
   "item.bladebound.fixed_cooldown_bracelet": "Cooldown Bracelet",
 
 
   "effect.bladebound.murasame_curse": "Murasame Curse",
-  "item.bladebound.lightning_spell": "Lightning Spell Grimoire",
-  "item.bladebound.zoltraak_spell": "Zoltraak Spell Grimoire",
-  "item.bladebound.perfect_heal_spell": "Perfect Heal Spell Grimoire",
+  "item.bladebound.firebolt_spell": "Firebolt Grimoire",
+  "item.bladebound.heal_spell": "Heal Grimoire",
+  "item.bladebound.frost_ray_spell": "Frost Ray Grimoire",
+  "item.bladebound.stone_dart_spell": "Stone Dart Grimoire",
+  "item.bladebound.lightning_spell": "Lightning Grimoire",
+  "item.bladebound.mana_barrier_spell": "Defensive Magic Grimoire",
+  "item.bladebound.zoltraak_spell": "Zoltraak Grimoire",
+  "item.bladebound.perfect_heal_spell": "Perfect Heal Grimoire",
+  "item.bladebound.world_rewrite_spell": "World Rewrite Grimoire",
   "item.bladebound.mana_apple": "Mana Apple",
   "item.bladebound.greater_mana_apple": "Greater Mana Apple",
 

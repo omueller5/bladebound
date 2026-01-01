@@ -5,17 +5,17 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.owen.bladebound.client.ClientSpellState;
+import net.minecraft.util.Identifier;
+import net.owen.bladebound.client.spell.ClientSpellState;
 import net.owen.bladebound.magic.StaffSpell;
 import net.owen.bladebound.network.ClientPackets;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class SpellScreen extends Screen {
 
-    private static final int UI_W = 176;
+    private static final int UI_W = 230;
 
     private int left, top;
     private int uiH;
@@ -71,10 +71,12 @@ public class SpellScreen extends Screen {
         int yCast = top + uiH - 28;
 
         // Tabs
-        int tabW = (btnW - 8) / 3;
+        int tabCount = 4;
+        int tabW = (btnW - (gap * (tabCount - 1))) / tabCount;
         addDrawableChild(tabButton(Tab.STARTER, x, yTabs, tabW));
         addDrawableChild(tabButton(Tab.RARE, x + tabW + 4, yTabs, tabW));
         addDrawableChild(tabButton(Tab.LEGENDARY, x + (tabW + 4) * 2, yTabs, tabW));
+        addDrawableChild(tabButton(Tab.ANCIENT, x + 3 * (tabW + 4), yTabs, tabW));
 
         // Scroll buttons if needed
         boolean needsScroll = filtered.size() > maxVisibleRows;
@@ -102,10 +104,9 @@ public class SpellScreen extends Screen {
             SpellDef def = filtered.get(start + row);
             int by = yList + row * rowH;
 
-            int spellIndex = def.index;
-            boolean learned = ClientSpellState.isLearned(spellIndex);
+            boolean learned = ClientSpellState.hasLearned(def.id);
 
-            ButtonWidget btn = ButtonWidget.builder(def.name, b -> ClientPackets.sendStaffSpellIndex(spellIndex))
+            ButtonWidget btn = ButtonWidget.builder(def.name, b -> ClientPackets.sendSelectedSpellId(def.id))
                     .dimensions(x, by, btnW, btnH)
                     .build();
 
@@ -113,7 +114,7 @@ public class SpellScreen extends Screen {
             addDrawableChild(btn);
         }
 
-        // Cast button (stub)
+        // Confirm button
         addDrawableChild(ButtonWidget.builder(Text.literal("Confirm"), b -> this.close())
                 .dimensions(x, yCast, btnW, 20)
                 .build());
@@ -145,52 +146,46 @@ public class SpellScreen extends Screen {
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
-    /**
-     * Key fix: override background rendering so Minecraft doesn't apply its default blurred background.
-     */
     @Override
     public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-        // No blur: just a dark translucent overlay
         context.fill(0, 0, this.width, this.height, 0xAA000000);
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        // Our custom background is handled by renderBackground() now
         super.renderBackground(context, mouseX, mouseY, delta);
 
         context.fill(left, top, left + UI_W, top + uiH, 0xCC000000);
         context.drawTextWithShadow(textRenderer, this.title, left + 8, top + 8, 0xFFFFFF);
 
-        int selectedIdx = ClientSpellState.getSelected();
-        Text selectedText = Text.literal("Selected: ").append(getNameForIndex(selectedIdx));
+        Identifier selectedId = ClientSpellState.getSelectedSpellId();
+        Text selectedText = Text.literal("Selected: ").append(getNameForId(selectedId));
         context.drawTextWithShadow(textRenderer, selectedText, left + 12, top + uiH - 52, 0xFFFFFF);
 
         super.render(context, mouseX, mouseY, delta);
     }
 
-    private Text getNameForIndex(int idx) {
-        StaffSpell[] v = StaffSpell.values();
-        if (idx < 0 || idx >= v.length) return Text.literal("(none)");
-        StaffSpell s = StaffSpell.fromIndex(idx);
+    private Text getNameForId(Identifier id) {
+        if (id == null) return Text.literal("(none)");
+
+        StaffSpell s = StaffSpell.fromId(id);
+        if (s == null) return Text.literal(id.toString()).formatted(Formatting.GRAY);
+
         return Text.literal(s.displayName).formatted(colorForRarity(s.rarity));
     }
 
     // -------------------------
-    // Dynamic spell list
+    // Dynamic spell list (ID-based)
     // -------------------------
 
     private static List<SpellDef> buildAllSpellDefs() {
         List<SpellDef> out = new ArrayList<>();
-        StaffSpell[] v = StaffSpell.values();
-
-        for (int i = 0; i < v.length; i++) {
-            StaffSpell s = StaffSpell.fromIndex(i);
+        for (StaffSpell s : StaffSpell.values()) {
+            Identifier id = s.id; // if your enum uses getter, replace with s.getId()
+            if (id == null) continue;
             Text name = Text.literal(s.displayName).formatted(colorForRarity(s.rarity));
-            out.add(new SpellDef(i, s, name));
+            out.add(new SpellDef(id, s, name));
         }
-
-        out.sort(Comparator.comparingInt(a -> a.index));
         return out;
     }
 
@@ -199,37 +194,39 @@ public class SpellScreen extends Screen {
             case STARTER -> Tab.STARTER;
             case RARE -> Tab.RARE;
             case LEGENDARY -> Tab.LEGENDARY;
+            case ANCIENT -> Tab.ANCIENT;
         };
     }
 
     private static Formatting colorForRarity(StaffSpell.SpellRarity rarity) {
-        // Your rule: ALL legendary = gold
         return switch (rarity) {
             case STARTER -> Formatting.GREEN;
             case RARE -> Formatting.BLUE;
             case LEGENDARY -> Formatting.GOLD;
+            case ANCIENT -> Formatting.RED;
         };
     }
 
     private enum Tab {
-        STARTER, RARE, LEGENDARY;
+        STARTER, RARE, LEGENDARY, ANCIENT;
 
         Text label() {
             return switch (this) {
-                case STARTER -> Text.literal("Starter").formatted(Formatting.GREEN);
+                case STARTER -> Text.literal("Start").formatted(Formatting.GREEN);
                 case RARE -> Text.literal("Rare").formatted(Formatting.BLUE);
-                case LEGENDARY -> Text.literal("Legendary").formatted(Formatting.GOLD);
+                case LEGENDARY -> Text.literal("Legend").formatted(Formatting.GOLD);
+                case ANCIENT -> Text.literal("Ancient").formatted(Formatting.RED);
             };
         }
     }
 
     private static class SpellDef {
-        final int index;
+        final Identifier id;
         final StaffSpell spell;
         final Text name;
 
-        SpellDef(int index, StaffSpell spell, Text name) {
-            this.index = index;
+        SpellDef(Identifier id, StaffSpell spell, Text name) {
+            this.id = id;
             this.spell = spell;
             this.name = name;
         }

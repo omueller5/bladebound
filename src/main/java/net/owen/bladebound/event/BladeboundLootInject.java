@@ -20,6 +20,15 @@ public final class BladeboundLootInject {
     private static final Identifier STRONGHOLD_CORRIDOR = Identifier.of("minecraft", "chests/stronghold_corridor");
     private static final Identifier STRONGHOLD_CROSSING = Identifier.of("minecraft", "chests/stronghold_crossing");
 
+    // Mineshaft and dungeon chests
+    private static final Identifier SIMPLE_DUNGEON = Identifier.of("minecraft", "chests/simple_dungeon");
+    private static final Identifier ABANDONED_MINESHAFT = Identifier.of("minecraft", "chests/abandoned_mineshaft");
+
+    // Nether chests
+    private static final Identifier NETHER_FORTRESS   = Identifier.of("minecraft", "chests/nether_bridge");
+    private static final Identifier BASTION_OTHER     = Identifier.of("minecraft", "chests/bastion_other");
+    private static final Identifier BASTION_TREASURE  = Identifier.of("minecraft", "chests/bastion_treasure");
+
     // Ancient City (ice chest only)
     private static final Identifier ANCIENT_CITY_ICE_BOX = Identifier.of("minecraft", "chests/ancient_city_ice_box");
 
@@ -68,6 +77,53 @@ public final class BladeboundLootInject {
                         .build();
                 tableBuilder.pool(pool);
             }
+
+            // Dungeons + Mineshafts: Stone Dart starter spell
+            // Total chance = 50% to get Stone Dart
+            if (SIMPLE_DUNGEON.equals(key.getValue()) || ABANDONED_MINESHAFT.equals(key.getValue())) {
+                LootPool pool = LootPool.builder()
+                        .rolls(ConstantLootNumberProvider.create(1))
+                        .conditionally(RandomChanceLootCondition.builder(0.50f))
+                        .with(ItemEntry.builder(ModItems.STONE_DART_SPELL).weight(1))
+                        .build();
+
+                tableBuilder.pool(pool);
+            }
+
+            // Nether structures ONLY: Mana Barrier spell roll
+            // Fortress = 25%
+            // Bastion other = 35%
+            // Bastion treasure = 50%
+            if (NETHER_FORTRESS.equals(key.getValue())) {
+                LootPool pool = LootPool.builder()
+                        .rolls(ConstantLootNumberProvider.create(1))
+                        .conditionally(RandomChanceLootCondition.builder(0.25f))
+                        .with(ItemEntry.builder(ModItems.MANA_BARRIER_SPELL).weight(1))
+                        .build();
+
+                tableBuilder.pool(pool);
+            }
+
+            if (BASTION_OTHER.equals(key.getValue())) {
+                LootPool pool = LootPool.builder()
+                        .rolls(ConstantLootNumberProvider.create(1))
+                        .conditionally(RandomChanceLootCondition.builder(0.35f))
+                        .with(ItemEntry.builder(ModItems.MANA_BARRIER_SPELL).weight(1))
+                        .build();
+
+                tableBuilder.pool(pool);
+            }
+
+            if (BASTION_TREASURE.equals(key.getValue())) {
+                LootPool pool = LootPool.builder()
+                        .rolls(ConstantLootNumberProvider.create(1))
+                        .conditionally(RandomChanceLootCondition.builder(0.50f))
+                        .with(ItemEntry.builder(ModItems.MANA_BARRIER_SPELL).weight(1))
+                        .build();
+
+                tableBuilder.pool(pool);
+            }
+
 
             // Ancient City ice box ONLY: exclusive legendary spell roll
             // Total chance = 35% (20% Zoltraak, 15% Perfect Heal)

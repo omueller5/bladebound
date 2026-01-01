@@ -3,7 +3,7 @@
   "id": "bladebound",
   "version": "${version}",
   "name": "Bladebound",
-  "description": "Legendary blades, dangerous curses, and rare structures scattered across the world.",
+  "description": "Legendary blades, staves, dangerous curses, and rare structures scattered across the world.",
   "authors": [
     "Owen"
   ],
@@ -11,7 +11,7 @@
     "homepage": "owenlab.dev",
     "sources": "https://github.com/omueller5/bladebound"
   },
-  "license": "CC0-1.0",
+  "license": "MIT",
   "icon": "assets/bladebound/icon.png",
   "environment": "*",
 

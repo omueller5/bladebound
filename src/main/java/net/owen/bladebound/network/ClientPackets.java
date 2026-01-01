@@ -2,14 +2,17 @@ package net.owen.bladebound.network;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.Identifier;
 import net.owen.bladebound.BladeboundClient;
+import net.owen.bladebound.client.spell.ClientSpellState;
 import net.owen.bladebound.mana.ManaHolder;
 
 public class ClientPackets {
 
-    // C2S: player selected spell index (NOT staff NBT anymore)
-    public static void sendStaffSpellIndex(int index) {
-        ClientPlayNetworking.send(new SetStaffSpellPayload(index));
+    // C2S: player selected spell id
+    public static void sendSelectedSpellId(Identifier spellId) {
+        if (spellId == null) return;
+        ClientPlayNetworking.send(new SetStaffSpellPayload(spellId));
     }
 
     public static void register() {
@@ -28,22 +31,21 @@ public class ClientPackets {
         });
 
         // -----------------------
-        // S2C spell state sync (learned mask + selected)
+        // S2C spell state sync (learned IDs + selected ID)
         // -----------------------
         ClientPlayNetworking.registerGlobalReceiver(
                 SpellStateSyncPayload.ID,
                 (payload, context) -> context.client().execute(() -> {
-                    net.owen.bladebound.client.ClientSpellState.set(payload.learnedMask(), payload.selected());
+                    ClientSpellState.set(payload.learnedSpellIds(), payload.selectedSpellId());
                 })
         );
 
         // -----------------------
-        // S2C staff cooldown timer (ticks)
+        // S2C per-spell cooldowns (spellId + ticks)
         // -----------------------
-        ClientPlayNetworking.registerGlobalReceiver(Payloads.StaffCooldownS2C.ID, (payload, context) -> {
+        ClientPlayNetworking.registerGlobalReceiver(Payloads.SpellCooldownS2C.ID, (payload, context) -> {
             context.client().execute(() -> {
-                // store the end tick inside BladeboundClient so HUD can show countdown
-                BladeboundClient.clientStartStaffCooldown(payload.cooldownTicks());
+                BladeboundClient.clientSetSpellCooldown(payload.spellId(), payload.cooldownTicks());
             });
         });
     }

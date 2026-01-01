@@ -57,11 +57,6 @@ public class WadoIchimonjiItem extends Item {
     private static final String NBT_LAST_HIT   = "lastHitTick";    // world time (long)
     private static final String NBT_LAST_TIER  = "lastTier";       // remembers last tier to detect transitions
 
-    // Advancement-award flags (per sword)
-    private static final String NBT_AWARD_BINDING = "award_binding";
-    private static final String NBT_AWARD_PERFECT = "award_perfect";
-    private static final String NBT_AWARD_MASTER  = "award_master";
-
     // =========================================================
     // XP balance knobs
     // =========================================================
@@ -193,12 +188,6 @@ public class WadoIchimonjiItem extends Item {
 
             if (attacker instanceof PlayerEntity p) {
                 p.sendMessage(Text.literal("§6Perfect Form§r achieved."), true);
-            }
-
-            // Advancement: perfect_form (once per sword)
-            if (attacker instanceof ServerPlayerEntity sp && !isFlagSet(stack, NBT_AWARD_PERFECT)) {
-                setFlag(stack, NBT_AWARD_PERFECT);
-                grantAdvancement(sp, "perfect_form");
             }
         }
     }
@@ -336,12 +325,6 @@ public class WadoIchimonjiItem extends Item {
                 return;
             }
 
-            // Award "first_binding" once per sword (first time the OWNER successfully holds it)
-            if (!isFlagSet(stack, NBT_AWARD_BINDING)) {
-                setFlag(stack, NBT_AWARD_BINDING);
-                grantAdvancement(player, "first_binding");
-            }
-
             // Enchant enforcement once per second (server-side)
             if (BladeboundConfig.DATA.enforceAllowedEnchantments
                     && world instanceof ServerWorld sw
@@ -460,17 +443,6 @@ public class WadoIchimonjiItem extends Item {
             // - must reach PERFECT tier (>= 75 discipline)
             // - must have at least 25 kills with this sword
             // -------------------------------------------------
-            if (!isFlagSet(stack, NBT_AWARD_MASTER)) {
-                int xp = getInt(stack, NBT_XP);
-                int level = computeLevelFromXp(xp);
-                int disc = getDiscipline(stack);
-                int kills = getInt(stack, NBT_KILLS);
-
-                if (level >= MAX_LEVEL && disc >= 75 && kills >= 25) {
-                    setFlag(stack, NBT_AWARD_MASTER);
-                    grantAdvancement(player, "master_of_wado");
-                }
-            }
         }
 
         return super.postHit(stack, target, attacker);

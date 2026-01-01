@@ -102,9 +102,10 @@ public class FrierenTowerPiece extends StructurePiece {
         if (baseLocked && lockedBase != null) {
             base = lockedBase;
         } else {
-            // For towers, do NOT scan down (can lock caves/holes). Just use the surface heightmap.
+            // Use WORLD_SURFACE_WG so the tower anchors to true terrain surface during worldgen.
+            // (MOTION_BLOCKING_* can produce "buried" results for large landmarks.)
             base = world.getTopPosition(
-                    Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
+                    Heightmap.Type.WORLD_SURFACE_WG,
                     new BlockPos(origin.getX(), 0, origin.getZ())
             );
 
