@@ -11,7 +11,8 @@
     "PlayerEntitySpellMixin",
     "PlayerEntityBarrierDamageMixin",
     "PlayerDropAccessoryInventoryMixin",
-    "PlayerDropAccessoriesMixin"
+    "PlayerDropAccessoriesMixin",
+    "LivingEntityBlackFlashMixin"
   ],
   "client": [
     "client.InventoryScreenMixin",

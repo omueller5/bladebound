@@ -30,6 +30,7 @@ public class ModItemGroups {
                         entries.add(ModItems.WADOICHIMONJI);
                         entries.add(ModItems.STARKAXE);
                         entries.add(ModItems.ZENITSUSWORD);
+                        entries.add(ModItems.SOULKATANA);
                         entries.add(ModItems.MURASAME);
                         entries.add(ModItems.EXCALIBUR);
 

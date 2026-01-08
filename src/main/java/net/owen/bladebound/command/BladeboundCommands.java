@@ -13,7 +13,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
-
+import net.owen.bladebound.combat.BlackFlash;
 import net.owen.bladebound.item.ModItems;
 import net.owen.bladebound.mana.ManaHolder;
 import net.owen.bladebound.worldgen.structure.ExcaliburChurchPiece;
@@ -26,10 +26,13 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public final class BladeboundCommands {
 
+    private BladeboundCommands() {}
+
     public static void init() {
-        CommandRegistrationCallback.EVENT.register(
-                (dispatcher, registryAccess, environment) -> register(dispatcher)
-        );
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            register(dispatcher);
+            registerBlackFlash(dispatcher);
+        });
     }
 
     private static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
@@ -120,10 +123,7 @@ public final class BladeboundCommands {
                                     ServerPlayerEntity player = src.getPlayerOrThrow();
                                     World world = player.getWorld();
 
-                                    String which = StringArgumentType
-                                            .getString(ctx, "which")
-                                            .toLowerCase();
-
+                                    String which = StringArgumentType.getString(ctx, "which").toLowerCase();
                                     BlockPos origin = player.getBlockPos().add(0, 0, 4);
 
                                     switch (which) {
@@ -131,19 +131,14 @@ public final class BladeboundCommands {
                                         case "wado" -> spawnWadoDojo(world, origin);
                                         case "murasame" -> spawnMurasameShrine(world, origin);
                                         case "frieren" -> spawnFrierenTower(world, origin);
-
                                         default -> {
-                                            src.sendError(Text.literal(
-                                                    "Unknown option. Use: excalibur, wado, murasame, frieren"
-                                            ));
+                                            src.sendError(Text.literal("Unknown option. Use: excalibur, wado, murasame, frieren"));
                                             return 0;
                                         }
                                     }
 
                                     src.sendFeedback(
-                                            () -> Text.literal(
-                                                    "Spawned debug structure: " + which + " at " + origin
-                                            ),
+                                            () -> Text.literal("Spawned debug structure: " + which + " at " + origin),
                                             false
                                     );
                                     return 1;
@@ -213,6 +208,32 @@ public final class BladeboundCommands {
                 chunkBox,
                 chunkPos,
                 origin
+        );
+    }
+
+    /* =========================================================
+       BLACK FLASH TEST MODE
+       /bladebound blackflash test on|off
+       ========================================================= */
+    private static void registerBlackFlash(CommandDispatcher<ServerCommandSource> dispatcher) {
+        dispatcher.register(literal("bladebound")
+                .then(literal("blackflash")
+                        .requires(src -> src.hasPermissionLevel(2))
+                        .then(literal("test")
+                                .then(literal("on").executes(ctx -> {
+                                    ServerPlayerEntity p = ctx.getSource().getPlayerOrThrow();
+                                    p.addCommandTag(BlackFlash.TEST_TAG);
+                                    ctx.getSource().sendFeedback(() -> Text.literal("Black Flash test mode: ON (100%)"), false);
+                                    return 1;
+                                }))
+                                .then(literal("off").executes(ctx -> {
+                                    ServerPlayerEntity p = ctx.getSource().getPlayerOrThrow();
+                                    p.removeCommandTag(BlackFlash.TEST_TAG);
+                                    ctx.getSource().sendFeedback(() -> Text.literal("Black Flash test mode: OFF"), false);
+                                    return 1;
+                                }))
+                        )
+                )
         );
     }
 }

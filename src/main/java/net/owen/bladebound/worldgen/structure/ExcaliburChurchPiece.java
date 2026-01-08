@@ -1,7 +1,7 @@
 package net.owen.bladebound.worldgen.structure;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.fluid.FluidState;
+import net.minecraft.block.Blocks;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.structure.StructureContext;
 import net.minecraft.structure.StructurePiece;
@@ -21,16 +21,22 @@ import net.minecraft.world.gen.chunk.ChunkGenerator;
 public class ExcaliburChurchPiece extends StructurePiece {
 
     private static final Identifier TEMPLATE_ID = Identifier.of("bladebound", "excalibur_church");
+
     private static final int WG_FLAGS = 2 | 16;
 
-    // You previously had it floating; 0 is the safe default.
-    private static final int EXCALIBUR_Y_OFFSET = 2;
+    // With carve-to-air, keep this small.
+    private static final int EXCALIBUR_Y_OFFSET = 0;
+
+    // Water avoidance tuning
+    private static final int WATER_STEP = 2;
+    private static final int WATER_MAX_HITS = 10; // lower = stricter
+    private static final int[] SEARCH_RADII = {0, 8, 16, 24, 32, 40, 48};
+    private static final int SEARCH_STRIDE = 8;
 
     private final BlockPos origin;
 
     private boolean entitiesPlaced;
 
-    // Lock base across chunk passes
     private boolean baseLocked;
     private BlockPos lockedBase;
 
@@ -38,12 +44,13 @@ public class ExcaliburChurchPiece extends StructurePiece {
         super(BladeboundStructures.EXCALIBUR_CHURCH_PIECE, nbt);
 
         this.origin = new BlockPos(nbt.getInt("ox"), nbt.getInt("oy"), nbt.getInt("oz"));
-
         this.entitiesPlaced = nbt.getBoolean("entitiesPlaced");
 
         this.baseLocked = nbt.getBoolean("baseLocked");
-        if (this.baseLocked) {
+        if (baseLocked) {
             this.lockedBase = new BlockPos(nbt.getInt("bx"), nbt.getInt("by"), nbt.getInt("bz"));
+        } else {
+            this.lockedBase = null;
         }
     }
 
@@ -56,6 +63,7 @@ public class ExcaliburChurchPiece extends StructurePiece {
                         origin.getX() + 96, origin.getY() + 128, origin.getZ() + 96
                 )
         );
+
         this.origin = origin;
         this.entitiesPlaced = false;
         this.baseLocked = false;
@@ -97,38 +105,36 @@ public class ExcaliburChurchPiece extends StructurePiece {
         Vec3i size = template.getSize();
         if (size.getX() <= 0 || size.getY() <= 0 || size.getZ() <= 0) return;
 
-        // Lock base so the structure doesn’t shift (also stabilizes entity anchor)
         BlockPos base;
         if (baseLocked && lockedBase != null) {
             base = lockedBase;
         } else {
-            base = findDryGround(world, origin);
-            if (base == null) return;
+            BlockPos candidate = findNearbyDryBase(world, origin, size, EXCALIBUR_Y_OFFSET, WATER_MAX_HITS, WATER_STEP);
+            if (candidate == null) return;
 
+            base = candidate;
             lockedBase = base;
             baseLocked = true;
         }
 
-        // Center X/Z and apply Y offset
         BlockPos placePos = base.add(-(size.getX() / 2), EXCALIBUR_Y_OFFSET, -(size.getZ() / 2));
 
-        this.boundingBox = new BlockBox(
-                placePos.getX(),
-                placePos.getY(),
-                placePos.getZ(),
+        BlockBox realBox = new BlockBox(
+                placePos.getX(), placePos.getY(), placePos.getZ(),
                 placePos.getX() + size.getX() - 1,
                 placePos.getY() + size.getY() - 1,
                 placePos.getZ() + size.getZ() - 1
         );
+        this.boundingBox = realBox;
 
-        if (!chunkBox.intersects(this.boundingBox)) return;
+        if (!chunkBox.intersects(realBox)) return;
 
-        // Debugspawn uses a huge chunkBox; force entities in that case
+        carveToAir(world, chunkBox, realBox);
+
         boolean debugBox =
                 (chunkBox.getMaxX() - chunkBox.getMinX()) > 400 ||
                         (chunkBox.getMaxZ() - chunkBox.getMinZ()) > 400;
 
-        // IMPORTANT: anchor must be computed from *placePos*, not origin/base.
         BlockPos center = placePos.add(size.getX() / 2, 0, size.getZ() / 2);
         ChunkPos anchorChunk = new ChunkPos(center);
 
@@ -136,45 +142,139 @@ public class ExcaliburChurchPiece extends StructurePiece {
                 debugBox || (!entitiesPlaced && chunkPos.equals(anchorChunk));
 
         StructurePlacementData placement = new StructurePlacementData()
-                .setBoundingBox(chunkBox)
-                .setRandom(random)
-                .setIgnoreEntities(false);
+                .setIgnoreEntities(!placeEntitiesThisTime);
 
         template.place(world, placePos, placePos, placement, random, WG_FLAGS);
 
         if (placeEntitiesThisTime) {
             entitiesPlaced = true;
         }
+
+        collapseExtraGrassToDirt(world, realBox);
     }
 
-    private static BlockPos findDryGround(StructureWorldAccess world, BlockPos approx) {
-        int radius = 12;
+    private static void carveToAir(StructureWorldAccess world, BlockBox chunkBox, BlockBox realBox) {
+        int pad = 1;
 
-        for (int r = 0; r <= radius; r++) {
-            for (int dx = -r; dx <= r; dx++) {
-                for (int dz = -r; dz <= r; dz++) {
-                    if (Math.abs(dx) != r && Math.abs(dz) != r) continue;
+        int minX = realBox.getMinX() - pad;
+        int minY = realBox.getMinY();
+        int minZ = realBox.getMinZ() - pad;
 
-                    BlockPos xz = new BlockPos(approx.getX() + dx, 0, approx.getZ() + dz);
-                    BlockPos p = world.getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, xz);
+        int maxX = realBox.getMaxX() + pad;
+        int maxY = realBox.getMaxY() + pad;
+        int maxZ = realBox.getMaxZ() + pad;
 
-                    while (p.getY() > world.getBottomY() + 2) {
-                        BlockState at = world.getBlockState(p);
-                        BlockState below = world.getBlockState(p.down());
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                for (int y = minY; y <= maxY; y++) {
+                    BlockPos p = new BlockPos(x, y, z);
+                    if (!chunkBox.contains(p)) continue;
 
-                        if ((at.isAir() || at.isReplaceable()) && below.isSolidBlock(world, p.down())) break;
-                        p = p.down();
+                    BlockState state = world.getBlockState(p);
+                    if (state.isOf(Blocks.BEDROCK)) continue;
+
+                    if (!state.isAir()) {
+                        world.setBlockState(p, Blocks.AIR.getDefaultState(), WG_FLAGS);
                     }
-
-                    FluidState fluidAt = world.getFluidState(p);
-                    FluidState fluidBelow = world.getFluidState(p.down());
-                    if (!fluidAt.isEmpty() || !fluidBelow.isEmpty()) continue;
-
-                    return p;
                 }
             }
         }
+    }
 
+    private static boolean tooMuchWater(StructureWorldAccess world, BlockBox box, int maxHits, int step) {
+        int hits = 0;
+
+        for (int x = box.getMinX(); x <= box.getMaxX(); x += step) {
+            for (int z = box.getMinZ(); z <= box.getMaxZ(); z += step) {
+                BlockPos top = world.getTopPosition(
+                        Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
+                        new BlockPos(x, 0, z)
+                );
+
+                if (!world.getFluidState(top).isEmpty() || !world.getFluidState(top.down()).isEmpty()) {
+                    hits++;
+                    if (hits >= maxHits) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static BlockPos findNearbyDryBase(
+            StructureWorldAccess world,
+            BlockPos origin,
+            Vec3i size,
+            int yOffset,
+            int waterMaxHits,
+            int waterStep
+    ) {
+        for (int r : SEARCH_RADII) {
+            for (int dx = -r; dx <= r; dx += SEARCH_STRIDE) {
+                for (int dz = -r; dz <= r; dz += SEARCH_STRIDE) {
+                    if (r != 0 && Math.abs(dx) != r && Math.abs(dz) != r) continue;
+
+                    BlockPos test = origin.add(dx, 0, dz);
+                    BlockPos base = snapToGround(world, test);
+
+                    BlockPos placePos = base.add(-(size.getX() / 2), yOffset, -(size.getZ() / 2));
+                    BlockBox realBox = new BlockBox(
+                            placePos.getX(), placePos.getY(), placePos.getZ(),
+                            placePos.getX() + size.getX() - 1,
+                            placePos.getY() + size.getY() - 1,
+                            placePos.getZ() + size.getZ() - 1
+                    );
+
+                    if (!tooMuchWater(world, realBox, waterMaxHits, waterStep)) {
+                        return base;
+                    }
+                }
+            }
+        }
         return null;
+    }
+
+    private static void collapseExtraGrassToDirt(StructureWorldAccess world, BlockBox box) {
+        for (int x = box.getMinX(); x <= box.getMaxX(); x++) {
+            for (int z = box.getMinZ(); z <= box.getMaxZ(); z++) {
+                boolean keptTopGrass = false;
+
+                for (int y = box.getMaxY(); y >= box.getMinY(); y--) {
+                    BlockPos p = new BlockPos(x, y, z);
+                    BlockState state = world.getBlockState(p);
+
+                    if (state.isOf(Blocks.GRASS_BLOCK)) {
+                        if (!keptTopGrass) {
+                            keptTopGrass = true;
+                        } else {
+                            world.setBlockState(p, Blocks.DIRT.getDefaultState(), WG_FLAGS);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static BlockPos snapToGround(StructureWorldAccess world, BlockPos approx) {
+        BlockPos p = world.getTopPosition(
+                Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
+                new BlockPos(approx.getX(), 0, approx.getZ())
+        );
+
+        if (p.getY() < world.getBottomY() + 2) {
+            p = new BlockPos(p.getX(), world.getBottomY() + 2, p.getZ());
+        }
+
+        while (p.getY() > world.getBottomY() + 2) {
+            BlockState at = world.getBlockState(p);
+            BlockState below = world.getBlockState(p.down());
+
+            boolean atOk = at.isAir() || at.isReplaceable();
+            boolean belowOk = below.isSolidBlock(world, p.down());
+
+            if (atOk && belowOk) return p;
+            p = p.down();
+        }
+
+        return p;
     }
 }

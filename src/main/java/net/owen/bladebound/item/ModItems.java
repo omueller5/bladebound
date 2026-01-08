@@ -193,6 +193,20 @@ public class ModItems {
             )
     );
 
+    public static final Item SOULKATANA = Registry.register(
+            Registries.ITEM,
+            Identifier.of("bladebound", "split-soul-katana"),
+            new SoulSplitKatanaItem(
+                    ToolMaterials.NETHERITE,
+                    4,        // Netherite sword bonus damage (+1 over diamond)
+                    -2.4f,    // Standard sword speed (1.6 attack speed)
+                    new Item.Settings()
+                            .maxCount(1)
+                            .rarity(Rarity.EPIC) // Legendary tier
+            )
+    );
+
+
     //---------------
     // Items
     //---------------

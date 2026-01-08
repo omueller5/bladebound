@@ -29,6 +29,9 @@ public final class BladeboundLootInject {
     private static final Identifier BASTION_OTHER     = Identifier.of("minecraft", "chests/bastion_other");
     private static final Identifier BASTION_TREASURE  = Identifier.of("minecraft", "chests/bastion_treasure");
 
+    // End City
+    private static final Identifier END_CITY_TREASURE = Identifier.of("minecraft", "chests/end_city_treasure");
+
     // Ancient City (ice chest only)
     private static final Identifier ANCIENT_CITY_ICE_BOX = Identifier.of("minecraft", "chests/ancient_city_ice_box");
 
@@ -124,6 +127,31 @@ public final class BladeboundLootInject {
                 tableBuilder.pool(pool);
             }
 
+            // =========================================================
+            // SOUL SPLIT KATANA (LEGENDARY)
+            // - Bastion Treasure (Nether): very rare
+            // - End City Treasure (End): very rare
+            // TUNE: change these chances to taste
+            // =========================================================
+            if (BASTION_TREASURE.equals(key.getValue())) {
+                LootPool pool = LootPool.builder()
+                        .rolls(ConstantLootNumberProvider.create(1))
+                        .conditionally(RandomChanceLootCondition.builder(0.25f)) // 25%
+                        .with(ItemEntry.builder(ModItems.SOULKATANA).weight(1))
+                        .build();
+
+                tableBuilder.pool(pool);
+            }
+
+            if (END_CITY_TREASURE.equals(key.getValue())) {
+                LootPool pool = LootPool.builder()
+                        .rolls(ConstantLootNumberProvider.create(1))
+                        .conditionally(RandomChanceLootCondition.builder(0.25f)) // 25%
+                        .with(ItemEntry.builder(ModItems.SOULKATANA).weight(1))
+                        .build();
+
+                tableBuilder.pool(pool);
+            }
 
             // Ancient City ice box ONLY: exclusive legendary spell roll
             // Total chance = 35% (20% Zoltraak, 15% Perfect Heal)

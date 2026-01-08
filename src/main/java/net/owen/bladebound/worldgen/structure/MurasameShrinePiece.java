@@ -25,6 +25,15 @@ public class MurasameShrinePiece extends StructurePiece {
     // Worldgen-safe placement flags
     private static final int WG_FLAGS = 2 | 16;
 
+    // Y offset for placement (0 with carving is usually correct)
+    private static final int Y_OFFSET = 0;
+
+    // Water avoidance tuning
+    private static final int WATER_STEP = 2;
+    private static final int WATER_MAX_HITS = 10; // lower = stricter
+    private static final int[] SEARCH_RADII = {0, 8, 16, 24, 32, 40, 48};
+    private static final int SEARCH_STRIDE = 8;
+
     private final BlockPos origin;
 
     // Entities (frames/paintings) once
@@ -105,13 +114,16 @@ public class MurasameShrinePiece extends StructurePiece {
         if (baseLocked && lockedBase != null) {
             base = lockedBase;
         } else {
-            base = snapToGround(world, origin);
+            BlockPos candidate = findNearbyDryBase(world, origin, size, Y_OFFSET, WATER_MAX_HITS, WATER_STEP);
+            if (candidate == null) return;
+
+            base = candidate;
             lockedBase = base;
             baseLocked = true;
         }
 
         // ✅ Center X/Z like dojo/church (more stable on slopes)
-        BlockPos placePos = base.add(-(size.getX() / 2), 0, -(size.getZ() / 2));
+        BlockPos placePos = base.add(-(size.getX() / 2), Y_OFFSET, -(size.getZ() / 2));
 
         // Real structure footprint
         BlockBox realBox = new BlockBox(
@@ -181,6 +193,67 @@ public class MurasameShrinePiece extends StructurePiece {
                 }
             }
         }
+    }
+
+    // ---------- Water check (footprint-based) ----------
+    private static boolean tooMuchWater(StructureWorldAccess world, BlockBox box, int maxHits, int step) {
+        int hits = 0;
+
+        for (int x = box.getMinX(); x <= box.getMaxX(); x += step) {
+            for (int z = box.getMinZ(); z <= box.getMaxZ(); z += step) {
+                BlockPos top = world.getTopPosition(
+                        Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
+                        new BlockPos(x, 0, z)
+                );
+
+                // If top or below is fluid (shorelines count), flag it
+                if (!world.getFluidState(top).isEmpty() || !world.getFluidState(top.down()).isEmpty()) {
+                    hits++;
+                    if (hits >= maxHits) return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Finds a nearby dry base position by searching around the origin.
+     * Returns an AIR block above solid (like snapToGround), or null if none found.
+     */
+    private static BlockPos findNearbyDryBase(
+            StructureWorldAccess world,
+            BlockPos origin,
+            Vec3i templateSize,
+            int yOffset,
+            int waterMaxHits,
+            int waterStep
+    ) {
+        for (int r : SEARCH_RADII) {
+            for (int dx = -r; dx <= r; dx += SEARCH_STRIDE) {
+                for (int dz = -r; dz <= r; dz += SEARCH_STRIDE) {
+                    // Only test the perimeter for r>0 (faster)
+                    if (r != 0 && Math.abs(dx) != r && Math.abs(dz) != r) continue;
+
+                    BlockPos test = origin.add(dx, 0, dz);
+                    BlockPos base = snapToGround(world, test);
+
+                    BlockPos placePos = base.add(-(templateSize.getX() / 2), yOffset, -(templateSize.getZ() / 2));
+                    BlockBox realBox = new BlockBox(
+                            placePos.getX(), placePos.getY(), placePos.getZ(),
+                            placePos.getX() + templateSize.getX() - 1,
+                            placePos.getY() + templateSize.getY() - 1,
+                            placePos.getZ() + templateSize.getZ() - 1
+                    );
+
+                    if (!tooMuchWater(world, realBox, waterMaxHits, waterStep)) {
+                        return base;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

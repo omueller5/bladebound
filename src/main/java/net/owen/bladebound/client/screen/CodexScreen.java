@@ -554,6 +554,20 @@ public class CodexScreen extends Screen {
                 Rarity.RARE
         ));
 
+        // Soul Split Katana
+        s.add(Spread.item(
+                stack("bladebound:split-soul-katana"),
+                "Split Soul Katana",
+                "A blade forged at the cost of everything.\n" +
+                        "• Origin: Created by Mai Zenin — her life was the price of its existence\n" +
+                        "• Core effect: Deals bonus TRUE damage that bypasses armor\n" +
+                        "• How to obtain: Looted from Bastion Treasure chests and End City Treasure chests\n" +
+                        "• Notes: Legendary-tier weapon on the level of netherite; designed as a pure damage blade, not a mobility tool",
+                "Split Soul Katana",
+                Rarity.LEGENDARY
+        ));
+
+
         // Murasame
         s.add(Spread.item(
                 stack("bladebound:murasame"),
