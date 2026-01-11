@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "bladebound:frost_ray_spell" }
+  ],
+  "result": { "id": "bladebound:frost_ray_scroll", "count": 1 }
+}

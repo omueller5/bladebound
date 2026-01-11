@@ -1,4 +1,4 @@
-package net.owen.bladebound.magic.spells;
+package net.owen.bladebound.magic.ancient;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -13,36 +13,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * World Rewrite Spell (Ancient)
- *
- * Now includes:
- * - Mana cost + cooldown (unless exempt via creative staff)
- * - Zone creation unchanged
- *
- * NOTE: cooldown is runtime-only for now (resets on restart).
- */
 public final class WorldRewriteSpell {
 
     public static final Identifier ID = Identifier.of("bladebound", "world_rewrite_spell");
 
-    // Tunables
     public static final double RADIUS = 7.0;
-
-    // Active duration: 20 seconds @ 20 TPS
     public static final int DURATION_TICKS = 20 * 20;
 
-    // Cost + cooldown
     public static final int MANA_COST = 500;
-
-    // 15 minutes @ 20 TPS
     public static final int COOLDOWN_TICKS = 15 * 60 * 20;
 
-    // Creative staff item id (adjust ONLY if your item id differs)
     private static final Identifier CREATIVE_STAFF_ID = Identifier.of("bladebound", "creative_staff");
 
-    // Runtime-only cooldown tracker: player -> next world time tick allowed
     private static final Map<UUID, Long> NEXT_ALLOWED_TICK = new HashMap<>();
+    private static final Map<UUID, Long> LAST_SEEN_WORLD_TIME = new HashMap<>();
 
     private WorldRewriteSpell() {}
 
@@ -52,7 +36,6 @@ public final class WorldRewriteSpell {
     }
 
     public static boolean cast(ServerWorld world, ServerPlayerEntity caster, boolean exemptFromCosts) {
-        // Safety: one zone at a time
         if (WorldRewriteZoneManager.hasActiveZone(world)) {
             caster.sendMessage(Text.literal("Reality is already being rewritten."), true);
             return false;
@@ -60,30 +43,30 @@ public final class WorldRewriteSpell {
 
         long now = world.getTime();
 
-        // Cooldown check (skip if exempt)
+        // Fix: if world time goes backwards (new world / restart), clear stored cooldown for this player.
+        long last = LAST_SEEN_WORLD_TIME.getOrDefault(caster.getUuid(), now);
+        if (now < last) {
+            NEXT_ALLOWED_TICK.remove(caster.getUuid());
+        }
+        LAST_SEEN_WORLD_TIME.put(caster.getUuid(), now);
+
         if (!exemptFromCosts) {
             long next = NEXT_ALLOWED_TICK.getOrDefault(caster.getUuid(), 0L);
             if (now < next) {
                 long remainingTicks = next - now;
                 int seconds = (int) Math.ceil(remainingTicks / 20.0);
 
-                // mm:ss formatting
                 int mm = seconds / 60;
                 int ss = seconds % 60;
-                String s = mm > 0
-                        ? (mm + "m " + ss + "s")
-                        : (ss + "s");
+                String s = mm > 0 ? (mm + "m " + ss + "s") : (ss + "s");
 
                 caster.sendMessage(Text.literal("World Rewrite on cooldown: " + s), true);
                 return false;
             }
         }
 
-        // Mana check + consume (skip if exempt)
         if (!exemptFromCosts) {
-            if (!(caster instanceof ManaHolder mana)) {
-                return false;
-            }
+            if (!(caster instanceof ManaHolder mana)) return false;
 
             int currentMana = mana.bladebound$getMana();
             if (currentMana < MANA_COST) {
@@ -94,10 +77,8 @@ public final class WorldRewriteSpell {
             mana.bladebound$setMana(currentMana - MANA_COST);
         }
 
-        // Start zone
         WorldRewriteZoneManager.start(world, caster.getUuid(), caster.getPos(), RADIUS, DURATION_TICKS);
 
-        // Apply cooldown (skip if exempt)
         if (!exemptFromCosts) {
             NEXT_ALLOWED_TICK.put(caster.getUuid(), now + COOLDOWN_TICKS);
         }

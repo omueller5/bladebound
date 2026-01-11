@@ -19,7 +19,6 @@ import org.joml.Matrix4f;
 
 public class BarrierEntityRenderer extends EntityRenderer<BarrierEntity> {
 
-    // assets/bladebound/textures/entity/defensive_magic.png
     private static final Identifier TEX =
             Identifier.of(Bladebound.MOD_ID, "textures/entity/defensive_magic.png");
 
@@ -76,8 +75,6 @@ public class BarrierEntityRenderer extends EntityRenderer<BarrierEntity> {
 
                 if (max > 0) {
                     float pct = mana / (float) max;
-
-                    // Start fading at 30% mana (fast)
                     if (pct <= 0.30f) {
                         manaFactor = Math.max(0.04f, pct / 0.30f);
                     }
@@ -85,28 +82,28 @@ public class BarrierEntityRenderer extends EntityRenderer<BarrierEntity> {
             }
         }
 
-        // =========================================================
-        // ORIGINAL BLUE LOOK
-        // =========================================================
         float r = 0.55f;
         float g = 0.85f;
         float b = 1.00f;
-        float alpha = 0.70f * manaFactor;
+
+        // IMPORTANT:
+        // Lower alpha makes items behind the barrier much easier to see.
+        // If you want it stronger again later, raise the 0.45f.
+        float alpha = 0.45f * manaFactor;
 
         // =========================================================
-        // IMPORTANT:
-        // Render with DEPTH WRITES OFF so entities behind still render.
-        // We flush immediately so the depthMask state applies to THIS quad.
+        // Render state: translucent + do NOT write depth
         // =========================================================
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.depthMask(false);
+        RenderSystem.disableDepthTest();
 
-        // Use the immediate entity consumer so we can flush right after drawing
-        MinecraftClient mc = MinecraftClient.getInstance();
-        VertexConsumerProvider.Immediate immediate = mc.getBufferBuilders().getEntityVertexConsumers();
+        // IMPORTANT:
+        // Emissive translucent tends to behave better for "see-through shields"
+        // (less weirdness with other entity rendering).
+        VertexConsumer vc = vertexConsumers.getBuffer(RenderLayer.getEntityTranslucentEmissive(getTexture(entity)));
 
-        VertexConsumer vc = immediate.getBuffer(RenderLayer.getEntityTranslucent(getTexture(entity)));
         Matrix4f mat = matrices.peek().getPositionMatrix();
         int fullBright = LightmapTextureManager.MAX_LIGHT_COORDINATE;
 
@@ -138,9 +135,7 @@ public class BarrierEntityRenderer extends EntityRenderer<BarrierEntity> {
                 .light(fullBright)
                 .normal(0, 0, 1);
 
-        // Flush just-rendered vertices now (so our depthMask(false) is honored)
-        immediate.draw();
-
+        RenderSystem.enableDepthTest();
         RenderSystem.depthMask(true);
         RenderSystem.disableBlend();
 

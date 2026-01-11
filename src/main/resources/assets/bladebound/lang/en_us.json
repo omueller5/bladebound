@@ -32,8 +32,17 @@
   "item.bladebound.zoltraak_spell": "Zoltraak Grimoire",
   "item.bladebound.perfect_heal_spell": "Perfect Heal Grimoire",
   "item.bladebound.world_rewrite_spell": "World Rewrite Grimoire",
+  "item.bladebound.black_hole_spell": "Black Hole Grimoire",
   "item.bladebound.mana_apple": "Mana Apple",
   "item.bladebound.greater_mana_apple": "Greater Mana Apple",
+
+  "item.bladebound.firebolt_scroll": "Firebolt Spell Scroll",
+  "item.bladebound.frost_ray_scroll": "Frost Ray Spell Scroll",
+  "item.bladebound.heal_scroll": "Heal Spell Scroll",
+  "item.bladebound.stone_dart_scroll": "Stone Dart Spell Scroll",
+  "item.bladebound.lightning_scroll": "Lightning Strike Spell Scroll",
+  "item.bladebound.zoltraak_scroll": "Zoltraak Spell Scroll",
+  "item.bladebound.perfect_heal_scroll": "Perfect Heal Spell Scroll",
 
   "key.bladebound.open_spells": "Open Spells",
   "category.bladebound": "Bladebound"

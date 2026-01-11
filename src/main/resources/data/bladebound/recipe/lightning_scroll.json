@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "bladebound:lightning_spell" }
+  ],
+  "result": { "id": "bladebound:lightning_scroll", "count": 1 }
+}

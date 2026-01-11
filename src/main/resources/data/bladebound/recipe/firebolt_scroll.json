@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "bladebound:firebolt_spell" }
+  ],
+  "result": { "id": "bladebound:firebolt_scroll", "count": 1 }
+}

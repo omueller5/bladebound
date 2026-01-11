@@ -22,6 +22,8 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.owen.bladebound.client.MobHealthHud;
 import net.owen.bladebound.client.render.BarrierEntityRenderer;
+import net.owen.bladebound.client.render.BlackHoleEntityRenderer;
+import net.owen.bladebound.client.render.BlackHoleRenderer;
 import net.owen.bladebound.client.screen.SpellScreen;
 import net.owen.bladebound.entity.ModEntities;
 import net.owen.bladebound.item.ModItems;
@@ -107,6 +109,10 @@ public class BladeboundClient implements ClientModInitializer {
         // Barrier entity renderer
         EntityRendererRegistry.register(ModEntities.BARRIER, BarrierEntityRenderer::new);
         net.owen.bladebound.client.BarrierVisualHud.register();
+
+        // Black Hole entity renderer
+        EntityRendererRegistry.register(ModEntities.BLACK_HOLE, BlackHoleRenderer::new);
+        EntityRendererRegistry.register(ModEntities.BLACK_HOLE, BlackHoleEntityRenderer::new);
 
         // Keybinds
         OPEN_SPELLS = KeyBindingHelper.registerKeyBinding(new KeyBinding(

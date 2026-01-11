@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "bladebound:zoltraak_spell" }
+  ],
+  "result": { "id": "bladebound:zoltraak_scroll", "count": 1 }
+}

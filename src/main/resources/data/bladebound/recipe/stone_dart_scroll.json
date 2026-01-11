@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "bladebound:stone_dart_spell" }
+  ],
+  "result": { "id": "bladebound:stone_dart_scroll", "count": 1 }
+}

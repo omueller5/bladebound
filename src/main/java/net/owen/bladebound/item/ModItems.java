@@ -1,8 +1,10 @@
 package net.owen.bladebound.item;
 
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.component.type.FoodComponent;
+import net.minecraft.component.type.LoreComponent;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.Item;
@@ -409,6 +411,167 @@ public class ModItems {
                     )
             )
     );
+
+    public static final Item BLACK_HOLE_SPELL = Registry.register(
+            Registries.ITEM,
+            Identifier.of("bladebound", "black_hole_spell"),
+            new SpellGrantItem(
+                    new Item.Settings().maxCount(1),
+                    Identifier.of("bladebound", "black_hole"),
+                    Formatting.RED,
+                    List.of(
+                            Text.literal("ANCIENT SPELL").formatted(Formatting.RED, Formatting.BOLD),
+                            Text.literal("This spell cannot be learned by conventional means.").formatted(Formatting.YELLOW, Formatting.ITALIC),
+                            Text.literal(""),
+                            Text.literal("A grimoire that describes a hunger with no end.").formatted(Formatting.DARK_PURPLE),
+                            Text.literal(""),
+                            Text.literal("It does not summon darkness — it creates absence.").formatted(Formatting.AQUA),
+                            Text.literal("Matter, magic, and momentum are dragged into silence,").formatted(Formatting.AQUA),
+                            Text.literal("spiraling toward a point that refuses to exist.").formatted(Formatting.AQUA),
+                            Text.literal(""),
+                            Text.literal("Within its event horizon, strength fails and will breaks,").formatted(Formatting.LIGHT_PURPLE),
+                            Text.literal("as even the brave are reduced to falling debris.").formatted(Formatting.LIGHT_PURPLE),
+                            Text.literal(""),
+                            Text.literal("When the singularity collapses,").formatted(Formatting.AQUA),
+                            Text.literal("it leaves only echoes and ash behind.").formatted(Formatting.AQUA)
+                    )
+            )
+    );
+
+    // Spell Scrolls
+    public static final Item FIREBOLT_SCROLL = Registry.register(
+            Registries.ITEM,
+            Identifier.of("bladebound", "firebolt_scroll"),
+            new net.owen.bladebound.item.custom.SpellScrollItem(
+                    new Item.Settings()
+                            .maxCount(64)
+                            .component(DataComponentTypes.CUSTOM_NAME,
+                                    Text.literal("Firebolt Scroll").formatted(Formatting.GREEN))
+                            .component(DataComponentTypes.LORE, new LoreComponent(List.of(
+                                    Text.literal("STARTER SPELL").formatted(Formatting.GREEN, Formatting.BOLD),
+                                    Text.literal("Launches a condensed bolt of flame.").formatted(Formatting.AQUA),
+                                    Text.literal("Simple, reliable, and dangerous in practiced hands.").formatted(Formatting.GRAY),
+                                    Text.literal(""),
+                                    Text.literal("Mana: 20").formatted(Formatting.BLUE)
+                            ))),
+                    Identifier.of("bladebound", "firebolt")
+            )
+    );
+
+    public static final Item FROST_RAY_SCROLL = Registry.register(
+            Registries.ITEM,
+            Identifier.of("bladebound", "frost_ray_scroll"),
+            new net.owen.bladebound.item.custom.SpellScrollItem(
+                    new Item.Settings()
+                            .maxCount(64)
+                            .component(DataComponentTypes.CUSTOM_NAME,
+                                    Text.literal("Frost Ray Scroll").formatted(Formatting.GREEN))
+                            .component(DataComponentTypes.LORE, new LoreComponent(List.of(
+                                    Text.literal("STARTER SPELL").formatted(Formatting.GREEN, Formatting.BOLD),
+                                    Text.literal("Unleashes a chilling beam of frost.").formatted(Formatting.AQUA),
+                                    Text.literal("Slows enemies, leaving them vulnerable to follow-up attacks.").formatted(Formatting.GRAY),
+                                    Text.literal(""),
+                                    Text.literal("Mana: 25").formatted(Formatting.BLUE)
+                            ))),
+                    Identifier.of("bladebound", "frost_ray")
+            )
+    );
+
+    public static final Item HEAL_SCROLL = Registry.register(
+            Registries.ITEM,
+            Identifier.of("bladebound", "heal_scroll"),
+            new net.owen.bladebound.item.custom.SpellScrollItem(
+                    new Item.Settings()
+                            .maxCount(64)
+                            .component(DataComponentTypes.CUSTOM_NAME,
+                                    Text.literal("Heal Scroll").formatted(Formatting.GREEN))
+                            .component(DataComponentTypes.LORE, new LoreComponent(List.of(
+                                    Text.literal("STARTER SPELL").formatted(Formatting.GREEN, Formatting.BOLD),
+                                    Text.literal("Mends minor wounds through focused mana.").formatted(Formatting.AQUA),
+                                    Text.literal("Restores a small smount of health when invoked.").formatted(Formatting.GRAY),
+                                    Text.literal(""),
+                                    Text.literal("Mana: 30").formatted(Formatting.BLUE)
+                            ))),
+                    Identifier.of("bladebound", "heal")
+            )
+    );
+
+    public static final Item STONE_DART_SCROLL = Registry.register(
+            Registries.ITEM,
+            Identifier.of("bladebound", "stone_dart_scroll"),
+            new net.owen.bladebound.item.custom.SpellScrollItem(
+                    new Item.Settings()
+                            .maxCount(64)
+                            .component(DataComponentTypes.CUSTOM_NAME,
+                                    Text.literal("Stone Dart Scroll").formatted(Formatting.GREEN))
+                            .component(DataComponentTypes.LORE, new LoreComponent(List.of(
+                                    Text.literal("STARTER SPELL").formatted(Formatting.GREEN, Formatting.BOLD),
+                                    Text.literal("Fires a quick magic dart.").formatted(Formatting.AQUA),
+                                    Text.literal("Great for early combat and pulling enemies.").formatted(Formatting.GRAY),
+                                    Text.literal(""),
+                                    Text.literal("Mana: 5").formatted(Formatting.BLUE)
+                            ))),
+                    Identifier.of("bladebound", "stone_dart")
+            )
+    );
+
+    public static final Item LIGHTNING_SCROLL = Registry.register(
+            Registries.ITEM,
+            Identifier.of("bladebound", "lightning_scroll"),
+            new net.owen.bladebound.item.custom.SpellScrollItem(
+                    new Item.Settings()
+                            .maxCount(64)
+                            .component(DataComponentTypes.CUSTOM_NAME,
+                                    Text.literal("Lightning Strike Scroll").formatted(Formatting.AQUA))
+                            .component(DataComponentTypes.LORE, new LoreComponent(List.of(
+                                    Text.literal("RARE SPELL").formatted(Formatting.AQUA, Formatting.BOLD),
+                                    Text.literal("Calls down lightning at the targeted location.").formatted(Formatting.AQUA),
+                                    Text.literal("Strikes enemies or blocks in your line of sight.").formatted(Formatting.GRAY),
+                                    Text.literal(""),
+                                    Text.literal("Mana: 45").formatted(Formatting.BLUE)
+                            ))),
+                    Identifier.of("bladebound", "lightning_strike")
+            )
+    );
+
+    public static final Item ZOLTRAAK_SCROLL = Registry.register(
+            Registries.ITEM,
+            Identifier.of("bladebound", "zoltraak_scroll"),
+            new net.owen.bladebound.item.custom.SpellScrollItem(
+                    new Item.Settings()
+                            .maxCount(64)
+                            .component(DataComponentTypes.CUSTOM_NAME,
+                                    Text.literal("Zoltraak Scroll").formatted(Formatting.GOLD))
+                            .component(DataComponentTypes.LORE, new LoreComponent(List.of(
+                                    Text.literal("LEGENDARY SPELL").formatted(Formatting.GOLD, Formatting.BOLD),
+                                    Text.literal("A piercing beam of refined mana.").formatted(Formatting.AQUA),
+                                    Text.literal("Feared even by demons.").formatted(Formatting.GRAY),
+                                    Text.literal(""),
+                                    Text.literal("Mana: 50").formatted(Formatting.BLUE)
+                            ))),
+                    Identifier.of("bladebound", "zoltraak")
+            )
+    );
+
+    public static final Item PERFECT_HEAL_SCROLL = Registry.register(
+            Registries.ITEM,
+            Identifier.of("bladebound", "perfect_heal_scroll"),
+            new net.owen.bladebound.item.custom.SpellScrollItem(
+                    new Item.Settings()
+                            .maxCount(64)
+                            .component(DataComponentTypes.CUSTOM_NAME,
+                                    Text.literal("Perfect Heal Scroll").formatted(Formatting.GOLD))
+                            .component(DataComponentTypes.LORE, new LoreComponent(List.of(
+                                    Text.literal("LEGENDARY SPELL").formatted(Formatting.GOLD, Formatting.BOLD),
+                                    Text.literal("Restores you to full health instantly.").formatted(Formatting.GREEN, Formatting.ITALIC),
+                                    Text.literal("Cleanses all negative status effects.").formatted(Formatting.AQUA, Formatting.ITALIC),
+                                    Text.literal(""),
+                                    Text.literal("Mana: ALL").formatted(Formatting.BLUE)
+                            ))),
+                    Identifier.of("bladebound", "perfect_heal")
+            )
+    );
+
 
 
     // Food Items

@@ -20,6 +20,10 @@ public final class BladeboundYaclScreen {
         return YetAnotherConfigLib.createBuilder()
                 .title(Text.literal("BladeBound Settings"))
                 .save(() -> BladeboundConfig.save(FabricLoader.getInstance().getConfigDir()))
+
+                // =========================================================
+                // HUD CATEGORY
+                // =========================================================
                 .category(ConfigCategory.createBuilder()
                         .name(Text.literal("HUD"))
 
@@ -60,9 +64,6 @@ public final class BladeboundYaclScreen {
                                 () -> BladeboundConfig.DATA.hudHeight,
                                 v -> BladeboundConfig.DATA.hudHeight = v))
 
-                        // ----------------------------
-                        // Mana HUD (Staff)
-                        // ----------------------------
                         .option(LabelOption.create(Text.literal(" ")))
                         .option(LabelOption.create(Text.literal("Mana HUD")))
 
@@ -82,9 +83,6 @@ public final class BladeboundYaclScreen {
                                 () -> BladeboundConfig.DATA.manaHudNumbersYOffset,
                                 v -> BladeboundConfig.DATA.manaHudNumbersYOffset = Math.max(0, v)))
 
-                        // ----------------------------
-                        // Mob Health Indicator
-                        // ----------------------------
                         .option(LabelOption.create(Text.literal(" ")))
                         .option(LabelOption.create(Text.literal("Mob Health Indicator")))
 
@@ -104,7 +102,6 @@ public final class BladeboundYaclScreen {
                                 () -> BladeboundConfig.DATA.mobHealthHoldTicks,
                                 v -> BladeboundConfig.DATA.mobHealthHoldTicks = Math.max(0, v)))
 
-                        // Damage popups
                         .option(boolOption("Damage Popups",
                                 "Shows a damage number when the target loses health.",
                                 () -> BladeboundConfig.DATA.mobHealthDamagePopups,
@@ -127,6 +124,14 @@ public final class BladeboundYaclScreen {
 
                         .build())
 
+                // =========================================================
+                // BLACK HOLE CATEGORY (own screen)
+                // =========================================================
+                .category(net.owen.bladebound.config.yacl.BlackHoleYaclCategory.build(BladeboundConfig.DATA.blackHole))
+
+                // =========================================================
+                // GAMEPLAY CATEGORY
+                // =========================================================
                 .category(ConfigCategory.createBuilder()
                         .name(Text.literal("Gameplay"))
 
@@ -153,6 +158,7 @@ public final class BladeboundYaclScreen {
                                 "How much durability is consumed per hit.",
                                 () -> BladeboundConfig.DATA.durabilityPerHit,
                                 v -> BladeboundConfig.DATA.durabilityPerHit = Math.max(0, v)))
+
                         .build())
 
                 .build()

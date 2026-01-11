@@ -8,6 +8,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
@@ -79,14 +80,26 @@ public class FrierenStaffItem extends Item {
                         }
 
                         boolean turningOn = !sh.bladebound$isBarrierActive();
-                        if (turningOn && mh.bladebound$getMana() <= 0) {
+                        if (turningOn && mh.bladebound$getMana() < 30) {
                             user.sendMessage(Text.literal("Not enough mana!"), true);
                             return TypedActionResult.fail(stack);
                         }
                     }
 
+                    // >>> THIS was missing / out of scope before <<<
                     boolean nowActive = !sh.bladebound$isBarrierActive();
                     sh.bladebound$setBarrierActive(nowActive);
+
+                    // =========================================================
+                    // Persistent barrier manager (keeps entity alive while active)
+                    // =========================================================
+                    if (user instanceof ServerPlayerEntity sp && world instanceof ServerWorld sw) {
+                        net.owen.bladebound.util.BarrierEntityUtil.onBarrierToggled(sw, sp, nowActive);
+
+                        if (sp instanceof ManaHolder) {
+                            ModPackets.sendMana(sp);
+                        }
+                    }
 
                     world.playSound(
                             null,
@@ -96,15 +109,12 @@ public class FrierenStaffItem extends Item {
                             0.6f,
                             nowActive ? 1.2f : 0.9f
                     );
-
-                    if (user instanceof ServerPlayerEntity sp && user instanceof ManaHolder) {
-                        ModPackets.sendMana(sp);
-                    }
                 }
 
                 return TypedActionResult.success(stack, world.isClient);
             }
         }
+
 
         // =========================================================
         // Existing click-to-cast behavior for other spells

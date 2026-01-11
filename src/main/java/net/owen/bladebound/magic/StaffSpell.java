@@ -25,11 +25,14 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
+import net.owen.bladebound.magic.ancient.BlackHoleSpell;
 import net.owen.bladebound.mana.ManaHolder;
-import net.owen.bladebound.magic.spells.WorldRewriteSpell;
+import net.owen.bladebound.magic.ancient.WorldRewriteSpell;
 import net.owen.bladebound.magic.worldrewrite.WorldRewriteZoneManager;
 
 import java.util.List;
+
+import static net.owen.bladebound.entity.ModEntities.BLACK_HOLE;
 
 public enum StaffSpell {
 
@@ -55,7 +58,7 @@ public enum StaffSpell {
     ),
     MANA_BARRIER(
             Identifier.of("bladebound", "mana_barrier"),
-            "Defensive Magic", SpellRarity.RARE, 0, 0
+            "Defensive Magic", SpellRarity.RARE, 30, 0
     ),
     ZOLTRAAK(
             Identifier.of("bladebound", "zoltraak"),
@@ -68,6 +71,10 @@ public enum StaffSpell {
     WORLD_REWRITE(
             Identifier.of("bladebound", "world_rewrite"),
             "World Rewrite", SpellRarity.ANCIENT, 500, 900
+    ),
+    BLACK_HOLE(
+            Identifier.of("bladebound", "black_hole"),
+            "Black Hole", SpellRarity.ANCIENT, 350, 1200
     );
 
     // =========================================================
@@ -147,6 +154,7 @@ public enum StaffSpell {
             case ZOLTRAAK -> { castZoltraak(world, user); yield 0; }
             case PERFECT_HEAL -> castPerfectHeal(world, user);
             case WORLD_REWRITE -> castWorldRewrite(world, user);
+            case BLACK_HOLE -> castBlackHole(world, user);
         };
     }
 
@@ -482,7 +490,7 @@ public enum StaffSpell {
     }
 
     // -------------------------
-    // World Rewrite (Ancient) — TEST VERSION (no mana/cooldown yet)
+    // World Rewrite (Ancient)
     // -------------------------
     private static int castWorldRewrite(World world, PlayerEntity user) {
         if (world.isClient) return 0;
@@ -490,6 +498,18 @@ public enum StaffSpell {
         if (!(user instanceof ServerPlayerEntity sp)) return 0;
 
         WorldRewriteSpell.cast(sw, sp);
+        return 0;
+    }
+
+    // -------------------------
+    // Black Hole (Ancient)
+    // -------------------------
+    private static int castBlackHole(World world, PlayerEntity user) {
+        if (world.isClient) return 0;
+        if (!(world instanceof ServerWorld sw)) return 0;
+        if (!(user instanceof ServerPlayerEntity sp)) return 0;
+
+        BlackHoleSpell.cast(sw, sp);
         return 0;
     }
 

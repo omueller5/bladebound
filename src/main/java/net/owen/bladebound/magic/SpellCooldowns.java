@@ -34,6 +34,7 @@ public final class SpellCooldowns {
 
         // Ancient spells
         if (spellId.equals(StaffSpell.WORLD_REWRITE.id)) return 900;
+        if (spellId.equals(StaffSpell.BLACK_HOLE.id)) return 1200;
 
         // Safe fallback
         return 20;

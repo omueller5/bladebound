@@ -94,6 +94,7 @@ public class SpellGrantItem extends Item {
             case ZOLTRAAK -> 65;
             case PERFECT_HEAL -> 160;
             case WORLD_REWRITE -> 900;
+            case BLACK_HOLE -> 1200;
         };
     }
 

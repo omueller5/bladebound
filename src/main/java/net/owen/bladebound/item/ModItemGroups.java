@@ -48,6 +48,16 @@ public class ModItemGroups {
                         entries.add(ModItems.ZOLTRAAK_SPELL);
                         entries.add(ModItems.PERFECT_HEAL_SPELL);
                         entries.add(ModItems.WORLD_REWRITE_SPELL);
+                        entries.add(ModItems.BLACK_HOLE_SPELL);
+
+                        // Scrolls
+                        entries.add(ModItems.FIREBOLT_SCROLL);
+                        entries.add(ModItems.FROST_RAY_SCROLL);
+                        entries.add(ModItems.HEAL_SCROLL);
+                        entries.add(ModItems.STONE_DART_SCROLL);
+                        entries.add(ModItems.LIGHTNING_SCROLL);
+                        entries.add(ModItems.ZOLTRAAK_SCROLL);
+                        entries.add(ModItems.PERFECT_HEAL_SCROLL);
 
                         // Materials
                         entries.add(ModItems.CURSED_KITETSU_SHARD);

@@ -503,6 +503,27 @@ public class CodexScreen extends Screen {
                 Rarity.LEGENDARY
         ));
 
+        // Spell Scrolls (single page)
+        s.add(Spread.item(
+                stack("bladebound:firebolt_scroll"),
+                "Spell Scrolls",
+                "Spell Scrolls are single-use casts of a spell.\n" +
+                        "They still cost mana, but do not use cooldowns.\n" +
+                        "\n" +
+                        "Scrolls can be made for these tiers:\n" +
+                        "• Starter spells\n" +
+                        "• Rare spells\n" +
+                        "• Legendary spells\n" +
+                        "\n" +
+                        "Ancient spells cannot be turned into scrolls.\n" +
+                        "Defensive Magic cannot be turned into a scroll\n" +
+                        "\n" +
+                        "Tip: Keep extra scrolls for emergencies or boss fights.",
+                "Spell Scrolls",
+                Rarity.RARE
+        ));
+
+
         // Sandai Kitetsu
         s.add(Spread.item(
                 stack("bladebound:sandai-kitetsu"),

@@ -2,6 +2,7 @@ package net.owen.bladebound;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.owen.bladebound.config.BlackHoleConfig;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,6 +29,9 @@ public final class BladeboundConfig {
             BladeboundConfigData loaded = GSON.fromJson(json, BladeboundConfigData.class);
             if (loaded != null) DATA = loaded;
 
+            // Safety: if older configs exist, ensure new sections aren't null
+            if (DATA.blackHole == null) DATA.blackHole = new BlackHoleConfig();
+
         } catch (Exception e) {
             // If config is broken, keep defaults (don't crash the game)
             e.printStackTrace();
@@ -47,6 +51,11 @@ public final class BladeboundConfig {
 
     // All your toggles live here
     public static final class BladeboundConfigData {
+
+        // =========================
+        // Black Hole (Ancient Spell)
+        // =========================
+        public BlackHoleConfig blackHole = new BlackHoleConfig();
 
         // =========================
         // Wado / Discipline HUD
@@ -98,7 +107,6 @@ public final class BladeboundConfig {
 
         public boolean mobHealthBossStyle = false;
         public boolean mobHealthHitSound = false;
-
 
         // =========================
         // Perfect Form visuals

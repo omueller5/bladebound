@@ -1,18 +1,18 @@
 package net.owen.bladebound.magic.worldrewrite;
 
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.particle.DustParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
-import org.joml.Vector3f;
 
 import java.util.*;
 
@@ -22,23 +22,26 @@ import java.util.*;
  * - Freeze mobs + projectiles inside radius
  * - DO NOT freeze players (movement stays normal)
  * - Actionbar countdown for caster (AQUA->YELLOW near end)
- * - Visual: hollow sphere outline using dark dust particles
+ * - Visual: hollow sphere outline (black/white debug particles)
  * - Restore everything cleanly
+ *
+ * NOTE: This class self-registers a world tick hook so visuals persist
+ * for the entire spell duration (no reliance on external tick calls).
  */
 public final class WorldRewriteZoneManager {
 
     private static ActiveZone active;
     private static final Map<UUID, Snapshot> snapshots = new HashMap<>();
 
+    // Tick hook guard
+    private static boolean TICK_HOOKED = false;
+
     // Actionbar timer frequency
-    private static final int TIMER_INTERVAL_TICKS = 20; // once per second
+    private static final int TIMER_INTERVAL_TICKS = 20;
 
     // Outline visuals
-    private static final int OUTLINE_INTERVAL_TICKS = 2; // every 2 ticks
-    private static final int OUTLINE_POINTS = 96;        // more = smoother, more cost
-    private static final float OUTLINE_SIZE = 0.9f;      // particle size
-    private static final DustParticleEffect OUTLINE_DUST =
-            new DustParticleEffect(new Vector3f(0.05f, 0.05f, 0.05f), OUTLINE_SIZE); // very dark gray
+    private static final int OUTLINE_INTERVAL_TICKS = 2;
+    private static final int OUTLINE_POINTS = 120;
 
     private WorldRewriteZoneManager() {}
 
@@ -57,6 +60,8 @@ public final class WorldRewriteZoneManager {
     }
 
     public static void start(ServerWorld world, UUID casterUuid, Vec3d center, double radius, int durationTicks) {
+        ensureTickHooked();
+
         if (active != null) endActiveZone();
 
         Box box = new Box(
@@ -66,7 +71,16 @@ public final class WorldRewriteZoneManager {
 
         active = new ActiveZone(world, casterUuid, center, radius, box, durationTicks);
 
-        tick(world); // apply immediately
+        // Show immediately (and then persist via tick hook)
+        spawnOutline(world, active.center, active.radius);
+    }
+
+    private static void ensureTickHooked() {
+        if (TICK_HOOKED) return;
+        TICK_HOOKED = true;
+
+        // Called every tick for every ServerWorld
+        ServerTickEvents.END_WORLD_TICK.register(WorldRewriteZoneManager::tick);
     }
 
     public static void tick(ServerWorld world) {
@@ -78,17 +92,16 @@ public final class WorldRewriteZoneManager {
             return;
         }
 
-        // === Visual outline (hollow sphere surface only) ===
+        // Visual outline
         if ((active.ticksRemaining % OUTLINE_INTERVAL_TICKS) == 0) {
             spawnOutline(world, active.center, active.radius);
         }
 
-        // === Actionbar countdown (caster only) ===
+        // Actionbar countdown
         if ((active.ticksRemaining % TIMER_INTERVAL_TICKS) == 0 || active.ticksRemaining == 1) {
             ServerPlayerEntity caster = getCaster(world);
             if (caster != null) {
-                int secondsLeft = Math.max(0, (active.ticksRemaining + 19) / 20); // round up
-
+                int secondsLeft = Math.max(0, (active.ticksRemaining + 19) / 20);
                 Formatting color = secondsLeft <= 5 ? Formatting.YELLOW : Formatting.AQUA;
 
                 caster.sendMessage(
@@ -99,12 +112,12 @@ public final class WorldRewriteZoneManager {
             }
         }
 
-        // === Freeze entities each tick (catches entities that enter mid-duration) ===
+        // Freeze entities
         List<Entity> entities = world.getOtherEntities(null, active.box);
         for (Entity e : entities) {
             if (!e.isAlive()) continue;
 
-            // Do NOT freeze players (movement stays normal)
+            // Do NOT freeze players
             if (e instanceof PlayerEntity) continue;
 
             snapshots.computeIfAbsent(e.getUuid(), uuid -> Snapshot.capture(e));
@@ -118,12 +131,10 @@ public final class WorldRewriteZoneManager {
     }
 
     private static void spawnOutline(ServerWorld world, Vec3d center, double radius) {
-        // Random points ON the sphere surface (not inside), so it stays hollow.
-        // Using a uniform-ish method: pick z in [-1,1], theta in [0,2pi).
         for (int i = 0; i < OUTLINE_POINTS; i++) {
-            double z = world.random.nextDouble() * 2.0 - 1.0;           // [-1, 1]
-            double t = world.random.nextDouble() * Math.PI * 2.0;       // [0, 2pi)
-            double r = Math.sqrt(Math.max(0.0, 1.0 - z * z));           // circle radius at this z
+            double z = world.random.nextDouble() * 2.0 - 1.0;
+            double t = world.random.nextDouble() * Math.PI * 2.0;
+            double r = Math.sqrt(Math.max(0.0, 1.0 - z * z));
 
             double x = r * Math.cos(t);
             double y = z;
@@ -131,8 +142,8 @@ public final class WorldRewriteZoneManager {
 
             Vec3d p = center.add(x * radius, y * radius, zz * radius);
 
-            // Spawn exactly 1 particle at that surface point
-            world.spawnParticles(OUTLINE_DUST, p.x, p.y, p.z, 1, 0, 0, 0, 0.0);
+            world.spawnParticles(ParticleTypes.ASH, p.x, p.y, p.z, 1, 0, 0, 0, 0.0);
+            world.spawnParticles(ParticleTypes.END_ROD, p.x, p.y, p.z, 1, 0, 0, 0, 0.0);
         }
     }
 

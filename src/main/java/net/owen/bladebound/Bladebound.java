@@ -15,6 +15,7 @@ import net.owen.bladebound.event.BladeboundTrades;
 import net.owen.bladebound.event.PlayerRespawnCopy;
 import net.owen.bladebound.item.ModItemGroups;
 import net.owen.bladebound.item.ModItems;
+import net.owen.bladebound.magic.ancient.BlackHoleWardenDropHandler;
 import net.owen.bladebound.network.ClientPackets;
 import net.owen.bladebound.network.Payloads;
 import net.owen.bladebound.network.ServerPackets;
@@ -54,6 +55,7 @@ public class Bladebound implements ModInitializer {
         AccessoryCompat.init();
         MurasamePoisonHandler.init();
         BladeboundEffects.init();
+        BlackHoleWardenDropHandler.init();
 
         Payloads.register();
         ClientPackets.register();
