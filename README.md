@@ -34,6 +34,8 @@ _Found inside the Wado Ichimonji Dojo_
 **_Soul Split Katana_** — <span style="color:#843fa1;">Legendary</span>  
 A legendary katana that deals **bonus damage that goes through armor** enemies.
 
+_Found in bastions and end city treasure chests_
+
 **_Excalibur_** — <span style="color:#843fa1;">Legendary</span>  
 A legendary holy sword that deals **bonus damage to undead** enemies.  
 
