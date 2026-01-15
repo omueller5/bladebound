@@ -252,26 +252,36 @@ public class FrierenTowerPiece extends StructurePiece {
     }
 
     private static BlockPos snapToGround(StructureWorldAccess world, BlockPos approx) {
-        BlockPos p = world.getTopPosition(
+        int x = approx.getX();
+        int z = approx.getZ();
+
+        // Get the heightmap position, then start from one block ABOVE it
+        // (prevents starting inside terrain and "falling into" caves).
+        BlockPos top = world.getTopPosition(
                 Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
-                new BlockPos(approx.getX(), 0, approx.getZ())
-        );
+                new BlockPos(x, 0, z)
+        ).up();
 
-        if (p.getY() < world.getBottomY() + 2) {
-            p = new BlockPos(p.getX(), world.getBottomY() + 2, p.getZ());
-        }
+        int minY = Math.max(world.getBottomY() + 2, top.getY() - 24); // only scan near the surface
+        BlockPos p = top;
 
-        while (p.getY() > world.getBottomY() + 2) {
+        // Walk DOWN a limited amount to land on the first "air above solid" spot.
+        while (p.getY() >= minY) {
             BlockState at = world.getBlockState(p);
             BlockState below = world.getBlockState(p.down());
 
             boolean atOk = at.isAir() || at.isReplaceable();
             boolean belowOk = below.isSolidBlock(world, p.down());
 
-            if (atOk && belowOk) return p;
+            if (atOk && belowOk) {
+                return p;
+            }
+
             p = p.down();
         }
 
-        return p;
+        // Fallback: just clamp to something sane near surface.
+        int fallbackY = Math.max(world.getBottomY() + 2, top.getY());
+        return new BlockPos(x, fallbackY, z);
     }
 }

@@ -6,6 +6,6 @@
     "minecraft:birch_forest"
   ],
   "step": "surface_structures",
-  "terrain_adaptation": "beard_thin",
+  "terrain_adaptation": "none",
   "spawn_overrides": {}
 }

@@ -255,26 +255,36 @@ public class ExcaliburChurchPiece extends StructurePiece {
     }
 
     private static BlockPos snapToGround(StructureWorldAccess world, BlockPos approx) {
-        BlockPos p = world.getTopPosition(
+        int x = approx.getX();
+        int z = approx.getZ();
+
+        // Start one block ABOVE the surface heightmap
+        BlockPos top = world.getTopPosition(
                 Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
-                new BlockPos(approx.getX(), 0, approx.getZ())
-        );
+                new BlockPos(x, 0, z)
+        ).up();
 
-        if (p.getY() < world.getBottomY() + 2) {
-            p = new BlockPos(p.getX(), world.getBottomY() + 2, p.getZ());
-        }
+        // Only allow a short downward scan near the surface
+        int minY = Math.max(world.getBottomY() + 2, top.getY() - 24);
+        BlockPos p = top;
 
-        while (p.getY() > world.getBottomY() + 2) {
+        while (p.getY() >= minY) {
             BlockState at = world.getBlockState(p);
             BlockState below = world.getBlockState(p.down());
 
             boolean atOk = at.isAir() || at.isReplaceable();
             boolean belowOk = below.isSolidBlock(world, p.down());
 
-            if (atOk && belowOk) return p;
+            if (atOk && belowOk) {
+                return p;
+            }
+
             p = p.down();
         }
 
-        return p;
+        // Fallback: clamp safely to surface instead of caves
+        return new BlockPos(x, top.getY(), z);
     }
+
+
 }
