@@ -16,10 +16,25 @@ Bladebound is a Fabric mod focused on **named legendary weapons**, **world-based
 A cursed blade from a dangerous lineage.  
 This sword **does not generate in the world** and must be crafted using a Nether-obtained cursed component.
 
+**_Zeintsu's Nichirin Sword_** — <span style="color:#3598db;">Rare</span>  
+A Nichirin blade honed through countless repetitions. **Allows the user to dash in a straight line at blinding speeds**.
+
+_Craftable using steel ingots and a diamond sword_
+
+**_Starks Axe_** — <span style="color:#3598db;">Rare</span>  
+A colossal axe wielded by warriors of immense strength. **Deals extra damage to bosses**.
+
+_Craftable using steel ingots and a diamond axe_
+
 **_Wado Ichimonji_** — <span style="color:#3598db;">Rare</span>  
 A disciplined blade that grows stronger through mastery and consistent use.  
 
 _Found inside the Wado Ichimonji Dojo_
+
+**_Soul Split Katana_** — <span style="color:#843fa1;">Legendary</span>  
+A legendary katana that deals **bonus damage that goes through armor** enemies.
+
+_Found in bastions and end city treasure chests_
 
 **_Excalibur_** — <span style="color:#843fa1;">Legendary</span>  
 A legendary holy sword that deals **bonus damage to undead** enemies.  
