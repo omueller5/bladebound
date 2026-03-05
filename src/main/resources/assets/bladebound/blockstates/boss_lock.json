@@ -1,0 +1,7 @@
+{
+  "multipart": [
+    {
+      "apply": { "model": "bladebound:block/boss_lock" }
+    }
+  ]
+}

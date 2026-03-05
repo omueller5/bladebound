@@ -4,6 +4,15 @@
   "item.bladebound.bladebound-codex": "Bladebound Codex",
   "block.bladebound.sword-in-stone": "Excalibur — Sword in the Stone",
 
+  "item.bladebound.boss_key": "Boss Key",
+
+  "block.bladebound.boss_lock": "Boss Lock",
+  "block.bladebound.dungeon_door": "Dungeon Door",
+  "block.bladebound.dungeon_bricks": "Dungeon Bricks",
+
+  "block.bladebound.frieren_boss_anchor": "Frieren Boss Anchor",
+  "block.bladebound.frieren_boss_anchor_builder": "Frieren Boss Anchor",
+
   "item.bladebound.murasame": "Murasame",
   "item.bladebound.excalibur": "Excalibur",
   "item.bladebound.wado-ichimonji": "Wado Ichimonji",
@@ -14,6 +23,8 @@
 
   "item.bladebound.frieren-staff": "Frieren's Staff",
   "item.bladebound.frieren-staff-creative": "Frieren's Staff (Creative)",
+  "item.bladebound.frieren_boss_spawn_egg": "Frieren Spawn Egg",
+  "entity.bladebound.frieren_boss": "Frieren",
 
   "item.bladebound.cursed-kitetsu-shard": "Cursed Kitetsu Shard",
   "item.bladebound.steel_ingot": "Steel Ingot",
@@ -43,6 +54,15 @@
   "item.bladebound.lightning_scroll": "Lightning Strike Spell Scroll",
   "item.bladebound.zoltraak_scroll": "Zoltraak Spell Scroll",
   "item.bladebound.perfect_heal_scroll": "Perfect Heal Spell Scroll",
+
+  "item.bladebound.archmage_hat": "Archmage Hat",
+
+  "item.bladebound.magic_upgrade_smithing_template": "Smithing Template",
+  "item.bladebound.magic_upgrade_smithing_template.title": "§7Magic Armor Upgrade§r",
+  "item.bladebound.magic_upgrade_smithing_template.applies_to": "§9Netherite Helmets§r",
+  "item.bladebound.magic_upgrade_smithing_template.ingredients": "§9Nether Star§r",
+  "item.bladebound.magic_upgrade_smithing_template.base_slot_description": "§9Place netherite helmet here§r",
+  "item.bladebound.magic_upgrade_smithing_template.additions_slot_description": "§9Add nether star§r",
 
   "key.bladebound.open_spells": "Open Spells",
   "category.bladebound": "Bladebound"

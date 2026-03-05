@@ -5,8 +5,13 @@ public interface ManaHolder {
     int bladebound$getMana();
     void bladebound$setMana(int mana);
 
+    // EFFECTIVE max mana (what the game/HUD should use)
     int bladebound$getMaxMana();
-    void bladebound$setMaxMana(int maxMana);
+
+    // BASE max mana (stored/synced/saved)
+    int bladebound$getBaseMaxMana();
+
+    void bladebound$setMaxMana(int baseMaxMana);
 
     // ----------------------------
     // Infinite mana toggle
@@ -19,9 +24,7 @@ public interface ManaHolder {
     // ----------------------------
     default boolean bladebound$tryConsumeMana(int cost) {
 
-        // ✅ infinite mana short-circuit
         if (bladebound$hasInfiniteMana()) {
-            // keep HUD full so it looks sane
             if (bladebound$getMana() < bladebound$getMaxMana()) {
                 bladebound$setMana(bladebound$getMaxMana());
             }

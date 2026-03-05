@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "bladebound:item/frieren_boss_anchor_builder"
+  }
+}

@@ -11,8 +11,38 @@ public final class BladeboundAccessoryInventory extends SimpleInventory {
         super(SIZE);
     }
 
-    // 1.21: we need the backing list for Inventories.writeNbt/readNbt
+    // --------------------------------------------------
+    // NBT access (unchanged)
+    // --------------------------------------------------
     public DefaultedList<ItemStack> bladebound$stacks() {
-        return this.heldStacks; // SimpleInventory keeps this list
+        return this.heldStacks;
+    }
+
+    // --------------------------------------------------
+    // FIX: ensure inventory changes sync correctly
+    // --------------------------------------------------
+
+    @Override
+    public void setStack(int slot, ItemStack stack) {
+        super.setStack(slot, stack);
+        this.markDirty(); // 🔧 REQUIRED
+    }
+
+    @Override
+    public ItemStack removeStack(int slot, int amount) {
+        ItemStack result = super.removeStack(slot, amount);
+        if (!result.isEmpty()) {
+            this.markDirty(); // 🔧 REQUIRED
+        }
+        return result;
+    }
+
+    @Override
+    public ItemStack removeStack(int slot) {
+        ItemStack result = super.removeStack(slot);
+        if (!result.isEmpty()) {
+            this.markDirty(); // 🔧 REQUIRED
+        }
+        return result;
     }
 }

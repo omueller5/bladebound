@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ASA",
+    "ADA",
+    "AAA"
+  ],
+  "key": {
+    "A": { "item": "minecraft:amethyst_shard" },
+    "S": { "item": "minecraft:nether_star" },
+    "D": { "item": "minecraft:diamond" }
+  },
+  "result": {
+    "id": "bladebound:magic_upgrade_smithing_template",
+    "count": 1
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smithing_transform",
+  "template": { "item": "bladebound:magic_upgrade_smithing_template" },
+  "base": { "item": "minecraft:netherite_helmet" },
+  "addition": { "item": "minecraft:nether_star" },
+  "result": {
+    "id": "bladebound:archmage_hat",
+    "count": 1
+  }
+}

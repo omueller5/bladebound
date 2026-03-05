@@ -1,4 +1,3 @@
-// FILE: src/main/java/net/owen/bladebound/combat/BlackFlash.java
 package net.owen.bladebound.combat;
 
 import net.minecraft.entity.Entity;
@@ -12,21 +11,127 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import org.joml.Vector3f;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.UUID;
+
 public final class BlackFlash {
     private BlackFlash() {}
 
-    // Canon rarity: 1 / 100000
-    public static int denominator = 100_000;
+    // =========================================================
+    // HOT WINDOW TUNING
+    // =========================================================
+    public static int denominator = 100;
+    public static int hotWindowTicks = 60;
+    public static double bonusPerStack = 0.49;
+    public static double maxChanceCap = 0.50;
+    public static boolean decayOnMiss = true;
+    private static final int CLEANUP_GRACE_TICKS = 20 * 30; // 30 seconds
 
     // Command tag used for 100% testing
     public static final String TEST_TAG = "bladebound_blackflash_test";
+
+    // =========================================================
+    // CHAIN / HOT WINDOW STATE
+    // =========================================================
+
+    private static final class State {
+        int streak;            // number of successful Black Flashes in current window
+        long windowEndsAt;     // server tick when hot window expires
+        long lastTouchedAt;    // for cleanup
+    }
+
+    private static final Map<UUID, State> STATES = new HashMap<>();
+
+    private static State state(UUID id) {
+        return STATES.computeIfAbsent(id, k -> new State());
+    }
+
+    private static void cleanupOccasionally(long nowTick) {
+        // Run cleanup every 64 ticks (cheap)
+        if ((nowTick & 0x3F) != 0) return;
+
+        Iterator<Map.Entry<UUID, State>> it = STATES.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<UUID, State> e = it.next();
+            State s = e.getValue();
+
+            if (nowTick > s.windowEndsAt + CLEANUP_GRACE_TICKS
+                    && nowTick > s.lastTouchedAt + CLEANUP_GRACE_TICKS) {
+                it.remove();
+            }
+        }
+    }
+
+    private static void normalizeWindow(State s, long nowTick) {
+        if (s.windowEndsAt > 0 && nowTick > s.windowEndsAt) {
+            s.streak = 0;
+            s.windowEndsAt = 0;
+        }
+        s.lastTouchedAt = nowTick;
+    }
+
+    private static double baseChance() {
+        if (denominator <= 1) return 1.0;
+        return 1.0 / (double) denominator;
+    }
+
+    private static double chanceWithStreak(State s) {
+        double chance = baseChance() + (s.streak * bonusPerStack);
+        if (chance > maxChanceCap) chance = maxChanceCap;
+        if (chance < 0.0) chance = 0.0;
+        return chance;
+    }
+
+    private static void onProc(State s, long nowTick) {
+        s.streak += 1;
+        s.windowEndsAt = nowTick + hotWindowTicks;
+        s.lastTouchedAt = nowTick;
+    }
+
+    private static void onMiss(State s, long nowTick) {
+        if (s.windowEndsAt > 0 && nowTick <= s.windowEndsAt) {
+            if (decayOnMiss) {
+                if (s.streak > 0) s.streak -= 1;
+                // Keep the window alive; you're still “hot” as long as you're fighting in time.
+            } else {
+                s.streak = 0;
+                s.windowEndsAt = 0;
+            }
+        } else {
+            s.streak = 0;
+            s.windowEndsAt = 0;
+        }
+        s.lastTouchedAt = nowTick;
+    }
+
+    // =========================================================
+    // PROC CHECK
+    // =========================================================
 
     public static boolean shouldProc(PlayerEntity attacker) {
         // 100% mode for testing
         if (attacker.getCommandTags().contains(TEST_TAG)) return true;
 
-        if (denominator <= 1) return true;
-        return attacker.getRandom().nextInt(denominator) == 0;
+        // Only roll + mutate hot-window state on server
+        if (!(attacker.getWorld() instanceof ServerWorld sw)) {
+            return false;
+        }
+
+        long nowTick = sw.getTime();
+        cleanupOccasionally(nowTick);
+
+        State s = state(attacker.getUuid());
+        normalizeWindow(s, nowTick);
+
+        double chance = chanceWithStreak(s);
+        boolean proc = attacker.getRandom().nextDouble() < chance;
+
+        if (proc) onProc(s, nowTick);
+        else onMiss(s, nowTick);
+
+        return proc;
     }
 
     /**

@@ -11,7 +11,6 @@ public record ManaSyncPayload(int mana, int maxMana) implements CustomPayload {
     public static final Id<ManaSyncPayload> ID =
             new Id<>(Identifier.of("bladebound", "mana_sync"));
 
-    // ✅ Uses Mojang's built-in integer codecs (no manual writeInt/readInt needed)
     public static final PacketCodec<RegistryByteBuf, ManaSyncPayload> CODEC =
             PacketCodec.tuple(
                     PacketCodecs.INTEGER, ManaSyncPayload::mana,

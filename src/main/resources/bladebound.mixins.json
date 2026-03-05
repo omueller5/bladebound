@@ -10,11 +10,13 @@
     "PlayerEntityManaMixin",
     "PlayerEntitySpellMixin",
     "PlayerEntityBarrierDamageMixin",
-    "PlayerDropAccessoryInventoryMixin",
+    "ServerPlayerEntityWorldChangeMixin",
     "EnderDragonAncientDropMixin",
     "PlayerDropAccessoriesMixin",
     "LivingEntityBlackFlashMixin",
-    "accessor.PersistentProjectileAsItemStackInvoker"
+    "accessor.PersistentProjectileAsItemStackInvoker",
+    "ServerPlayerEntityManaCopyMixin",
+    "ServerPlayerEntityAccessoryCopyMixin"
   ],
   "client": [
     "client.InventoryScreenMixin",

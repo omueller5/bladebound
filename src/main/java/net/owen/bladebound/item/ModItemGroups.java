@@ -24,6 +24,7 @@ public class ModItemGroups {
                         entries.add(ModItems.MURASAME_GAUNTLETS);
                         entries.add(ModItems.COOLDOWN_BRACELET);
                         entries.add(ModItems.FIXED_COOLDOWN_BRACELET);
+                        //entries.add(ModItems.BOSS_KEY);
 
                         // Swords
                         entries.add(ModItems.SANDAIKITETSU);
@@ -34,7 +35,7 @@ public class ModItemGroups {
                         entries.add(ModItems.MURASAME);
                         entries.add(ModItems.EXCALIBUR);
 
-                        // Staffs
+                        // Staves
                         entries.add(ModItems.FRIEREN_STAFF);
                         entries.add(ModItems.FRIEREN_STAFF_CREATIVE);
 
@@ -69,6 +70,17 @@ public class ModItemGroups {
 
                         // Blocks (add the *item* form)
                         entries.add(BladeboundBlocks.SWORD_IN_STONE_ITEM);
+                        entries.add(BladeboundBlocks.FRIEREN_BOSS_ANCHOR_BUILDER_ITEM);
+                        entries.add(BladeboundBlocks.BOSS_LOCK_ITEM);
+                        entries.add(BladeboundBlocks.DUNGEON_DOOR_ITEM);
+                        entries.add(BladeboundBlocks.DUNGEON_BRICKS_ITEM);
+
+                        // Spawn Eggs
+                        entries.add(ModSpawnEggs.FRIEREN_BOSS_SPAWN_EGG);
+
+                        // Armor
+                        entries.add(ModItems.ARCHMAGE_HAT);
+                        entries.add(ModItems.MAGIC_UPGRADE_SMITHING_TEMPLATE);
                     })
                     .build()
     );

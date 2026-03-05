@@ -9,6 +9,7 @@ import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import net.owen.bladebound.Bladebound;
 import net.owen.bladebound.entity.custom.BlackHoleEntity;
+import net.owen.bladebound.entity.custom.FrierenBossEntity;
 
 public final class ModEntities {
     private ModEntities() {}
@@ -30,6 +31,16 @@ public final class ModEntities {
                     .dimensions(EntityDimensions.fixed(0.1f, 0.1f))
                     .trackRangeBlocks(96)
                     .trackedUpdateRate(1)
+                    .build()
+    );
+
+    public static final EntityType<FrierenBossEntity> FRIEREN_BOSS = Registry.register(
+            Registries.ENTITY_TYPE,
+            Identifier.of(Bladebound.MOD_ID, "frieren_boss"),
+            EntityType.Builder.create(FrierenBossEntity::new, SpawnGroup.MONSTER)
+                    .dimensions(0.6f, 1.8f)
+                    .maxTrackingRange(64)
+                    .trackingTickInterval(3)
                     .build()
     );
 

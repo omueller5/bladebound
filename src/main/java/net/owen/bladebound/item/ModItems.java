@@ -7,6 +7,8 @@ import net.minecraft.component.type.FoodComponent;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.ArmorMaterials;
 import net.minecraft.item.Item;
 import net.minecraft.item.ToolMaterials;
 import net.minecraft.registry.Registries;
@@ -16,6 +18,10 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import net.owen.bladebound.Bladebound;
+import net.minecraft.item.SmithingTemplateItem;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import java.util.List;
 import net.owen.bladebound.item.custom.*;
 
 import java.util.List;
@@ -612,10 +618,47 @@ public class ModItems {
             new FixedCooldownBraceletItem(new Item.Settings().maxCount(1).rarity(Rarity.UNCOMMON))
     );
 
-    /**
-     * Called from Bladebound.onInitialize()
-     * Forces class loading so static registration runs.
-     */
+    // Boss Items
+    public static final Item BOSS_KEY = Registry.register(
+            Registries.ITEM,
+            Identifier.of("bladebound", "boss_key"),
+            new Item(new Item.Settings())
+    );
+
+    // Armor
+    public static final Item ARCHMAGE_HAT = Registry.register(
+            Registries.ITEM,
+            Identifier.of("bladebound", "archmage_hat"),
+            new net.owen.bladebound.item.custom.ArchmageHatItem(
+                    ArmorMaterials.NETHERITE,
+                    ArmorItem.Type.HELMET,
+                    new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
+            )
+    );
+
+    public static final Item MAGIC_UPGRADE_SMITHING_TEMPLATE = Registry.register(
+            Registries.ITEM,
+            Identifier.of("bladebound", "magic_upgrade_smithing_template"),
+            new SmithingTemplateItem(
+                    Text.translatable("item.bladebound.magic_upgrade_smithing_template.applies_to")
+                            .formatted(Formatting.GRAY),
+                    Text.translatable("item.bladebound.magic_upgrade_smithing_template.ingredients")
+                            .formatted(Formatting.GRAY),
+                    Text.translatable("item.bladebound.magic_upgrade_smithing_template.title")
+                            .formatted(Formatting.GRAY),
+                    Text.translatable("item.bladebound.magic_upgrade_smithing_template.base_slot_description")
+                            .formatted(Formatting.BLUE),
+                    Text.translatable("item.bladebound.magic_upgrade_smithing_template.additions_slot_description")
+                            .formatted(Formatting.BLUE),
+                    List.of(
+                            Identifier.of("minecraft", "item/empty_armor_slot_helmet")
+                    ),
+                    List.of(
+                            Identifier.of("minecraft", "item/empty_slot_ingot")
+                    )
+            )
+    );
+
     public static void register() {
         // no-op
     }

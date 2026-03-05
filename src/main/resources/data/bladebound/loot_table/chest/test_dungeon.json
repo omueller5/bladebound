@@ -1,0 +1,73 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "bladebound:mana_apple",
+          "functions": [
+            {
+              "function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1.0, "max": 4.0}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "bladebound:boss_key"
+        }
+      ],
+      "conditions": [
+        { "condition": "bladebound:boss_key_claim", "chunk_radius": 1, "y_radius": 64 }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "bladebound:zoltraak_scroll",
+          "functions": [
+            {
+              "function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1.0, "max": 3.0}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "bladebound:firebolt_scroll",
+          "functions": [
+            {
+              "function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 3.0, "max": 6.0}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "bladebound:stone_dart_scroll",
+          "functions": [
+            {
+              "function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 3.0, "max": 7.0}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
