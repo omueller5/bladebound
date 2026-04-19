@@ -25,10 +25,10 @@ public final class BladeboundItemRules {
      */
     public static void enforceAllowedEnchantments(ServerWorld world, ItemStack stack, ServerPlayerEntity player) {
         // Build allowed set from the registry (1.21 uses RegistryEntry)
-        var enchReg = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+        var enchReg = world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
 
-        RegistryEntry<?> unbreaking = enchReg.entryOf(Enchantments.UNBREAKING);
-        RegistryEntry<?> mending    = enchReg.entryOf(Enchantments.MENDING);
+        RegistryEntry<?> unbreaking = enchReg.getEntry(enchReg.getValueOrThrow(Enchantments.UNBREAKING));
+        RegistryEntry<?> mending    = enchReg.getEntry(enchReg.getValueOrThrow(Enchantments.MENDING));
 
         Set<RegistryEntry<?>> allowed = new HashSet<>();
         allowed.add((RegistryEntry<?>) unbreaking);

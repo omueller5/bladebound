@@ -1,5 +1,6 @@
 package net.owen.bladebound.mixin.client;
 
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
@@ -36,9 +37,10 @@ public abstract class InventoryScreenBladeboundSlotIconMixin extends HandledScre
 
             // Draw icon behind the slot so it's visible even when empty
             context.drawTexture(
+                    RenderPipelines.GUI_TEXTURED,
                     GAUNTLET_SLOT_ICON,
                     screenX, screenY,
-                    0, 0,
+                    0.0f, 0.0f,
                     16, 16,
                     16, 16
             );

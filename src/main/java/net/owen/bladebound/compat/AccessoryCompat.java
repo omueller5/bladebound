@@ -5,7 +5,8 @@ import net.fabricmc.loader.api.FabricLoader;
 public final class AccessoryCompat {
 
     public static final boolean HAS_TRINKETS =
-            FabricLoader.getInstance().isModLoaded("trinkets");
+            FabricLoader.getInstance().isModLoaded("trinkets")
+            || FabricLoader.getInstance().isModLoaded("trinkets_updated");
 
     private static AccessoryApi api;
 

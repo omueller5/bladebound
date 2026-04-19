@@ -12,6 +12,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.entity.projectile.TridentEntity;
 import net.minecraft.item.ItemStack;
@@ -20,6 +21,8 @@ import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
@@ -33,72 +36,43 @@ public class BlackHoleEntity extends Entity {
 
     private Vec3d center = Vec3d.ZERO;
 
-    // =========================================================
-    // 3-ZONE RADII (EDIT HERE)
-    // =========================================================
     private float coreRadius = 6.0f;
-    private float midRadius  = 10.0f;
+    private float midRadius = 10.0f;
     private float pullRadius = 14.0f;
 
-    // =========================================================
-    // DURATION (EDIT HERE)
-    // =========================================================
     private int durationTicks = 20 * 12;
 
-    // =========================================================
-    // DAMAGE (EDIT HERE)
-    // =========================================================
     private float coreDamagePerSecond = 80.0f;
-    private float midDamagePerSecond  = 10.0f;
+    private float midDamagePerSecond = 10.0f;
 
-    // Base inward pull (radial)
     private double pullStrength = 0.12;
 
-    // Spiral settings
     private double swirlStrength = 0.18;
     private boolean swirlClockwise = true;
 
-    // =========================================================
-    // EVENT HORIZON (EDIT HERE)
-    // =========================================================
     private boolean eventHorizonEnabled = true;
     private int eventHorizonDurationTicks = 25;
     private int slownessAmplifier = 3;
     private int weaknessAmplifier = 1;
 
-    // =========================================================
-    // SINGULARITY COLLAPSE (EDIT HERE)
-    // =========================================================
     private boolean collapseEnabled = true;
     private float collapseDamage = 10.0f;
     private float collapseRadius = 6.0f;
     private boolean collapseHitCaster = false;
     private boolean collapseDone = false;
 
-    // =========================================================
-    // FALLING-BLOCK RIP SETTINGS (EDIT HERE)
-    // =========================================================
     private boolean ripBlocksAsFalling = true;
     private int blocksPerRip = 5;
     private int ripIntervalTicks = 2;
     private int ripCooldown = 0;
     private double fallingBlockKick = 0.45;
 
-    // =========================================================
-    // PERFORMANCE BUDGETS (EDIT HERE)
-    // =========================================================
     private int maxTargetsPerTick = 90;
     private int maxFallingBlocksNearby = 140;
 
-    // IMPORTANT: core cleanup
     private boolean deleteDebrisInCore = true;
     private boolean deleteItemsInCore = true;
 
-    // =========================================================
-    // PROJECTILES (NEW)
-    // =========================================================
-    // Destroy most projectiles in the CORE.
-    // Tridents are NOT destroyed; they are dropped as an item with enchants intact.
     private boolean destroyProjectilesInCore = true;
 
     private UUID ownerUuid;
@@ -107,10 +81,9 @@ public class BlackHoleEntity extends Entity {
         super(type, world);
         this.noClip = true;
         this.setNoGravity(true);
-        this.ignoreCameraFrustum = true;
     }
 
-    public void setOwner(net.minecraft.entity.player.PlayerEntity owner) {
+    public void setOwner(PlayerEntity owner) {
         this.ownerUuid = owner == null ? null : owner.getUuid();
     }
 
@@ -118,51 +91,93 @@ public class BlackHoleEntity extends Entity {
         this.center = center;
     }
 
-    // --- setters you already use ---
-    public void setDurationTicks(int ticks) { this.durationTicks = ticks; }
-    public void setPullStrength(double pullStrength) { this.pullStrength = pullStrength; }
+    public void setDurationTicks(int ticks) {
+        this.durationTicks = ticks;
+    }
+
+    public void setPullStrength(double pullStrength) {
+        this.pullStrength = pullStrength;
+    }
 
     public void setCoreRadius(float r) {
         this.coreRadius = Math.max(0.5f, r);
         if (midRadius < coreRadius) midRadius = coreRadius;
         if (pullRadius < midRadius) pullRadius = midRadius;
     }
+
     public void setMidRadius(float r) {
         this.midRadius = Math.max(r, coreRadius);
         if (pullRadius < midRadius) pullRadius = midRadius;
     }
+
     public void setPullRadius(float r) {
         this.pullRadius = Math.max(r, midRadius);
     }
 
-    public void setCoreDamagePerSecond(float dps) { this.coreDamagePerSecond = Math.max(0.0f, dps); }
-    public void setMidDamagePerSecond(float dps) { this.midDamagePerSecond = Math.max(0.0f, dps); }
+    public void setCoreDamagePerSecond(float dps) {
+        this.coreDamagePerSecond = Math.max(0.0f, dps);
+    }
 
-    public void setSwirlStrength(double swirlStrength) { this.swirlStrength = MathHelper.clamp(swirlStrength, 0.0, 5.0); }
-    public void setSwirlClockwise(boolean clockwise) { this.swirlClockwise = clockwise; }
+    public void setMidDamagePerSecond(float dps) {
+        this.midDamagePerSecond = Math.max(0.0f, dps);
+    }
 
-    public void setRipBlocksAsFalling(boolean b) { this.ripBlocksAsFalling = b; }
-    public void setBlocksPerRip(int n) { this.blocksPerRip = MathHelper.clamp(n, 0, 64); }
-    public void setRipIntervalTicks(int ticks) { this.ripIntervalTicks = Math.max(1, ticks); }
-    public void setFallingBlockKick(double kick) { this.fallingBlockKick = MathHelper.clamp(kick, 0.0, 3.0); }
+    public void setSwirlStrength(double swirlStrength) {
+        this.swirlStrength = MathHelper.clamp(swirlStrength, 0.0, 5.0);
+    }
 
-    public void setMaxTargetsPerTick(int n) { this.maxTargetsPerTick = MathHelper.clamp(n, 10, 1000); }
-    public void setMaxFallingBlocksNearby(int n) { this.maxFallingBlocksNearby = MathHelper.clamp(n, 0, 5000); }
-    public void setDeleteDebrisInCore(boolean b) { this.deleteDebrisInCore = b; }
-    public void setDeleteItemsInCore(boolean b) { this.deleteItemsInCore = b; }
+    public void setSwirlClockwise(boolean clockwise) {
+        this.swirlClockwise = clockwise;
+    }
+
+    public void setRipBlocksAsFalling(boolean b) {
+        this.ripBlocksAsFalling = b;
+    }
+
+    public void setBlocksPerRip(int n) {
+        this.blocksPerRip = MathHelper.clamp(n, 0, 64);
+    }
+
+    public void setRipIntervalTicks(int ticks) {
+        this.ripIntervalTicks = Math.max(1, ticks);
+    }
+
+    public void setFallingBlockKick(double kick) {
+        this.fallingBlockKick = MathHelper.clamp(kick, 0.0, 3.0);
+    }
+
+    public void setMaxTargetsPerTick(int n) {
+        this.maxTargetsPerTick = MathHelper.clamp(n, 10, 1000);
+    }
+
+    public void setMaxFallingBlocksNearby(int n) {
+        this.maxFallingBlocksNearby = MathHelper.clamp(n, 0, 5000);
+    }
+
+    public void setDeleteDebrisInCore(boolean b) {
+        this.deleteDebrisInCore = b;
+    }
+
+    public void setDeleteItemsInCore(boolean b) {
+        this.deleteItemsInCore = b;
+    }
 
     @Override
     protected void initDataTracker(DataTracker.Builder builder) {
-        // no tracked data needed
+    }
+
+    @Override
+    public boolean damage(ServerWorld world, DamageSource source, float amount) {
+        return false;
     }
 
     @Override
     public void tick() {
         super.tick();
 
-        if (this.getWorld().isClient) return;
+        if (this.getEntityWorld().isClient()) return;
 
-        if (!(this.getWorld() instanceof ServerWorld sw)) {
+        if (!(this.getEntityWorld() instanceof ServerWorld sw)) {
             this.discard();
             return;
         }
@@ -203,10 +218,11 @@ public class BlackHoleEntity extends Entity {
             if (e instanceof LivingEntity living) {
                 if (!collapseHitCaster && ownerUuid != null && ownerUuid.equals(living.getUuid())) continue;
 
-                double dist = living.getPos().distanceTo(center);
+                Vec3d livingPos = new Vec3d(living.getX(), living.getY(), living.getZ());
+                double dist = livingPos.distanceTo(center);
                 if (dist > r) continue;
 
-                living.damage(sw.getDamageSources().magic(), collapseDamage);
+                living.damage(sw, sw.getDamageSources().magic(), collapseDamage);
             }
         }
 
@@ -235,21 +251,18 @@ public class BlackHoleEntity extends Entity {
         for (Entity e : targets) {
             if (processed >= maxTargetsPerTick) break;
 
-            Vec3d toCenter = center.subtract(e.getPos());
+            Vec3d entityPos = new Vec3d(e.getX(), e.getY(), e.getZ());
+            Vec3d toCenter = center.subtract(entityPos);
             double dist = toCenter.length();
             if (dist < 0.001) continue;
             if (dist > pullRadius) continue;
 
-            // =========================
-            // CORE CLEANUP (PERF)
-            // =========================
             if (dist <= coreRadius * 0.60) {
                 if (deleteDebrisInCore && e instanceof FallingBlockEntity) {
                     e.discard();
                     continue;
                 }
                 if (deleteItemsInCore && e instanceof ItemEntity item) {
-                    // DO NOT delete trident drops (keeps enchants/name fair)
                     if (!isProtectedCoreItem(item)) {
                         e.discard();
                         continue;
@@ -259,14 +272,12 @@ public class BlackHoleEntity extends Entity {
 
             Vec3d radialDir = toCenter.multiply(1.0 / dist);
 
-            // Pull factor based on outer radius
             double tPull = 1.0 - (dist / pullRadius);
             double radial = pullStrength * (0.35 + 1.65 * tPull);
 
             if (dist <= midRadius) radial *= 1.15;
             if (dist <= coreRadius) radial *= 1.35;
 
-            // Tangential orbit
             Vec3d tangent = axis.crossProduct(radialDir);
             if (tangent.lengthSquared() < 1.0e-6) {
                 tangent = new Vec3d(1, 0, 0).crossProduct(radialDir);
@@ -285,34 +296,21 @@ public class BlackHoleEntity extends Entity {
             dv = new Vec3d(dv.x, dv.y * 0.55, dv.z);
 
             e.addVelocity(dv.x, dv.y, dv.z);
-            e.velocityModified = true;
+            e.velocityDirty = true;
 
-            // =========================
-            // PROJECTILES: pull all
-            // destroy most in CORE
-            // but TRIDENTS drop as items
-            // =========================
             if (destroyProjectilesInCore && dist <= coreRadius && e instanceof ProjectileEntity proj) {
                 if (proj instanceof TridentEntity trident) {
-                    // Convert to a dropped stack (keeps name + enchants)
                     dropTridentStack(sw, trident);
-
-                    // Delete the trident projectile entity so it doesn't keep flying around
                     trident.discard();
-
                     processed++;
                     continue;
                 } else {
-                    // Arrows, potions, fireballs, etc: deleted in the core
                     proj.discard();
                     processed++;
                     continue;
                 }
             }
 
-            // =========================
-            // DAMAGE TIERS
-            // =========================
             if (e instanceof LivingEntity living) {
                 if (dist <= coreRadius) {
                     applyDamage(sw, living, dist, coreRadius, coreDamagePerSecond);
@@ -334,11 +332,7 @@ public class BlackHoleEntity extends Entity {
     }
 
     private void dropTridentStack(ServerWorld sw, TridentEntity trident) {
-        ItemStack stack;
-
-        // Yarn typically exposes this as public on TridentEntity (not via PersistentProjectileEntity),
-        // which avoids the "protected access" error.
-        stack = trident.getItemStack().copy();
+        ItemStack stack = trident.getItemStack().copy();
 
         if (stack.isEmpty()) {
             stack = new ItemStack(Items.TRIDENT);
@@ -359,7 +353,7 @@ public class BlackHoleEntity extends Entity {
         scaled = MathHelper.clamp(scaled, 0.05f, 200.0f);
 
         DamageSource src = sw.getDamageSources().magic();
-        living.damage(src, scaled);
+        living.damage(sw, src, scaled);
     }
 
     private void applyEventHorizon(LivingEntity living) {
@@ -369,7 +363,7 @@ public class BlackHoleEntity extends Entity {
                 slownessAmplifier,
                 true,
                 true
-        ));
+        ), this);
 
         living.addStatusEffect(new StatusEffectInstance(
                 StatusEffects.WEAKNESS,
@@ -377,12 +371,9 @@ public class BlackHoleEntity extends Entity {
                 weaknessAmplifier,
                 true,
                 true
-        ));
+        ), this);
     }
 
-    // =========================================================
-    // RIP SAFETY FILTERS
-    // =========================================================
     private boolean isRippableBlock(ServerWorld sw, BlockPos pos, BlockState state) {
         if (state.isAir()) return false;
         if (!state.getFluidState().isEmpty()) return false;
@@ -505,7 +496,7 @@ public class BlackHoleEntity extends Entity {
                 dir.y * fallingBlockKick * 0.35,
                 dir.z * fallingBlockKick
         );
-        fb.velocityModified = true;
+        fb.velocityDirty = true;
 
         return true;
     }
@@ -537,8 +528,10 @@ public class BlackHoleEntity extends Entity {
     }
 
     @Override
-    protected void readCustomDataFromNbt(net.minecraft.nbt.NbtCompound nbt) {}
+    protected void readCustomData(ReadView view) {
+    }
 
     @Override
-    protected void writeCustomDataToNbt(net.minecraft.nbt.NbtCompound nbt) {}
+    protected void writeCustomData(WriteView view) {
+    }
 }

@@ -66,13 +66,13 @@ public final class BarrierManager {
 
             if (ent == null || ent.isRemoved()) {
                 // NOTE: use your registered type's create path if you have it.
-                ent = new BarrierEntity(ModEntities.BARRIER, player.getWorld());
+                ent = new BarrierEntity(ModEntities.BARRIER, player.getEntityWorld());
                 ent.setOwnerUuid(player.getUuid());
 
                 Vec3d p = player.getEyePos();
                 ent.setPos(p.x, p.y, p.z);
 
-                player.getWorld().spawnEntity(ent);
+                player.getEntityWorld().spawnEntity(ent);
                 ACTIVE.put(id, ent);
             }
 

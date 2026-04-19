@@ -6,9 +6,9 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -17,11 +17,12 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.Map;
 import java.util.UUID;
 import java.util.WeakHashMap;
 
-public class SoulSplitKatanaItem extends SwordItem {
+public class SoulSplitKatanaItem extends Item {
 
     /* =========================================================
        SOUL SPLIT KATANA — Legendary Effect
@@ -40,32 +41,31 @@ public class SoulSplitKatanaItem extends SwordItem {
     private static final Map<UUID, Integer> lastProcTick = new WeakHashMap<>();
 
     public SoulSplitKatanaItem(ToolMaterial material, int attackDamage, float attackSpeed, Settings settings) {
-        super(material, settings.attributeModifiers(SwordItem.createAttributeModifiers(material, attackDamage, attackSpeed)));
+        super(settings);
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        boolean result = super.postHit(stack, target, attacker);
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        super.postHit(stack, target, attacker);
 
-        if (!(attacker instanceof PlayerEntity player)) return result;
-        if (player.getWorld().isClient) return result;
+        if (!(attacker instanceof PlayerEntity player)) return;
+        if (player.getEntityWorld().isClient()) return;
 
-        ServerWorld world = (ServerWorld) player.getWorld();
+        ServerWorld world = (ServerWorld) player.getEntityWorld();
 
         int now = player.age;
         Integer last = lastProcTick.get(player.getUuid());
-        if (last != null && (now - last) < SOUL_CUT_COOLDOWN_TICKS) return result;
+        if (last != null && (now - last) < SOUL_CUT_COOLDOWN_TICKS) return;
 
         float bonus = Math.min(BONUS_DAMAGE, BONUS_MAX);
 
         // Armor-bypassing "soul" damage vibe (magic damage)
         DamageSource soul = world.getDamageSources().magic();
-        target.damage(soul, bonus);
+        target.damage(world, soul, bonus);
 
         spawnSoulSplitEffects(world, target);
 
         lastProcTick.put(player.getUuid(), now);
-        return result;
     }
 
     /* =========================================================
@@ -132,9 +132,11 @@ public class SoulSplitKatanaItem extends SwordItem {
     public void appendTooltip(
             ItemStack stack,
             Item.TooltipContext context,
-            List<Text> tooltip,
+            TooltipDisplayComponent displayComponent,
+            Consumer<Text> textConsumer,
             TooltipType type
     ) {
+        List<Text> tooltip = new java.util.ArrayList<>();
         tooltip.add(Text.literal("LEGENDARY WEAPON")
                 .formatted(Formatting.GOLD, Formatting.BOLD));
 
@@ -151,5 +153,7 @@ public class SoulSplitKatanaItem extends SwordItem {
                 .formatted(Formatting.GOLD));
         tooltip.add(Text.literal("• A cold tear marks the wound")
                 .formatted(Formatting.GOLD));
+
+        tooltip.forEach(textConsumer);
     }
 }

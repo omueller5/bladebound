@@ -1,17 +1,19 @@
 package net.owen.bladebound.item.custom;
 
+import net.minecraft.component.type.TooltipDisplayComponent;
+import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
@@ -19,8 +21,9 @@ import net.minecraft.world.World;
 import net.owen.bladebound.fx.ZenitsuTrailTicker;
 
 import java.util.List;
+import java.util.function.Consumer;
 
-public class ZenitsuSwordItem extends SwordItem {
+public class ZenitsuSwordItem extends Item {
 
     private static final int TCF_COOLDOWN_TICKS = 20 * 6; // tune
 
@@ -39,25 +42,26 @@ public class ZenitsuSwordItem extends SwordItem {
     private static final int TRAIL_TICKS = 10; // ~0.5s (try 8–14)
 
     public ZenitsuSwordItem(ToolMaterial material, int attackDamage, float attackSpeed, Settings settings) {
-        super(material, settings.attributeModifiers(SwordItem.createAttributeModifiers(material, attackDamage, attackSpeed)));
+        super(settings);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
+        ItemCooldownManager cooldowns = user.getItemCooldownManager();
 
         // Only Shift + Right Click
         if (!user.isSneaking()) {
-            return TypedActionResult.pass(stack);
+            return ActionResult.PASS;
         }
 
-        if (user.getItemCooldownManager().isCoolingDown(this)) {
-            return TypedActionResult.fail(stack);
+        if (cooldowns.isCoolingDown(stack)) {
+            return ActionResult.FAIL;
         }
 
-        if (!world.isClient) {
+        if (!world.isClient()) {
             Vec3d look = user.getRotationVec(1.0f).normalize();
-            Vec3d start = user.getPos().add(0.0, 0.1, 0.0);
+            Vec3d start = new Vec3d(user.getX(), user.getY(), user.getZ()).add(0.0, 0.1, 0.0);
 
             Vec3d end = getDashEnd(world, user, start, look, DASH_RANGE);
             Vec3d delta = end.subtract(start);
@@ -78,7 +82,7 @@ public class ZenitsuSwordItem extends SwordItem {
 
                 // Add some momentum
                 user.addVelocity(dir.x * DASH_IMPULSE, 0.02, dir.z * DASH_IMPULSE);
-                user.velocityModified = true;
+                user.velocityDirty = true;
 
                 user.fallDistance = 0.0f;
 
@@ -89,10 +93,10 @@ public class ZenitsuSwordItem extends SwordItem {
             }
 
             // Cooldown
-            user.getItemCooldownManager().set(this, TCF_COOLDOWN_TICKS);
+            cooldowns.set(cooldowns.getGroup(stack), TCF_COOLDOWN_TICKS);
         }
 
-        return TypedActionResult.success(stack, world.isClient);
+        return ActionResult.SUCCESS;
     }
 
     private static Vec3d getDashEnd(World world, PlayerEntity user, Vec3d start, Vec3d look, double range) {
@@ -121,7 +125,8 @@ public class ZenitsuSwordItem extends SwordItem {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack stack, Item.TooltipContext context, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
+        List<Text> tooltip = new java.util.ArrayList<>();
         tooltip.add(Text.literal("RARE WEAPON").formatted(Formatting.BLUE, Formatting.BOLD));
         tooltip.add(Text.literal("A Nichirin blade honed through countless repetitions.")
                 .formatted(Formatting.AQUA, Formatting.ITALIC));
@@ -134,5 +139,7 @@ public class ZenitsuSwordItem extends SwordItem {
                 .formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
         tooltip.add(Text.literal("thunder echoes where the blade once was.")
                 .formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
+
+        tooltip.forEach(textConsumer);
     }
 }

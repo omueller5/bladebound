@@ -1,23 +1,25 @@
 package net.owen.bladebound.item.custom;
 
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ArmorMaterial;
+import net.minecraft.component.type.TooltipDisplayComponent;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
-public class ArchmageHatItem extends ArmorItem {
+public class ArchmageHatItem extends Item {
 
-    public ArchmageHatItem(RegistryEntry<ArmorMaterial> material, Type type, Settings settings) {
-        super(material, type, settings);
+    public ArchmageHatItem(Settings settings) {
+        super(settings);
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack stack, Item.TooltipContext context, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
+        List<Text> tooltip = new ArrayList<>();
         tooltip.add(Text.literal("LEGENDARY").formatted(Formatting.GOLD, Formatting.BOLD));
 
         tooltip.add(Text.literal(" "));
@@ -27,5 +29,7 @@ public class ArchmageHatItem extends ArmorItem {
         tooltip.add(Text.literal(" "));
         tooltip.add(Text.literal("+10% Maximum Mana").formatted(Formatting.AQUA));
         tooltip.add(Text.literal("Regenerate 2 Mana per Second").formatted(Formatting.AQUA));
+
+        tooltip.forEach(textConsumer);
     }
 }

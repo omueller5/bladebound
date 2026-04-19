@@ -13,7 +13,7 @@ public abstract class PlayerEntityCooldownTickMixin {
     @Inject(method = "tick", at = @At("HEAD"))
     private void bladebound$tickSpellCooldowns(CallbackInfo ci) {
         PlayerEntity self = (PlayerEntity)(Object)this;
-        if (self.getWorld().isClient) return;
+        if (self.getEntityWorld().isClient()) return;
 
         if ((Object) self instanceof SpellHolder sh) {
             sh.bladebound$tickSpellCooldowns();

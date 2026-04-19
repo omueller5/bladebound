@@ -1,7 +1,6 @@
 package net.owen.bladebound.entity.ai;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.projectile.ProjectileUtil;
@@ -52,7 +51,7 @@ public class FrierenSpellcastingGoal extends Goal {
 
     @Override
     public void tick() {
-        if (!(mob.getWorld() instanceof ServerWorld sw)) return;
+        if (!(mob.getEntityWorld() instanceof ServerWorld sw)) return;
 
         LivingEntity target = mob.getTarget();
         if (target == null || !target.isAlive()) return;
@@ -115,7 +114,7 @@ public class FrierenSpellcastingGoal extends Goal {
 
         Vec3d end = start.add(look.multiply(range));
 
-        HitResult blockHit = caster.getWorld().raycast(new RaycastContext(
+        HitResult blockHit = caster.getEntityWorld().raycast(new RaycastContext(
                 start, end,
                 RaycastContext.ShapeType.OUTLINE,
                 RaycastContext.FluidHandling.NONE,
@@ -136,7 +135,7 @@ public class FrierenSpellcastingGoal extends Goal {
             Entity hit = entityHit.getEntity();
             finalEnd = entityHit.getPos();
 
-            hit.damage(caster.getWorld().getDamageSources().magic(), damage);
+            hit.damage(sw, caster.getEntityWorld().getDamageSources().magic(), damage);
 
             double shockRadius = 2.6;
             float knockbackStrength = 0.85f;
@@ -167,13 +166,13 @@ public class FrierenSpellcastingGoal extends Goal {
                     ),
                     e -> e.isAlive() && e != caster
             )) {
-                Vec3d dir = e.getPos().subtract(finalEnd).normalize();
+                Vec3d dir = new Vec3d(e.getX(), e.getY(), e.getZ()).subtract(finalEnd).normalize();
                 e.addVelocity(
                         dir.x * knockbackStrength,
                         0.25,
                         dir.z * knockbackStrength
                 );
-                e.velocityModified = true;
+                e.velocityDirty = true;
             }
         }
 
@@ -225,11 +224,11 @@ public class FrierenSpellcastingGoal extends Goal {
                 32, 0.22, 0.22, 0.22, 0.14
         );
 
-        caster.getWorld().playSound(null, caster.getBlockPos(),
+        caster.getEntityWorld().playSound(null, caster.getBlockPos(),
                 SoundEvents.ENTITY_GUARDIAN_ATTACK, SoundCategory.HOSTILE,
                 0.9f, 1.6f);
 
-        caster.getWorld().playSound(null, BlockPos.ofFloored(finalEnd),
+        caster.getEntityWorld().playSound(null, BlockPos.ofFloored(finalEnd),
                 SoundEvents.BLOCK_AMETHYST_BLOCK_RESONATE, SoundCategory.HOSTILE,
                 0.8f, 1.2f);
     }
@@ -240,17 +239,13 @@ public class FrierenSpellcastingGoal extends Goal {
     private static void castFirebolt(ServerWorld sw, LivingEntity caster, double speed) {
         Vec3d look = caster.getRotationVec(1.0F).normalize().multiply(speed);
 
-        SmallFireballEntity fireball = EntityType.SMALL_FIREBALL.create(sw);
-        if (fireball == null) return;
-
+        SmallFireballEntity fireball = new SmallFireballEntity(sw, caster, look);
         fireball.setOwner(caster);
         fireball.setPosition(
                 caster.getX(),
                 caster.getEyeY() - 0.1,
                 caster.getZ()
         );
-
-        fireball.setVelocity(look.x, look.y, look.z, (float) speed, 0.0f);
 
         sw.spawnEntity(fireball);
 

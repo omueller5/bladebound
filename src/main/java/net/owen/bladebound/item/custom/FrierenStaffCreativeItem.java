@@ -4,18 +4,20 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.ActionResult;
 import net.minecraft.world.World;
 import net.owen.bladebound.magic.SpellHolder;
 import net.owen.bladebound.magic.StaffSpell;
 import net.owen.bladebound.network.ModPackets;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class FrierenStaffCreativeItem extends FrierenStaffItem {
 
@@ -33,10 +35,10 @@ public class FrierenStaffCreativeItem extends FrierenStaffItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        super.inventoryTick(stack, world, entity, slot, selected);
+    public void inventoryTick(ItemStack stack, net.minecraft.server.world.ServerWorld world, Entity entity, net.minecraft.entity.EquipmentSlot slot) {
+        super.inventoryTick(stack, world, entity, slot);
 
-        if (world.isClient) return;
+        if (world.isClient()) return;
         if (!(entity instanceof ServerPlayerEntity sp)) return;
 
         SpellHolder spells = (SpellHolder) sp;
@@ -77,21 +79,26 @@ public class FrierenStaffCreativeItem extends FrierenStaffItem {
 
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, net.minecraft.entity.player.PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, net.minecraft.entity.player.PlayerEntity user, Hand hand) {
         // Cast exactly like survival staff
-        TypedActionResult<ItemStack> result = super.use(world, user, hand);
+        ActionResult result = super.use(world, user, hand);
 
         // No cooldown
-        if (!world.isClient) {
-            user.getItemCooldownManager().remove(this);
+        if (!world.isClient()) {
+            user.getItemCooldownManager().remove(
+                    user.getItemCooldownManager().getGroup(user.getStackInHand(hand))
+            );
         }
 
         return result;
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack stack, Item.TooltipContext context, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
+        List<Text> tooltip = new java.util.ArrayList<>();
         tooltip.add(Text.literal("Creative version of Frieren's Staff").formatted(Formatting.DARK_AQUA, Formatting.ITALIC));
         tooltip.add(Text.literal("Grants infinite mana when held and has no cooldown cost").formatted(Formatting.DARK_AQUA, Formatting.ITALIC));
+
+        tooltip.forEach(textConsumer);
     }
 }

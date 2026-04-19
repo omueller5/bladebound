@@ -30,7 +30,7 @@ public class MurasameShrineStructure extends Structure {
         );
 
         int bottom = context.world().getBottomY();
-        int top = context.world().getTopY();
+        int top = context.world().getTopYInclusive();
         y = Math.max(bottom, Math.min(y, top - 1));
 
         BlockPos origin = new BlockPos(x, y, z);

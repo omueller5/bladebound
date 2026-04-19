@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    { "item": "bladebound:heal_spell" }
+    "bladebound:heal_spell"
   ],
   "result": { "id": "bladebound:heal_scroll", "count": 1 }
 }

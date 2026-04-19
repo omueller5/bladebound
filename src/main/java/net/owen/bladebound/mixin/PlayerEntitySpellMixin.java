@@ -4,8 +4,9 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import net.owen.bladebound.magic.SpellHolder;
@@ -137,35 +138,33 @@ public abstract class PlayerEntitySpellMixin implements SpellHolder {
     @Unique private String bladebound$lastSentSelected = null;
 
     // =========================================================
-    // Saving/loading cooldowns only (NBT)
+    // Saving/loading cooldowns only
     // =========================================================
 
-    @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
-    private void bladebound$writeCooldowns(NbtCompound nbt, CallbackInfo ci) {
+    @Inject(method = "writeCustomData", at = @At("TAIL"))
+    private void bladebound$writeCooldowns(WriteView view, CallbackInfo ci) {
         NbtCompound cds = new NbtCompound();
         for (var e : bladebound$spellCooldowns.object2IntEntrySet()) {
             Identifier id = e.getKey();
             int ticks = e.getIntValue();
             if (ticks > 0 && id != null) cds.putInt(id.toString(), ticks);
         }
-        nbt.put("bladebound_spell_cooldowns", cds);
+        view.put("bladebound_spell_cooldowns", NbtCompound.CODEC, cds);
     }
 
-    @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
-    private void bladebound$readCooldownsAndMigrate(NbtCompound nbt, CallbackInfo ci) {
+    @Inject(method = "readCustomData", at = @At("TAIL"))
+    private void bladebound$readCooldownsAndMigrate(ReadView view, CallbackInfo ci) {
         PlayerEntity self = (PlayerEntity) (Object) this;
 
         // Load cooldowns
         bladebound$spellCooldowns.clear();
-        if (nbt.contains("bladebound_spell_cooldowns", NbtElement.COMPOUND_TYPE)) {
-            NbtCompound cds = nbt.getCompound("bladebound_spell_cooldowns");
-            for (String key : cds.getKeys()) {
-                try {
-                    Identifier id = Identifier.of(key);
-                    int ticks = cds.getInt(key);
-                    if (ticks > 0) bladebound$spellCooldowns.put(id, ticks);
-                } catch (Exception ignored) {}
-            }
+        NbtCompound cds = view.read("bladebound_spell_cooldowns", NbtCompound.CODEC).orElse(new NbtCompound());
+        for (String key : cds.getKeys()) {
+            try {
+                Identifier id = Identifier.of(key);
+                int ticks = cds.getInt(key, 0);
+                if (ticks > 0) bladebound$spellCooldowns.put(id, ticks);
+            } catch (Exception ignored) {}
         }
         bladebound$cooldownSyncPending = true;
 
@@ -175,7 +174,12 @@ public abstract class PlayerEntitySpellMixin implements SpellHolder {
 
             // 2) One-time migrate old index/mask NBT -> safe tags (only if present)
             if (!bladebound$hasCommandTag(sp, MIGRATED_SAFE_TAG)) {
-                bladebound$migrateOldIndexDataIfPresent(sp, nbt);
+                NbtCompound oldNbt = new NbtCompound();
+                view.read(OLD_MASK_KEY, com.mojang.serialization.Codec.INT)
+                        .ifPresent(v -> oldNbt.putInt(OLD_MASK_KEY, v));
+                view.read(OLD_SEL_KEY, com.mojang.serialization.Codec.INT)
+                        .ifPresent(v -> oldNbt.putInt(OLD_SEL_KEY, v));
+                bladebound$migrateOldIndexDataIfPresent(sp, oldNbt);
                 sp.addCommandTag(MIGRATED_SAFE_TAG);
             }
 
@@ -200,8 +204,8 @@ public abstract class PlayerEntitySpellMixin implements SpellHolder {
     @Inject(method = "tick", at = @At("TAIL"))
     private void bladebound$tickSync(CallbackInfo ci) {
         PlayerEntity self = (PlayerEntity) (Object) this;
-        World world = self.getWorld();
-        if (world.isClient) return;
+        World world = self.getEntityWorld();
+        if (world.isClient()) return;
 
         this.bladebound$tickSpellCooldowns();
 
@@ -229,7 +233,7 @@ public abstract class PlayerEntitySpellMixin implements SpellHolder {
             String selStr = (sel == null) ? null : sel.toString();
 
             if (learnHash != bladebound$lastSentLearnHash
-                    || (selStr == null ? bladebound$lastSentSelected != null : !selStr.equals(bladebound$lastSentSelected))) {
+                    || !java.util.Objects.equals(selStr, bladebound$lastSentSelected)) {
 
                 bladebound$lastSentLearnHash = learnHash;
                 bladebound$lastSentSelected = selStr;
@@ -375,10 +379,10 @@ public abstract class PlayerEntitySpellMixin implements SpellHolder {
 
     @Unique
     private static void bladebound$migrateOldIndexDataIfPresent(ServerPlayerEntity sp, NbtCompound nbt) {
-        if (!nbt.contains(OLD_MASK_KEY, NbtElement.INT_TYPE)) return;
+        if (!nbt.contains(OLD_MASK_KEY)) return;
 
-        int mask = nbt.getInt(OLD_MASK_KEY);
-        int selIndex = nbt.contains(OLD_SEL_KEY, NbtElement.INT_TYPE) ? nbt.getInt(OLD_SEL_KEY) : 0;
+        int mask = nbt.getInt(OLD_MASK_KEY, 0);
+        int selIndex = nbt.contains(OLD_SEL_KEY) ? nbt.getInt(OLD_SEL_KEY, 0) : 0;
 
         int count = StaffSpell.values().length;
         for (int i = 0; i < count; i++) {

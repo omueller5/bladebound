@@ -4,6 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.util.Identifier;
@@ -40,6 +41,6 @@ public final class BarrierVisualHud {
         int y = (h / 2) - (ICON_SIZE / 2) + 18;
 
         // Draw 128x128 texture scaled to ICON_SIZE
-        ctx.drawTexture(TEX, x, y, 0, 0, ICON_SIZE, ICON_SIZE, 128, 128);
+        ctx.drawTexture(RenderPipelines.GUI_TEXTURED, TEX, x, y, 0.0f, 0.0f, ICON_SIZE, ICON_SIZE, 128, 128);
     }
 }

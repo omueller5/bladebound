@@ -23,7 +23,7 @@ public class ManaAppleItem extends Item {
 
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-        if (!world.isClient && user instanceof PlayerEntity player) {
+        if (!world.isClient() && user instanceof PlayerEntity player) {
             if (player instanceof ManaHolder mana) {
 
                 int newMax = mana.bladebound$getMaxMana() + manaIncrease;

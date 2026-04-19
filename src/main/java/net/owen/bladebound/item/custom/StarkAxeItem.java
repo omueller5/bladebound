@@ -5,9 +5,11 @@ import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -20,6 +22,7 @@ import net.minecraft.world.World;
 import net.owen.bladebound.BladeboundBind;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class StarkAxeItem extends AxeItem {
 
@@ -31,21 +34,21 @@ public class StarkAxeItem extends AxeItem {
     private static final float  SWEEP_KNOCKBACK = 0.30f;   // small shove
 
     public StarkAxeItem(ToolMaterial material, float attackDamage, float attackSpeed, Settings settings) {
-        super(material, settings.attributeModifiers(AxeItem.createAttributeModifiers(material, attackDamage, attackSpeed)));
+        super(material, attackDamage, attackSpeed, settings);
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        boolean ok = super.postHit(stack, target, attacker);
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        super.postHit(stack, target, attacker);
 
-        World world = target.getWorld();
-        if (world.isClient) return ok;
-        if (!(world instanceof ServerWorld sw)) return ok;
-        if (!(attacker instanceof PlayerEntity player)) return ok;
-        if (!target.isAlive()) return ok;
+        World world = target.getEntityWorld();
+        if (world.isClient()) return;
+        if (!(world instanceof ServerWorld sw)) return;
+        if (!(attacker instanceof PlayerEntity player)) return;
+        if (!target.isAlive()) return;
 
         // Base attack damage (good enough for consistent tuning)
-        float base = (float) player.getAttributeValue(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        float base = (float) player.getAttributeValue(net.minecraft.entity.attribute.EntityAttributes.ATTACK_DAMAGE);
         float sweepDamage = Math.max(0.0f, base * SWEEP_DAMAGE_MULT);
 
         // Nearby entities around the primary target
@@ -59,7 +62,7 @@ public class StarkAxeItem extends AxeItem {
                         && !e.isTeammate(player)
         );
 
-        if (near.isEmpty() || sweepDamage <= 0.0f) return ok;
+        if (near.isEmpty() || sweepDamage <= 0.0f) return;
 
         DamageSource src = world.getDamageSources().playerAttack(player);
 
@@ -74,7 +77,7 @@ public class StarkAxeItem extends AxeItem {
             // Don't sweep through walls
             if (!player.canSee(e)) continue;
 
-            e.damage(src, sweepDamage);
+            e.damage(sw, src, sweepDamage);
 
             if (SWEEP_KNOCKBACK > 0.0f) {
                 e.takeKnockback(SWEEP_KNOCKBACK, -look.x, -look.z);
@@ -105,11 +108,12 @@ public class StarkAxeItem extends AxeItem {
             );
         }
 
-        return ok;
+        return;
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack stack, Item.TooltipContext context, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
+        List<Text> tooltip = new java.util.ArrayList<>();
         tooltip.add(Text.literal("RARE WEAPON").formatted(Formatting.BLUE, Formatting.BOLD));
         tooltip.add(Text.literal("A colossal axe wielded by warriors of immense strength.")
                 .formatted(Formatting.AQUA, Formatting.ITALIC));
@@ -120,5 +124,7 @@ public class StarkAxeItem extends AxeItem {
                 .formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
         tooltip.add(Text.literal("Overwhelming force decides the outcome.")
                 .formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
+
+        tooltip.forEach(textConsumer);
     }
 }

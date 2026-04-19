@@ -43,11 +43,11 @@ public final class BladeboundBind {
 
     private static NbtCompound getOrCreateRoot(ItemStack stack) {
         NbtCompound data = getCustomData(stack);
-        if (!data.contains(ROOT, NbtElement.COMPOUND_TYPE)) {
+        if (!data.contains(ROOT)) {
             data.put(ROOT, new NbtCompound());
             setCustomData(stack, data);
         }
-        return data.getCompound(ROOT);
+        return data.getCompoundOrEmpty(ROOT);
     }
 
     private static void saveRoot(ItemStack stack, NbtCompound root) {
@@ -83,7 +83,7 @@ public final class BladeboundBind {
 
         // Advancement trigger (once per stack)
         NbtCompound root = getOrCreateRoot(stack);
-        if (root.getBoolean(KEY_ADV_GRANTED)) return;
+        if (root.getBoolean(KEY_ADV_GRANTED, false)) return;
 
         // Grant "first_binding" ONLY if they have already collected a blade
         if (BladeboundAdvancements.has(player, "bladebound/collect_first_blade")) {
@@ -121,17 +121,17 @@ public final class BladeboundBind {
 
     private static void stripLegacyOwnerData(ItemStack stack) {
         NbtCompound data = getCustomData(stack);
-        if (!data.contains(ROOT, NbtElement.COMPOUND_TYPE)) return;
+        if (!data.contains(ROOT)) return;
 
-        NbtCompound root = data.getCompound(ROOT);
+        NbtCompound root = data.getCompoundOrEmpty(ROOT);
 
         boolean changed = false;
 
-        if (root.containsUuid(KEY_OWNER)) {
+        if (root.contains(KEY_OWNER)) {
             root.remove(KEY_OWNER);
             changed = true;
         }
-        if (root.contains(KEY_OWNER_NAME, NbtElement.STRING_TYPE)) {
+        if (root.contains(KEY_OWNER_NAME)) {
             root.remove(KEY_OWNER_NAME);
             changed = true;
         }

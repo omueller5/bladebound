@@ -56,7 +56,7 @@ public final class FrierenBossAnchorHandler {
                             ).isEmpty();
 
                             if (!already) {
-                                FrierenBossEntity boss = ModEntities.FRIEREN_BOSS.create(world);
+                                FrierenBossEntity boss = new FrierenBossEntity(ModEntities.FRIEREN_BOSS, world);
                                 if (boss != null) {
                                     boss.refreshPositionAndAngles(m.getX() + 0.5, m.getY(), m.getZ() + 0.5, 0.0F, 0.0F);
                                     boss.initialize(world, world.getLocalDifficulty(m), SpawnReason.STRUCTURE, null);

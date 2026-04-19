@@ -137,7 +137,7 @@ public final class BarrierEntityUtil {
     private static void ensureBarrierExists(ServerWorld world, PlayerEntity player) {
         if (findExistingBarrier(world, player) != null) return;
 
-        Entity barrier = ModEntities.BARRIER.create(world);
+        Entity barrier = new net.owen.bladebound.entity.BarrierEntity(ModEntities.BARRIER, world);
         if (barrier == null) return;
 
         Vec3d eye = player.getEyePos();

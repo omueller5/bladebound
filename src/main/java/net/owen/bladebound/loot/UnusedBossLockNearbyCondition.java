@@ -12,7 +12,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.Set;
 
 import net.owen.bladebound.BladeboundBlocks;
 import net.owen.bladebound.block.custom.BossLockBlock;
@@ -29,12 +28,6 @@ public record UnusedBossLockNearbyCondition(int radius) implements LootCondition
     public LootConditionType getType() {
         return ModLootConditions.UNUSED_BOSS_LOCK_NEARBY;
     }
-
-    @Override
-    public Set<net.minecraft.loot.context.LootContextParameter<?>> getRequiredParameters() {
-        return Set.of();
-    }
-
     @Override
     public boolean test(LootContext ctx) {
         if (!(ctx.getWorld() instanceof ServerWorld world)) return false;

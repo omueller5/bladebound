@@ -66,7 +66,8 @@ public final class BossRoomSpawner {
                         ).isEmpty();
 
                         if (!bossExists) {
-                            FrierenBossEntity boss = ModEntities.FRIEREN_BOSS.create(world);
+                            FrierenBossEntity boss;
+                            boss = new net.owen.bladebound.entity.custom.FrierenBossEntity(ModEntities.FRIEREN_BOSS, world);
                             if (boss != null) {
                                 boss.refreshPositionAndAngles(
                                         p.getX() + 0.5, p.getY(), p.getZ() + 0.5,

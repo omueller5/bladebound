@@ -14,7 +14,6 @@ import net.minecraft.util.math.Vec3d;
 import net.owen.bladebound.BladeboundBlocks;
 import net.owen.bladebound.block.custom.BossLockBlock;
 
-import java.util.Set;
 
 public record BossKeyClaimCondition(int chunkRadius, int yRadius) implements LootCondition {
 
@@ -32,12 +31,6 @@ public record BossKeyClaimCondition(int chunkRadius, int yRadius) implements Loo
     public LootConditionType getType() {
         return ModLootConditions.BOSS_KEY_CLAIM;
     }
-
-    @Override
-    public Set<net.minecraft.loot.context.LootContextParameter<?>> getRequiredParameters() {
-        return Set.of(); // don't hard-require params
-    }
-
     @Override
     public boolean test(LootContext ctx) {
         if (!(ctx.getWorld() instanceof ServerWorld world)) return false;
@@ -68,7 +61,7 @@ public record BossKeyClaimCondition(int chunkRadius, int yRadius) implements Loo
 
     private static BlockPos findBossLockInNearbyChunks(ServerWorld world, ChunkPos base, int originY, int chunkR, int yR) {
         int minY = Math.max(world.getBottomY(), originY - yR);
-        int maxY = Math.min(world.getTopY() - 1, originY + yR);
+        int maxY = Math.min(world.getTopYInclusive(), originY + yR);
 
         for (int cx = -chunkR; cx <= chunkR; cx++) {
             for (int cz = -chunkR; cz <= chunkR; cz++) {

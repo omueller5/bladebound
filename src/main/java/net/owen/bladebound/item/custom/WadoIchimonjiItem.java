@@ -4,7 +4,9 @@ import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.block.BlockState;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -13,7 +15,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -26,6 +27,7 @@ import net.owen.bladebound.BladeboundConfig;
 import net.owen.bladebound.item.BladeboundItemRules;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Wado Ichimonji — per-sword progression stored directly on the ItemStack.
@@ -126,11 +128,12 @@ public class WadoIchimonjiItem extends Item {
     // Advancement helper (embedded — no extra classes needed)
     // =========================================================
     private static void grantAdvancement(ServerPlayerEntity player, String path) {
-        if (player == null || player.getServer() == null) return;
+        if (player == null) return;
 
-        AdvancementEntry adv = player.getServer()
-                .getAdvancementLoader()
-                .get(Identifier.of("bladebound", path)); // must match your mod id
+        var server = player.getEntityWorld().getServer();
+        if (server == null) return;
+
+        AdvancementEntry adv = server.getAdvancementLoader().get(Identifier.of("bladebound", path));
 
         if (adv == null) return;
 
@@ -167,7 +170,7 @@ public class WadoIchimonjiItem extends Item {
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, 60, 0, true, false));
             attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 60, 0, true, false));
 
-            attacker.getWorld().playSound(
+            attacker.getEntityWorld().playSound(
                     null,
                     attacker.getBlockPos(),
                     net.minecraft.sound.SoundEvents.BLOCK_AMETHYST_BLOCK_CHIME,
@@ -176,7 +179,7 @@ public class WadoIchimonjiItem extends Item {
                     1.2f
             );
 
-            if (attacker.getWorld() instanceof ServerWorld sw) {
+            if (attacker.getEntityWorld() instanceof ServerWorld sw) {
                 sw.spawnParticles(
                         net.minecraft.particle.ParticleTypes.END_ROD,
                         attacker.getX(), attacker.getBodyY(0.7), attacker.getZ(),
@@ -206,12 +209,12 @@ public class WadoIchimonjiItem extends Item {
     private static NbtCompound getRoot(ItemStack stack) {
         NbtCompound data = getCustomData(stack);
 
-        if (!data.contains(NBT_ROOT, NbtElement.COMPOUND_TYPE)) {
+        if (!data.contains(NBT_ROOT)) {
             data.put(NBT_ROOT, new NbtCompound());
             setCustomData(stack, data);
         }
 
-        return data.getCompound(NBT_ROOT);
+        return data.getCompoundOrEmpty(NBT_ROOT);
     }
 
     private static void saveRoot(ItemStack stack, NbtCompound root) {
@@ -221,11 +224,11 @@ public class WadoIchimonjiItem extends Item {
     }
 
     private static int getInt(ItemStack stack, String key) {
-        return getRoot(stack).getInt(key);
+        return getRoot(stack).getInt(key, 0);
     }
 
     private static long getLong(ItemStack stack, String key) {
-        return getRoot(stack).getLong(key);
+        return getRoot(stack).getLong(key).orElse(0L);
     }
 
     private static void putInt(ItemStack stack, String key, int val) {
@@ -302,7 +305,6 @@ public class WadoIchimonjiItem extends Item {
     // =========================================================
     // Vanilla behavior tweaks
     // =========================================================
-    @Override
     public boolean canMine(BlockState state, World world, BlockPos pos, PlayerEntity miner) {
         return false;
     }
@@ -312,8 +314,9 @@ public class WadoIchimonjiItem extends Item {
     // + binding enforcement
     // =========================================================
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (world.isClient) return;
+    public void inventoryTick(ItemStack stack, ServerWorld world, Entity entity, EquipmentSlot slot) {
+        boolean selected = slot == EquipmentSlot.MAINHAND;
+        if (world.isClient()) return;
 
         // Only enforce bind when actually in-hand
         if (selected && entity instanceof ServerPlayerEntity player) {
@@ -327,9 +330,8 @@ public class WadoIchimonjiItem extends Item {
 
             // Enchant enforcement once per second (server-side)
             if (BladeboundConfig.DATA.enforceAllowedEnchantments
-                    && world instanceof ServerWorld sw
                     && world.getTime() % 20L == 0L) {
-                BladeboundItemRules.enforceAllowedEnchantments(sw, stack, player);
+                BladeboundItemRules.enforceAllowedEnchantments(world, stack, player);
             }
         }
 
@@ -356,15 +358,16 @@ public class WadoIchimonjiItem extends Item {
     // Combat hook
     // =========================================================
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.getWorld().isClient && attacker instanceof ServerPlayerEntity player) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (!attacker.getEntityWorld().isClient() && attacker instanceof ServerPlayerEntity player) {
 
             // Bind on first real combat use too
             BladeboundBind.bindIfUnbound(stack, player);
 
             // If not owner: punish + block all special behavior/progression
             if (!BladeboundBind.allowUseOrPunish(stack, player)) {
-                return super.postHit(stack, target, attacker);
+                super.postHit(stack, target, attacker);
+                return;
             }
 
             // Durability loss per hit (owner only)
@@ -375,7 +378,7 @@ public class WadoIchimonjiItem extends Item {
             // -------------------------------------------------
             // Discipline timing logic (hit spacing)
             // -------------------------------------------------
-            long now = attacker.getWorld().getTime();
+            long now = attacker.getEntityWorld().getTime();
             long last = getLong(stack, NBT_LAST_HIT);
             long dt = (last == 0L) ? 9999L : (now - last);
             putLong(stack, NBT_LAST_HIT, now);
@@ -430,9 +433,9 @@ public class WadoIchimonjiItem extends Item {
 
             if (totalBonus > 0.0f) {
                 if (attacker instanceof PlayerEntity p) {
-                    target.damage(p.getDamageSources().playerAttack(p), totalBonus);
+                    target.damage((ServerWorld) attacker.getEntityWorld(), p.getDamageSources().playerAttack(p), totalBonus);
                 } else {
-                    target.damage(attacker.getDamageSources().mobAttack(attacker), totalBonus);
+                    target.damage((ServerWorld) attacker.getEntityWorld(), attacker.getDamageSources().mobAttack(attacker), totalBonus);
                 }
             }
 
@@ -445,14 +448,15 @@ public class WadoIchimonjiItem extends Item {
             // -------------------------------------------------
         }
 
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     // =========================================================
     // Tooltip
     // =========================================================
     @Override
-    public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack stack, Item.TooltipContext context, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
+        List<Text> tooltip = new java.util.ArrayList<>();
         // Lore
         tooltip.add(Text.literal("RARE").formatted(Formatting.BLUE, Formatting.BOLD));
         tooltip.add(Text.literal("A blade of restraint and discipline.").formatted(Formatting.AQUA, Formatting.ITALIC));
@@ -494,5 +498,7 @@ public class WadoIchimonjiItem extends Item {
         } else {
             tooltip.add(Text.literal("Maxed").formatted(Formatting.GOLD));
         }
+
+        tooltip.forEach(textConsumer);
     }
 }

@@ -3,9 +3,9 @@ package net.owen.bladebound.mixin;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.world.World;
 import net.owen.bladebound.item.ModItems;
 import net.owen.bladebound.mana.ManaHolder;
@@ -117,33 +117,25 @@ public abstract class PlayerEntityManaMixin implements ManaHolder {
     // -------------------
     // Save (BASE max mana)
     // -------------------
-    @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
-    private void bladebound$writeMana(NbtCompound nbt, CallbackInfo ci) {
-        nbt.putInt("bladebound_mana", bladebound$mana);
-        nbt.putInt("bladebound_max_mana", bladebound$maxMana); // BASE
-        nbt.putBoolean("bladebound_infinite_mana", bladebound$infiniteMana);
+    @Inject(method = "writeCustomData", at = @At("TAIL"))
+    private void bladebound$writeMana(WriteView view, CallbackInfo ci) {
+        view.putInt("bladebound_mana", bladebound$mana);
+        view.putInt("bladebound_max_mana", bladebound$maxMana); // BASE
+        view.putBoolean("bladebound_infinite_mana", bladebound$infiniteMana);
     }
 
     // -------------------
     // Load (BASE max mana)
     // -------------------
-    @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
-    private void bladebound$readMana(NbtCompound nbt, CallbackInfo ci) {
-        int loadedMax = 100;
-        int loadedMana = 100;
-
-        if (nbt.contains("bladebound_max_mana", NbtElement.INT_TYPE)) {
-            loadedMax = nbt.getInt("bladebound_max_mana");
-        }
-        if (nbt.contains("bladebound_mana", NbtElement.INT_TYPE)) {
-            loadedMana = nbt.getInt("bladebound_mana");
-        }
+    @Inject(method = "readCustomData", at = @At("TAIL"))
+    private void bladebound$readMana(ReadView view, CallbackInfo ci) {
+        int loadedMax = view.getInt("bladebound_max_mana", 100);
+        int loadedMana = view.getInt("bladebound_mana", 100);
 
         bladebound$maxMana = Math.max(1, loadedMax);
         bladebound$mana = Math.max(0, loadedMana);
 
-        bladebound$infiniteMana = nbt.contains("bladebound_infinite_mana", NbtElement.BYTE_TYPE)
-                && nbt.getBoolean("bladebound_infinite_mana");
+        bladebound$infiniteMana = view.getBoolean("bladebound_infinite_mana", false);
 
         PlayerEntity self = (PlayerEntity) (Object) this;
         int effMax = bladebound$getEffectiveMaxMana(self);
@@ -166,8 +158,8 @@ public abstract class PlayerEntityManaMixin implements ManaHolder {
     @Inject(method = "tick", at = @At("TAIL"))
     private void bladebound$tickMana(CallbackInfo ci) {
         PlayerEntity self = (PlayerEntity) (Object) this;
-        World world = self.getWorld();
-        if (world.isClient) return;
+        World world = self.getEntityWorld();
+        if (world.isClient()) return;
 
         int effMax = bladebound$getEffectiveMaxMana(self);
 

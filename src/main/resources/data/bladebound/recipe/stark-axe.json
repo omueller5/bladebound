@@ -7,8 +7,8 @@
     " S "
   ],
   "key": {
-    "S": { "item": "bladebound:steel_ingot" },
-    "A": { "item": "minecraft:diamond_axe" }
+    "S": "bladebound:steel_ingot",
+    "A": "minecraft:diamond_axe"
   },
   "result": {
     "id": "bladebound:stark-axe",

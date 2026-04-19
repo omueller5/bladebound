@@ -1,38 +1,29 @@
 package net.owen.bladebound.client.render;
 
+import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
+import net.minecraft.client.render.state.CameraRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 import net.owen.bladebound.Bladebound;
+import net.owen.bladebound.client.render.state.BlackHoleEntityRenderState;
 import net.owen.bladebound.entity.custom.BlackHoleEntity;
 import org.joml.Matrix4f;
 
-public class BlackHoleEntityRenderer extends EntityRenderer<BlackHoleEntity> {
+public class BlackHoleEntityRenderer extends EntityRenderer<BlackHoleEntity, BlackHoleEntityRenderState> {
 
-    private static final Identifier DISK_TEX =
-            Identifier.of(Bladebound.MOD_ID, "textures/entity/black_hole_disk.png");
-    private static final Identifier RIM_TEX =
-            Identifier.of(Bladebound.MOD_ID, "textures/entity/black_hole_rim.png");
-
-    // =========================================================
-    // VISUAL SCALE (EDIT HERE)
-    // 1.0 = current size
-    // 1.5 = 50% bigger
-    // 2.0 = double size
-    // =========================================================
+    private static final Identifier DISK_TEX = Identifier.of(Bladebound.MOD_ID, "textures/entity/black_hole_disk.png");
+    private static final Identifier RIM_TEX = Identifier.of(Bladebound.MOD_ID, "textures/entity/black_hole_rim.png");
     private static final float VISUAL_SCALE = 2.0f;
-
-    // base sizes (before scaling)
     private static final float DISK_RADIUS = 3.0f;
-    private static final float RIM_RADIUS  = 3.25f;
-
+    private static final float RIM_RADIUS = 3.25f;
     private static final int DISK_SLICES = 4;
 
     public BlackHoleEntityRenderer(EntityRendererFactory.Context ctx) {
@@ -41,89 +32,89 @@ public class BlackHoleEntityRenderer extends EntityRenderer<BlackHoleEntity> {
     }
 
     @Override
-    public Identifier getTexture(BlackHoleEntity entity) {
-        return DISK_TEX;
+    public BlackHoleEntityRenderState createRenderState() {
+        return new BlackHoleEntityRenderState();
     }
 
     @Override
-    public boolean shouldRender(BlackHoleEntity entity, net.minecraft.client.render.Frustum frustum, double x, double y, double z) {
+    public boolean shouldRender(BlackHoleEntity entity, Frustum frustum, double x, double y, double z) {
         return true;
     }
 
     @Override
     public void render(
-            BlackHoleEntity entity,
-            float yaw,
-            float tickDelta,
+            BlackHoleEntityRenderState state,
             MatrixStack matrices,
-            VertexConsumerProvider vertexConsumers,
-            int light
+            OrderedRenderCommandQueue queue,
+            CameraRenderState cameraState
     ) {
         matrices.push();
-
-        // Scale everything (disk + rim) together
         matrices.scale(VISUAL_SCALE, VISUAL_SCALE, VISUAL_SCALE);
 
-        VertexConsumer diskVc = vertexConsumers.getBuffer(RenderLayer.getEntityCutoutNoCull(DISK_TEX));
+        final int fullBright = LightmapTextureManager.MAX_LIGHT_COORDINATE;
 
         for (int i = 0; i < DISK_SLICES; i++) {
             matrices.push();
-
             float rot = (180.0f / DISK_SLICES) * i;
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rot));
 
-            Matrix4f mat = matrices.peek().getPositionMatrix();
-            drawQuad(diskVc, mat, DISK_RADIUS, 1f, 1f, 1f, 1.0f, light);
+            queue.submitCustom(
+                    matrices,
+                    RenderLayers.entityNoOutline(DISK_TEX),
+                    (entry, vc) -> drawQuad(vc, entry.getPositionMatrix(), DISK_RADIUS, 1.0f, 1.0f, 1.0f, 1.0f, fullBright)
+            );
 
             matrices.pop();
         }
 
         matrices.push();
 
-        matrices.multiply(this.dispatcher.getRotation());
+        if (cameraState != null && cameraState.orientation != null) {
+            matrices.multiply(cameraState.orientation);
+        }
+
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0f));
         matrices.translate(0.0, 0.0, -0.02);
 
-        VertexConsumer rimVc = vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(RIM_TEX));
-        Matrix4f rimMat = matrices.peek().getPositionMatrix();
-
-        int fullBright = LightmapTextureManager.MAX_LIGHT_COORDINATE;
-        drawQuad(rimVc, rimMat, RIM_RADIUS, 1f, 1f, 1f, 0.95f, fullBright);
-
-        matrices.pop();
+        queue.submitCustom(
+                matrices,
+                RenderLayers.entityTranslucent(RIM_TEX),
+                (entry, vc) -> drawQuad(vc, entry.getPositionMatrix(), RIM_RADIUS, 1.0f, 1.0f, 1.0f, 0.95f, fullBright)
+        );
 
         matrices.pop();
-        super.render(entity, yaw, tickDelta, matrices, vertexConsumers, light);
+        matrices.pop();
+
+        super.render(state, matrices, queue, cameraState);
     }
 
-    private static void drawQuad(VertexConsumer vc, Matrix4f mat, float radius,
-                                 float r, float g, float b, float a, int light) {
-        vc.vertex(mat, -radius,  radius, 0.0f)
+    private static void drawQuad(VertexConsumer vc, Matrix4f mat, float radius, float r, float g, float b, float a, int light) {
+        vc.vertex(mat, -radius, radius, 0.0f)
                 .color(r, g, b, a)
                 .texture(0.0f, 0.0f)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(light)
-                .normal(0, 0, 1);
+                .normal(0.0f, 0.0f, 1.0f);
 
-        vc.vertex(mat,  radius,  radius, 0.0f)
+        vc.vertex(mat, radius, radius, 0.0f)
                 .color(r, g, b, a)
                 .texture(1.0f, 0.0f)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(light)
-                .normal(0, 0, 1);
+                .normal(0.0f, 0.0f, 1.0f);
 
-        vc.vertex(mat,  radius, -radius, 0.0f)
+        vc.vertex(mat, radius, -radius, 0.0f)
                 .color(r, g, b, a)
                 .texture(1.0f, 1.0f)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(light)
-                .normal(0, 0, 1);
+                .normal(0.0f, 0.0f, 1.0f);
 
         vc.vertex(mat, -radius, -radius, 0.0f)
                 .color(r, g, b, a)
                 .texture(0.0f, 1.0f)
                 .overlay(OverlayTexture.DEFAULT_UV)
                 .light(light)
-                .normal(0, 0, 1);
+                .normal(0.0f, 0.0f, 1.0f);
     }
 }

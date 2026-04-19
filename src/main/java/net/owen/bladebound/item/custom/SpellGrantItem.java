@@ -4,6 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
@@ -12,12 +13,13 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.ActionResult;
 import net.minecraft.world.World;
 import net.owen.bladebound.magic.SpellHolder;
 import net.owen.bladebound.magic.StaffSpell;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class SpellGrantItem extends Item {
 
@@ -48,7 +50,8 @@ public class SpellGrantItem extends Item {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack stack, Item.TooltipContext context, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
+        List<Text> tooltip = new java.util.ArrayList<>();
         if (loreLines != null && !loreLines.isEmpty()) {
             tooltip.addAll(loreLines);
         }
@@ -69,6 +72,8 @@ public class SpellGrantItem extends Item {
             tooltip.add(Text.literal("Mana: " + spell.manaCost).formatted(Formatting.DARK_GRAY));
             tooltip.add(Text.literal("Cooldown: " + getStaticCooldownSeconds(spell) + "s").formatted(Formatting.DARK_GRAY));
         }
+
+        tooltip.forEach(textConsumer);
     }
 
     private StaffSpell resolveSpell(ItemStack stack) {
@@ -108,15 +113,15 @@ public class SpellGrantItem extends Item {
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
 
-        if (world.isClient) {
-            return TypedActionResult.success(stack, true);
+        if (world.isClient()) {
+            return ActionResult.SUCCESS;
         }
 
         if (!(user instanceof ServerPlayerEntity sp)) {
-            return TypedActionResult.success(stack);
+            return ActionResult.SUCCESS;
         }
 
         Identifier idForTags = getSpellIdForTags(stack, this.spellId);
@@ -137,7 +142,7 @@ public class SpellGrantItem extends Item {
                     1.0f
             );
 
-            return TypedActionResult.success(stack);
+            return ActionResult.SUCCESS;
         }
 
         // Learn + select (safe-tag system)
@@ -159,6 +164,6 @@ public class SpellGrantItem extends Item {
             stack.decrement(1);
         }
 
-        return TypedActionResult.success(stack);
+        return ActionResult.SUCCESS;
     }
 }

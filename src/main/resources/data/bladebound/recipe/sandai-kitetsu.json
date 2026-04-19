@@ -6,9 +6,9 @@
     " I "
   ],
   "key": {
-    "S": { "item": "minecraft:string" },
-    "C": { "item": "bladebound:cursed-kitetsu-shard" },
-    "I": { "item": "minecraft:iron_sword" }
+    "S": "minecraft:string",
+    "C": "bladebound:cursed-kitetsu-shard",
+    "I": "minecraft:iron_sword"
   },
   "result": {
     "id": "bladebound:sandai-kitetsu",

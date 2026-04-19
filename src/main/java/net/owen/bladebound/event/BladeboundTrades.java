@@ -22,7 +22,7 @@ public final class BladeboundTrades {
         // Librarian (Level 5 / Master)
         // ---------------------------
         TradeOfferHelper.registerVillagerOffers(VillagerProfession.LIBRARIAN, 5, factories ->
-                factories.add((entity, random) -> new TradeOffer(
+                factories.add((entity, random, level) -> new TradeOffer(
                         new TradedItem(Items.EMERALD, 48),
                         Optional.of(new TradedItem(Items.BOOK, 1)),
                         new ItemStack(ModItems.COOLDOWN_BRACELET, 1),
@@ -36,7 +36,7 @@ public final class BladeboundTrades {
         // Farmer (Level 4)
         // ---------------------------
         TradeOfferHelper.registerVillagerOffers(VillagerProfession.FARMER, 4, factories ->
-                factories.add((entity, random) -> new TradeOffer(
+                factories.add((entity, random, level) -> new TradeOffer(
                         new TradedItem(Items.EMERALD, 18),
                         Optional.empty(),
                         new ItemStack(ModItems.GREATER_MANA_APPLE, 1),
@@ -50,7 +50,7 @@ public final class BladeboundTrades {
         // Cleric (Level 5 / Master)
         // ---------------------------
         TradeOfferHelper.registerVillagerOffers(VillagerProfession.CLERIC, 5, factories ->
-                factories.add((entity, random) -> new TradeOffer(
+                factories.add((entity, random, level) -> new TradeOffer(
                         new TradedItem(Items.EMERALD, 22),
                         Optional.empty(),
                         new ItemStack(ModItems.GREATER_MANA_APPLE, 1),

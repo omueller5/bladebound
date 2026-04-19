@@ -1,0 +1,8 @@
+{
+  "layers": [
+    {
+      "target": "humanoid",
+      "model": "bladebound:item/archmage_hat"
+    }
+  ]
+}

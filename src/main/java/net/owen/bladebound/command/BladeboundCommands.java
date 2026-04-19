@@ -3,6 +3,8 @@ package net.owen.bladebound.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.command.permission.Permission;
+import net.minecraft.command.permission.PermissionLevel;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -28,6 +30,10 @@ public final class BladeboundCommands {
 
     private BladeboundCommands() {}
 
+    private static boolean hasGamemasterPerm(ServerCommandSource src) {
+        return src.getPermissions().hasPermission(new Permission.Level(PermissionLevel.GAMEMASTERS));
+    }
+
     public static void init() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             register(dispatcher);
@@ -42,7 +48,7 @@ public final class BladeboundCommands {
                    CODEX
                    =============================== */
                 .then(literal("codex")
-                        .requires(src -> src.hasPermissionLevel(2))
+                        .requires(BladeboundCommands::hasGamemasterPerm)
                         .executes(ctx -> {
                             var player = ctx.getSource().getPlayerOrThrow();
                             player.giveItemStack(ModItems.CODEX.getDefaultStack());
@@ -59,7 +65,7 @@ public final class BladeboundCommands {
                    /bladebound infinitemana [on|off]
                    =============================== */
                 .then(literal("infinitemana")
-                        .requires(src -> src.hasPermissionLevel(2))
+                        .requires(BladeboundCommands::hasGamemasterPerm)
                         // toggle
                         .executes(ctx -> {
                             ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
@@ -109,7 +115,7 @@ public final class BladeboundCommands {
                    DEBUG SPAWN
                    =============================== */
                 .then(literal("debugspawn")
-                        .requires(src -> src.hasPermissionLevel(2))
+                        .requires(BladeboundCommands::hasGamemasterPerm)
                         .then(argument("which", StringArgumentType.word())
                                 .suggests((ctx, builder) -> {
                                     builder.suggest("excalibur");
@@ -121,7 +127,7 @@ public final class BladeboundCommands {
                                 .executes(ctx -> {
                                     ServerCommandSource src = ctx.getSource();
                                     ServerPlayerEntity player = src.getPlayerOrThrow();
-                                    World world = player.getWorld();
+                                    World world = player.getEntityWorld();
 
                                     String which = StringArgumentType.getString(ctx, "which").toLowerCase();
                                     BlockPos origin = player.getBlockPos().add(0, 0, 4);
@@ -218,7 +224,7 @@ public final class BladeboundCommands {
     private static void registerBlackFlash(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("bladebound")
                 .then(literal("blackflash")
-                        .requires(src -> src.hasPermissionLevel(2))
+                        .requires(BladeboundCommands::hasGamemasterPerm)
                         .then(literal("test")
                                 .then(literal("on").executes(ctx -> {
                                     ServerPlayerEntity p = ctx.getSource().getPlayerOrThrow();

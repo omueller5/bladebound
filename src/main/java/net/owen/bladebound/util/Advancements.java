@@ -8,11 +8,11 @@ public final class Advancements {
     private Advancements() {}
 
     public static void grant(ServerPlayerEntity player, String path) {
-        if (player.getServer() == null) return;
+        if (player.getEntityWorld().getServer() == null) return;
 
-        AdvancementEntry adv = player.getServer()
+        AdvancementEntry adv = player.getEntityWorld().getServer()
                 .getAdvancementLoader()
-                .get(Identifier.of("bladebound", path)); // "bladebound" = your mod id
+                .get(Identifier.of("bladebound", path));
 
         if (adv == null) return;
 

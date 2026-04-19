@@ -44,7 +44,7 @@ public class BossLockBlock extends Block {
     public ActionResult onUse(BlockState state, World world, BlockPos pos,
                               PlayerEntity player, BlockHitResult hit) {
 
-        if (world.isClient) return ActionResult.SUCCESS;
+        if (world.isClient()) return ActionResult.SUCCESS;
 
         ItemStack main = player.getMainHandStack();
         ItemStack off = player.getOffHandStack();

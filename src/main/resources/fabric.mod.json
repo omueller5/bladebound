@@ -22,7 +22,7 @@
     "client": [
       "net.owen.bladebound.BladeboundClient"
     ],
-    "emi": [
+    "rei_client": [
       "net.owen.bladebound.emi.BladeboundEmiPlugin"
     ],
     "modmenu": [
@@ -38,16 +38,17 @@
   ],
 
   "depends": {
-    "fabricloader": ">=0.15.11",
-    "minecraft": "~1.21.1",
+    "fabricloader": ">=0.18.1",
+    "minecraft": "~1.21.11",
     "java": ">=21",
     "fabric-api": "*"
   },
 
   "suggests": {
-    "emi": "*",
     "modmenu": "*",
     "yet_another_config_lib_v3": "*",
-    "trinkets": "*"
+    "trinkets": "*",
+    "roughlyenoughitems": "*",
+    "jei": "*"
   }
 }

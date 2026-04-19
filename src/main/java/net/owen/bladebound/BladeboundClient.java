@@ -1,34 +1,26 @@
 package net.owen.bladebound;
 
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.RotationAxis;
 import net.owen.bladebound.client.MobHealthHud;
 import net.owen.bladebound.client.render.BarrierEntityRenderer;
 import net.owen.bladebound.client.render.BlackHoleEntityRenderer;
@@ -109,14 +101,16 @@ public class BladeboundClient implements ClientModInitializer {
         ClientPackets.register();
         MobHealthHud.register();
 
-        // 3D Archmage Hat when worn (helmet slot)
-        ArmorRenderer.register(new ArchmageHatRenderer(), ModItems.ARCHMAGE_HAT);
-
+        // TEMP for 1.21.11 port:
+        // old Archmage hat ArmorRenderer code is disabled until the newer renderer signature is ported cleanly
+        // ArmorRenderer.register(new ArchmageHatRenderer(), ModItems.ARCHMAGE_HAT);
 
         ClientPlayNetworking.registerGlobalReceiver(BarrierBreakPayload.ID, (payload, context) -> {
             context.client().execute(() -> {
                 if (context.client().player == null) return;
-                context.client().player.playSound(SoundEvents.ITEM_SHIELD_BREAK, 1.0f, 1.0f);
+
+                RegistryEntry.Reference<SoundEvent> shieldBreak = SoundEvents.ITEM_SHIELD_BREAK;
+                context.client().player.playSound(shieldBreak.value(), 1.0f, 1.0f);
             });
         });
 
@@ -128,7 +122,6 @@ public class BladeboundClient implements ClientModInitializer {
         net.owen.bladebound.client.BarrierVisualHud.register();
 
         // Black Hole entity renderer
-        EntityRendererRegistry.register(ModEntities.BLACK_HOLE, BlackHoleRenderer::new);
         EntityRendererRegistry.register(ModEntities.BLACK_HOLE, BlackHoleEntityRenderer::new);
 
         // Keybinds
@@ -136,7 +129,7 @@ public class BladeboundClient implements ClientModInitializer {
                 "key.bladebound.open_spells",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_R,
-                "category.bladebound"
+                KeyBinding.Category.create(Identifier.of("bladebound", "general"))
         ));
 
         // Open spell UI + tick cooldown map
@@ -215,14 +208,13 @@ public class BladeboundClient implements ClientModInitializer {
         return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
     }
 
-
     private static int readDiscipline(ItemStack stack) {
         NbtCompound data = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).copyNbt();
 
-        if (!data.contains(NBT_ROOT, NbtElement.COMPOUND_TYPE)) return 0;
+        if (!data.contains(NBT_ROOT)) return 0;
 
-        NbtCompound root = data.getCompound(NBT_ROOT);
-        int v = root.getInt(NBT_DISCIPLINE);
+        NbtCompound root = data.getCompoundOrEmpty(NBT_ROOT);
+        int v = root.getInt(NBT_DISCIPLINE, 0);
 
         if (v < 0) v = 0;
         if (v > 100) v = 100;
@@ -292,8 +284,8 @@ public class BladeboundClient implements ClientModInitializer {
             int textWidth = mc.textRenderer.getWidth(text);
             int textX = x + (barWidth / 2) - (textWidth / 2);
 
-            int textY = y + barHeight + BladeboundConfig.DATA.manaHudNumbersYOffset;
-            ctx.drawText(mc.textRenderer, text, textX, textY, 0xFFFFFF, true);
+            int textY = y + barHeight + 6 + BladeboundConfig.DATA.manaHudNumbersYOffset;
+            ctx.drawText(mc.textRenderer, text, textX, textY, 0xFFFFFFFF, true);
 
             nextY = textY + mc.textRenderer.fontHeight + 2;
         }
@@ -310,41 +302,4 @@ public class BladeboundClient implements ClientModInitializer {
         int x = sw - barWidth - padding;
         ctx.drawText(mc.textRenderer, line, x, textY, 0xFFFFFF, true);
     }
-
-    private static class ArchmageHatRenderer implements net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer {
-
-        @Override
-        public void render(net.minecraft.client.util.math.MatrixStack matrices,
-                           net.minecraft.client.render.VertexConsumerProvider vertexConsumers,
-                           net.minecraft.item.ItemStack stack,
-                           net.minecraft.entity.LivingEntity entity,
-                           net.minecraft.entity.EquipmentSlot slot,
-                           int light,
-                           net.minecraft.client.render.entity.model.BipedEntityModel<net.minecraft.entity.LivingEntity> contextModel) {
-
-            if (slot != net.minecraft.entity.EquipmentSlot.HEAD) return;
-
-            matrices.push();
-            contextModel.head.rotate(matrices);
-            matrices.translate(0.0D, -0.78D, 0.0D);
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180.0F));
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0F));
-            ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
-            itemRenderer.renderItem(
-                    entity,
-                    stack,
-                    ModelTransformationMode.NONE,
-                    false,
-                    matrices,
-                    vertexConsumers,
-                    entity.getWorld(),
-                    light,
-                    OverlayTexture.DEFAULT_UV,
-                    0
-            );
-
-            matrices.pop();
-        }
-    }
-
 }

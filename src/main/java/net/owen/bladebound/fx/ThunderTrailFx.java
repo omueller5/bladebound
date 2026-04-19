@@ -2,15 +2,15 @@ package net.owen.bladebound.fx;
 
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.particle.TintedParticleEffect;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
-import org.joml.Vector3f;
 
 public final class ThunderTrailFx {
     private ThunderTrailFx() {}
 
     // Zenitsu yellow (tweak if you want more orange or gold)
-    private static final Vector3f YELLOW = new Vector3f(1.0f, 0.9f, 0.2f);
+    private static final int YELLOW = 0xFFE633;
     private static final float SIZE = 1.2f;
 
     /**
@@ -60,7 +60,7 @@ public final class ThunderTrailFx {
         }
 
         // Subtle flash at start/end (still white, but brief)
-        sw.spawnParticles(ParticleTypes.FLASH, start.x, start.y + 0.1, start.z, 1, 0, 0, 0, 0.0);
-        sw.spawnParticles(ParticleTypes.FLASH, end.x, end.y + 0.1, end.z, 1, 0, 0, 0, 0.0);
+        sw.spawnParticles(TintedParticleEffect.create(ParticleTypes.FLASH, 1.0f, 1.0f, 1.0f), start.x, start.y + 0.1, start.z, 1, 0, 0, 0, 0.0);
+        sw.spawnParticles(TintedParticleEffect.create(ParticleTypes.FLASH, 1.0f, 1.0f, 1.0f), end.x, end.y + 0.1, end.z, 1, 0, 0, 0, 0.0);
     }
 }

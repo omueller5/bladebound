@@ -131,8 +131,9 @@
 			"scale": [0.52, 0.52, 0.52]
 		},
 		"ground": {
-			"translation": [0, 3.25, 0],
-			"scale": [0.7, 0.7, 0.7]
+			"rotation": [115.5, 0, 0],
+			"translation": [0, -1.25, 2],
+			"scale": [0.36797, 0.36406, 0.27227]
 		},
 		"gui": {
 			"rotation": [25, 142, 0],
@@ -141,8 +142,11 @@
 		},
 		"head": {
 			"rotation": [6, 0, 0],
-			"translation": [0, 15.5, 1.5],
+			"translation": [0, 15, 1.5],
 			"scale": [1.51, 1.51, 1.51]
+		},
+		"on_shelf": {
+			"rotation": [180, 1.5, 180]
 		}
 	}
 }

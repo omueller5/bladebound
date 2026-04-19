@@ -16,6 +16,7 @@ import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import net.owen.bladebound.entity.ai.FrierenSpellcastingGoal;
 import net.owen.bladebound.item.ModItems;
@@ -34,8 +35,8 @@ public class FrierenBossEntity extends HostileEntity {
 
 
     @Override
-    protected void mobTick() {
-        super.mobTick();
+    protected void mobTick(ServerWorld world) {
+        super.mobTick(world);
         this.bossBar.setPercent(this.getHealth() / this.getMaxHealth());
     }
 
@@ -60,12 +61,12 @@ public class FrierenBossEntity extends HostileEntity {
 
     public static DefaultAttributeContainer.Builder createAttributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 300.0)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25)
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 48.0)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 8.0)
-                .add(EntityAttributes.GENERIC_ARMOR, 6.0)
-                .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0.25);
+                .add(EntityAttributes.MAX_HEALTH, 300.0)
+                .add(EntityAttributes.MOVEMENT_SPEED, 0.25)
+                .add(EntityAttributes.FOLLOW_RANGE, 48.0)
+                .add(EntityAttributes.ATTACK_DAMAGE, 8.0)
+                .add(EntityAttributes.ARMOR, 6.0)
+                .add(EntityAttributes.KNOCKBACK_RESISTANCE, 0.25);
     }
 
     @Override

@@ -1,15 +1,15 @@
 package net.owen.bladebound.item.custom;
 
-import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
-import net.minecraft.item.ToolMaterials;
+import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -25,34 +25,38 @@ import org.joml.Vector3f;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.Set;
 
-public class MurasameItem extends SwordItem {
+public class MurasameItem extends Item {
 
     // Replaces Poison/Wither with your custom curse.
     // Make this whatever pacing feels right.
     private static final int CURSE_TICKS_BASE = 20 * 5; // ~5s for “normal” mobs
 
     public MurasameItem(Settings settings) {
-        super(ToolMaterials.NETHERITE, settings);
+        super(settings);
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack stack, Item.TooltipContext context, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
+        List<Text> tooltip = new java.util.ArrayList<>();
         tooltip.add(Text.literal("LEGENDARY").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.literal("A cursed edge that drinks the last heartbeat.").formatted(Formatting.DARK_RED, Formatting.ITALIC));
         tooltip.add(Text.literal("Its mark lingers… and the body follows.").formatted(Formatting.GRAY, Formatting.ITALIC));
 
         tooltip.add(Text.literal(" "));
         BladeboundBind.appendBindTooltip(stack, tooltip);
+
+        tooltip.forEach(textConsumer);
     }
 
     private static void enforceEnchantRules(ServerWorld world, ItemStack stack) {
         if (!BladeboundConfig.DATA.enforceAllowedEnchantments) return;
 
-        var enchantReg = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
-        RegistryEntry<?> unbreaking = enchantReg.entryOf(Enchantments.UNBREAKING);
-        RegistryEntry<?> mending = enchantReg.entryOf(Enchantments.MENDING);
+        var enchantReg = world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
+        RegistryEntry<?> unbreaking = enchantReg.getEntry(enchantReg.getValueOrThrow(Enchantments.UNBREAKING));
+        RegistryEntry<?> mending = enchantReg.getEntry(enchantReg.getValueOrThrow(Enchantments.MENDING));
 
         Set<RegistryEntry<?>> allowed = new HashSet<>();
         allowed.add((RegistryEntry<?>) unbreaking);
@@ -64,10 +68,11 @@ public class MurasameItem extends SwordItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, net.minecraft.world.World world,
-                              net.minecraft.entity.Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, net.minecraft.server.world.ServerWorld world,
+                              net.minecraft.entity.Entity entity, net.minecraft.entity.EquipmentSlot slot) {
+        boolean selected = slot == EquipmentSlot.MAINHAND;
 
-        if (!world.isClient
+        if (!world.isClient()
                 && selected
                 && entity instanceof ServerPlayerEntity player
                 && world instanceof ServerWorld sw) {
@@ -81,26 +86,27 @@ public class MurasameItem extends SwordItem {
             BladeboundBind.allowUseOrPunish(stack, player);
         }
 
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
-        if (!attacker.getWorld().isClient() && attacker instanceof ServerPlayerEntity player) {
+        if (!attacker.getEntityWorld().isClient() && attacker instanceof ServerPlayerEntity player) {
 
             BladeboundBind.bindIfUnbound(stack, player);
 
             // If not owner: do nothing special
             if (!BladeboundBind.allowUseOrPunish(stack, player)) {
-                return super.postHit(stack, target, attacker);
+                super.postHit(stack, target, attacker);
+                return;
             }
 
-            ServerWorld serverWorld = (ServerWorld) attacker.getWorld();
+            ServerWorld serverWorld = (ServerWorld) attacker.getEntityWorld();
 
             // Particles (keep)
             serverWorld.spawnParticles(
-                    new DustParticleEffect(new Vector3f(0.6f, 0.0f, 0.0f), 1.2f),
+                    new DustParticleEffect(0x990000, 1.2f),
                     target.getX(),
                     target.getBodyY(0.5),
                     target.getZ(),
@@ -126,15 +132,13 @@ public class MurasameItem extends SwordItem {
             }
         }
 
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 
     private static boolean isGauntletImmune(LivingEntity entity) {
         if (!(entity instanceof ServerPlayerEntity player)) return false;
 
-        return TrinketsApi.getTrinketComponent(player)
-                .map(comp -> comp.isEquipped(ModItems.MURASAME_GAUNTLETS))
-                .orElse(false);
+        return !net.owen.bladebound.compat.AccessoryChecks.getEquippedAccessoryStack(player, ModItems.MURASAME_GAUNTLETS).isEmpty();
     }
 
     private static boolean isBossImmune(LivingEntity e) {

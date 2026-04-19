@@ -6,7 +6,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.consume.UseAction;
 import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -25,6 +27,7 @@ import net.owen.bladebound.network.ModPackets;
 import net.owen.bladebound.network.Payloads;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class FrierenStaffItem extends Item {
 
@@ -59,7 +62,7 @@ public class FrierenStaffItem extends Item {
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
 
         // =========================================================
@@ -70,19 +73,19 @@ public class FrierenStaffItem extends Item {
             StaffSpell selSpell = (selId == null) ? null : StaffSpell.fromId(selId);
 
             if (selSpell == StaffSpell.MANA_BARRIER) {
-                if (!world.isClient) {
+                if (!world.isClient()) {
                     boolean creativeStaff = stack.isOf(ModItems.FRIEREN_STAFF_CREATIVE);
 
                     // Normal staff: require mana to turn ON (but always allow turning OFF)
                     if (!creativeStaff) {
                         if (!(user instanceof ManaHolder mh)) {
-                            return TypedActionResult.fail(stack);
+                            return ActionResult.FAIL;
                         }
 
                         boolean turningOn = !sh.bladebound$isBarrierActive();
                         if (turningOn && mh.bladebound$getMana() < 30) {
                             user.sendMessage(Text.literal("Not enough mana!"), true);
-                            return TypedActionResult.fail(stack);
+                            return ActionResult.FAIL;
                         }
                     }
 
@@ -111,7 +114,7 @@ public class FrierenStaffItem extends Item {
                     );
                 }
 
-                return TypedActionResult.success(stack, world.isClient);
+                return ActionResult.SUCCESS;
             }
         }
 
@@ -120,36 +123,36 @@ public class FrierenStaffItem extends Item {
         // Existing click-to-cast behavior for other spells
         // =========================================================
         if (user.isSneaking()) {
-            if (!world.isClient) {
+            if (!world.isClient()) {
                 user.sendMessage(Text.literal("Use the spell menu to select spells."), true);
                 world.playSound(null, user.getBlockPos(), SoundEvents.UI_BUTTON_CLICK.value(),
                         SoundCategory.PLAYERS, 0.6F, 1.2F);
             }
-            return TypedActionResult.success(stack, world.isClient);
+            return ActionResult.SUCCESS;
         }
 
-        if (!world.isClient) {
+        if (!world.isClient()) {
             boolean creativeStaff = stack.isOf(ModItems.FRIEREN_STAFF_CREATIVE);
 
             if (!(user instanceof SpellHolder spells)) {
-                return TypedActionResult.fail(stack);
+                return ActionResult.FAIL;
             }
 
             if (!(user instanceof ManaHolder mana)) {
-                return TypedActionResult.fail(stack);
+                return ActionResult.FAIL;
             }
 
             // Selected spell (ID-based)
             Identifier selectedId = spells.bladebound$getSelectedSpellId();
             if (selectedId == null) {
                 user.sendMessage(Text.literal("No spell selected."), true);
-                return TypedActionResult.fail(stack);
+                return ActionResult.FAIL;
             }
 
             StaffSpell spell = StaffSpell.fromId(selectedId);
             if (spell == null) {
                 user.sendMessage(Text.literal("Unknown spell selected."), true);
-                return TypedActionResult.fail(stack);
+                return ActionResult.FAIL;
             }
 
             // =========================================================
@@ -159,7 +162,7 @@ public class FrierenStaffItem extends Item {
 
             // Creative staff bypasses cooldowns
             if (!creativeStaff && spells.bladebound$getSpellCooldown(spellId) > 0) {
-                return TypedActionResult.fail(stack);
+                return ActionResult.FAIL;
             }
 
             // =========================================================
@@ -175,7 +178,7 @@ public class FrierenStaffItem extends Item {
                 if (spell.manaCost > 0) {
                     if (!mana.bladebound$tryConsumeMana(spell.manaCost)) {
                         user.sendMessage(Text.literal("Not enough mana!"), true);
-                        return TypedActionResult.fail(stack);
+                        return ActionResult.FAIL;
                     }
                 }
             }
@@ -235,12 +238,13 @@ public class FrierenStaffItem extends Item {
             }
         }
 
-        return TypedActionResult.success(stack, world.isClient);
+        return ActionResult.SUCCESS;
     }
 
     // === DO NOT REMOVE: Frieren Staff Lore ===
     @Override
-    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack stack, Item.TooltipContext context, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
+        List<Text> tooltip = new java.util.ArrayList<>();
         tooltip.add(Text.literal("LEGENDARY").formatted(Formatting.GOLD, Formatting.BOLD));
 
         tooltip.add(Text.literal("A staff belonging to the great mage Frieren.").formatted(Formatting.AQUA, Formatting.ITALIC));
@@ -249,5 +253,7 @@ public class FrierenStaffItem extends Item {
 
         tooltip.add(Text.literal(" "));
         BladeboundBind.appendBindTooltip(stack, tooltip);
+
+        tooltip.forEach(textConsumer);
     }
 }

@@ -4,6 +4,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.permission.Permission;
+import net.minecraft.command.permission.PermissionLevel;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -15,6 +17,10 @@ public final class ManaCommands {
 
     private ManaCommands() {}
 
+    private static boolean hasGamemasterPerm(ServerCommandSource src) {
+        return src.getPermissions().hasPermission(new Permission.Level(PermissionLevel.GAMEMASTERS));
+    }
+
     public static void register() {
         CommandRegistrationCallback.EVENT.register(ManaCommands::registerCommands);
     }
@@ -25,7 +31,7 @@ public final class ManaCommands {
 
         dispatcher.register(CommandManager.literal("bladebound")
                 .then(CommandManager.literal("setmaxmana")
-                        .requires(src -> src.hasPermissionLevel(2))
+                        .requires(ManaCommands::hasGamemasterPerm)
                         .then(CommandManager.argument("amount", IntegerArgumentType.integer(0, 1_000_000))
                                 .executes(ctx -> {
                                     ServerCommandSource src = ctx.getSource();
@@ -44,7 +50,7 @@ public final class ManaCommands {
                         )
                 )
                 .then(CommandManager.literal("setmana")
-                        .requires(src -> src.hasPermissionLevel(2))
+                        .requires(ManaCommands::hasGamemasterPerm)
                         .then(CommandManager.argument("amount", IntegerArgumentType.integer(0, 1_000_000))
                                 .executes(ctx -> {
                                     ServerCommandSource src = ctx.getSource();

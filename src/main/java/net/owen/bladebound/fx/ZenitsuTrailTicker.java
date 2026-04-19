@@ -33,7 +33,7 @@ public final class ZenitsuTrailTicker {
      * Start trailing lightning from the player for a few ticks.
      */
     public static void start(ServerPlayerEntity sp, Vec3d lookDir, int ticks) {
-        if (sp == null || sp.getServer() == null) return;
+        if (sp == null) return;
         ensureRegistered();
 
         UUID id = sp.getUuid();
@@ -57,12 +57,12 @@ public final class ZenitsuTrailTicker {
                 continue;
             }
 
-            if (!(sp.getWorld() instanceof ServerWorld sw)) {
+            if (!(sp.getEntityWorld() instanceof ServerWorld sw)) {
                 left--;
             } else {
                 Vec3d look = LOOK.getOrDefault(id, sp.getRotationVec(1.0f).normalize());
                 // short “bolt” behind player (waist height)
-                Vec3d base = sp.getPos().add(0.0, 0.9, 0.0);
+                Vec3d base = new Vec3d(sp.getX(), sp.getY(), sp.getZ()).add(0.0, 0.9, 0.0);
                 Vec3d back = look.multiply(-1.0).normalize();
 
                 // Make it a little longer for the first ticks, then shorter (feels like dissipating trail)

@@ -7,27 +7,37 @@ import net.minecraft.component.type.FoodComponent;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ArmorMaterials;
+import net.minecraft.item.equipment.ArmorMaterials;
 import net.minecraft.item.Item;
-import net.minecraft.item.ToolMaterials;
+import net.minecraft.item.SmithingTemplateItem;
+import net.minecraft.item.ToolMaterial;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import net.owen.bladebound.Bladebound;
-import net.minecraft.item.SmithingTemplateItem;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import java.util.List;
 import net.owen.bladebound.item.custom.*;
 
 import java.util.List;
 
-
 public class ModItems {
+
+    private static Identifier id(String path) {
+        return Identifier.of(Bladebound.MOD_ID, path);
+    }
+
+    private static Item.Settings itemSettings(String path) {
+        return new Item.Settings().registryKey(RegistryKey.of(RegistryKeys.ITEM, id(path)));
+    }
+
+    private static <T extends Item> T registerItem(String path, T item) {
+        RegistryKey<Item> key = RegistryKey.of(RegistryKeys.ITEM, id(path));
+        return Registry.register(Registries.ITEM, key, item);
+    }
 
     //---------------
     // Swords
@@ -36,7 +46,7 @@ public class ModItems {
             AttributeModifiersComponent.builder()
                     // Netherite sword damage (8.0 total)
                     .add(
-                            EntityAttributes.GENERIC_ATTACK_DAMAGE,
+                            EntityAttributes.ATTACK_DAMAGE,
                             new EntityAttributeModifier(
                                     Identifier.of("bladebound", "murasame_damage"),
                                     7.0,
@@ -46,7 +56,7 @@ public class ModItems {
                     )
                     // Netherite sword speed
                     .add(
-                            EntityAttributes.GENERIC_ATTACK_SPEED,
+                            EntityAttributes.ATTACK_SPEED,
                             new EntityAttributeModifier(
                                     Identifier.of("bladebound", "murasame_speed"),
                                     3.4,
@@ -59,7 +69,7 @@ public class ModItems {
     private static final AttributeModifiersComponent EXCALIBUR_ATTRIBUTES =
             AttributeModifiersComponent.builder()
                     .add(
-                            EntityAttributes.GENERIC_ATTACK_DAMAGE,
+                            EntityAttributes.ATTACK_DAMAGE,
                             new EntityAttributeModifier(
                                     Identifier.of("bladebound", "excalibur_damage"),
                                     7.0,
@@ -68,7 +78,7 @@ public class ModItems {
                             AttributeModifierSlot.MAINHAND
                     )
                     .add(
-                            EntityAttributes.GENERIC_ATTACK_SPEED,
+                            EntityAttributes.ATTACK_SPEED,
                             new EntityAttributeModifier(
                                     Identifier.of("bladebound", "excalibur_speed"),
                                     2.4,
@@ -81,7 +91,7 @@ public class ModItems {
     private static final AttributeModifiersComponent WADO_ATTRIBUTES =
             AttributeModifiersComponent.builder()
                     .add(
-                            EntityAttributes.GENERIC_ATTACK_DAMAGE,
+                            EntityAttributes.ATTACK_DAMAGE,
                             new EntityAttributeModifier(
                                     Identifier.of("bladebound", "wado_damage"),
                                     5.0,
@@ -90,7 +100,7 @@ public class ModItems {
                             AttributeModifierSlot.MAINHAND
                     )
                     .add(
-                            EntityAttributes.GENERIC_ATTACK_SPEED,
+                            EntityAttributes.ATTACK_SPEED,
                             new EntityAttributeModifier(
                                     Identifier.of("bladebound", "wado_speed"),
                                     1.4,
@@ -103,7 +113,7 @@ public class ModItems {
     private static final AttributeModifiersComponent SANDAI_ATTRIBUTES =
             AttributeModifiersComponent.builder()
                     .add(
-                            EntityAttributes.GENERIC_ATTACK_DAMAGE,
+                            EntityAttributes.ATTACK_DAMAGE,
                             new EntityAttributeModifier(
                                     Identifier.of("bladebound", "sandai_damage"),
                                     5.0,
@@ -112,7 +122,7 @@ public class ModItems {
                             AttributeModifierSlot.MAINHAND
                     )
                     .add(
-                            EntityAttributes.GENERIC_ATTACK_SPEED,
+                            EntityAttributes.ATTACK_SPEED,
                             new EntityAttributeModifier(
                                     Identifier.of("bladebound", "sandai_speed"),
                                     1.4,
@@ -123,11 +133,8 @@ public class ModItems {
                     .build();
 
     // Weapons
-    public static final Item EXCALIBUR = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "excalibur"),
-            new ExcaliburItem(
-                    new Item.Settings()
+    public static final Item EXCALIBUR = registerItem("excalibur", new ExcaliburItem(
+                    itemSettings("excalibur")
                             .maxCount(1)
                             .fireproof()
                             .maxDamage(2031) // Legendary -> Netherite durability
@@ -136,11 +143,8 @@ public class ModItems {
             )
     );
 
-    public static final Item MURASAME = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "murasame"),
-            new MurasameItem(
-                    new Item.Settings()
+    public static final Item MURASAME = registerItem("murasame", new MurasameItem(
+                    itemSettings("murasame")
                             .maxCount(1)
                             .fireproof()
                             .maxDamage(2031) // Legendary -> Netherite durability
@@ -149,11 +153,8 @@ public class ModItems {
             )
     );
 
-    public static final Item WADOICHIMONJI = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "wado-ichimonji"),
-            new WadoIchimonjiItem(
-                    new Item.Settings()
+    public static final Item WADOICHIMONJI = registerItem("wado-ichimonji", new WadoIchimonjiItem(
+                    itemSettings("wado-ichimonji")
                             .maxCount(1)
                             .fireproof()
                             .maxDamage(1561) // Non-legendary -> Diamond durability
@@ -162,12 +163,9 @@ public class ModItems {
             )
     );
 
-    public static final Item SANDAIKITETSU = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "sandai-kitetsu"),
-            new SandaiKitetsuItem(
-                    ToolMaterials.IRON, // iron damage + durability
-                    new Item.Settings()
+    public static final Item SANDAIKITETSU = registerItem("sandai-kitetsu", new SandaiKitetsuItem(
+                    ToolMaterial.IRON, // iron damage + durability
+                    itemSettings("sandai-kitetsu")
                             .maxCount(1)
                             .maxDamage(783)
                             .attributeModifiers(SANDAI_ATTRIBUTES)
@@ -175,40 +173,31 @@ public class ModItems {
             )
     );
 
-    public static final Item STARKAXE = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "stark-axe"),
-            new StarkAxeItem(
-                    ToolMaterials.DIAMOND,
+    public static final Item STARKAXE = registerItem("stark-axe", new StarkAxeItem(
+                    ToolMaterial.DIAMOND,
                     4.0f,    // damage modifier → ~8 total damage
                     -2.8f,   // speed modifier → 1.2 attack speed
-                    new Item.Settings()
+                    itemSettings("stark-axe")
                             .maxCount(1)
                             .rarity(Rarity.RARE)
             )
     );
 
-    public static final Item ZENITSUSWORD = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "zenitsu-nichirin"),
-            new ZenitsuSwordItem(
-                    ToolMaterials.DIAMOND,
+    public static final Item ZENITSUSWORD = registerItem("zenitsu-nichirin", new ZenitsuSwordItem(
+                    ToolMaterial.DIAMOND,
                     3,        // diamond sword level damage
                     -2.3f,    // speed modifier → 1.7 attack speed
-                    new Item.Settings()
+                    itemSettings("zenitsu-nichirin")
                             .maxCount(1)
                             .rarity(Rarity.RARE)
             )
     );
 
-    public static final Item SOULKATANA = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "split-soul-katana"),
-            new SoulSplitKatanaItem(
-                    ToolMaterials.NETHERITE,
+    public static final Item SOULKATANA = registerItem("split-soul-katana", new SoulSplitKatanaItem(
+                    ToolMaterial.NETHERITE,
                     4,        // Netherite sword bonus damage (+1 over diamond)
                     -2.4f,    // Standard sword speed (1.6 attack speed)
-                    new Item.Settings()
+                    itemSettings("split-soul-katana")
                             .maxCount(1)
                             .rarity(Rarity.EPIC) // Legendary tier
             )
@@ -219,61 +208,40 @@ public class ModItems {
     // Items
     //---------------
 
-    public static final Item MURASAME_GAUNTLETS = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "murasame-gauntlets"),
-            new MurasameGauntletsItem(new Item.Settings().maxCount(1).rarity(Rarity.RARE))
+    public static final Item MURASAME_GAUNTLETS = registerItem("murasame-gauntlets", new MurasameGauntletsItem(itemSettings("murasame-gauntlets").maxCount(1).rarity(Rarity.RARE))
     );
 
     public static final Item CURSED_KITETSU_SHARD =
-            Registry.register(
-                    Registries.ITEM,
-                    Identifier.of("bladebound", "cursed-kitetsu-shard"),
-                    new Item(new Item.Settings().rarity(Rarity.RARE))
+            registerItem("cursed-kitetsu-shard", new Item(itemSettings("cursed-kitetsu-shard").rarity(Rarity.RARE))
             );
 
     public static final Item STEEL_INGOT =
-            Registry.register(
-                    Registries.ITEM,
-                    Identifier.of("bladebound", "steel_ingot"),
-                    new Item(new Item.Settings().rarity(Rarity.UNCOMMON))
+            registerItem("steel_ingot", new Item(itemSettings("steel_ingot").rarity(Rarity.UNCOMMON))
             );
 
-    public static final Item CODEX = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "bladebound-codex"),
-            new BladeboundCodexItem(new Item.Settings().maxCount(1))
+    public static final Item CODEX = registerItem("bladebound-codex", new BladeboundCodexItem(itemSettings("bladebound-codex").maxCount(1))
     );
 
     //---------------
     // Magical items
     //---------------
-    public static final Item FRIEREN_STAFF = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "frieren-staff"),
-            new FrierenStaffItem(
-                    new Item.Settings()
+    public static final Item FRIEREN_STAFF = registerItem("frieren-staff", new FrierenStaffItem(
+                    itemSettings("frieren-staff")
                             .maxCount(1)
                             .maxDamage(550)
                             .rarity(Rarity.EPIC)
             )
     );
 
-    public static final Item FRIEREN_STAFF_CREATIVE = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "frieren-staff-creative"),
-            new FrierenStaffCreativeItem(
-                    new Item.Settings()
+    public static final Item FRIEREN_STAFF_CREATIVE = registerItem("frieren-staff-creative", new FrierenStaffCreativeItem(
+                    itemSettings("frieren-staff-creative")
                             .maxCount(1)
                             .rarity(Rarity.EPIC)
             )
     );
 
-    public static final Item FIREBOLT_SPELL = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "firebolt_spell"),
-            new SpellGrantItem(
-                    new Item.Settings().maxCount(16),
+    public static final Item FIREBOLT_SPELL = registerItem("firebolt_spell", new SpellGrantItem(
+                    itemSettings("firebolt_spell").maxCount(16),
                     Identifier.of("bladebound", "firebolt"),
                     Formatting.GREEN,
                     List.of(
@@ -284,11 +252,8 @@ public class ModItems {
             )
     );
 
-    public static final Item FROST_RAY_SPELL = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "frost_ray_spell"),
-            new SpellGrantItem(
-                    new Item.Settings().maxCount(16),
+    public static final Item FROST_RAY_SPELL = registerItem("frost_ray_spell", new SpellGrantItem(
+                    itemSettings("frost_ray_spell").maxCount(16),
                     Identifier.of("bladebound", "frost_ray"),
                     Formatting.GREEN,
                     List.of(
@@ -299,11 +264,8 @@ public class ModItems {
             )
     );
 
-    public static final Item HEAL_SPELL = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "heal_spell"),
-            new SpellGrantItem(
-                    new Item.Settings().maxCount(16),
+    public static final Item HEAL_SPELL = registerItem("heal_spell", new SpellGrantItem(
+                    itemSettings("heal_spell").maxCount(16),
                     Identifier.of("bladebound", "heal"),
                     Formatting.GREEN,
                     List.of(
@@ -314,11 +276,8 @@ public class ModItems {
             )
     );
 
-    public static final Item STONE_DART_SPELL = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "stone_dart_spell"),
-            new SpellGrantItem(
-                    new Item.Settings().maxCount(16),
+    public static final Item STONE_DART_SPELL = registerItem("stone_dart_spell", new SpellGrantItem(
+                    itemSettings("stone_dart_spell").maxCount(16),
                     Identifier.of("bladebound", "stone_dart"),
                     Formatting.GREEN,
                     List.of(
@@ -329,11 +288,8 @@ public class ModItems {
             )
     );
 
-    public static final Item LIGHTNING_SPELL = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "lightning_spell"),
-            new SpellGrantItem(
-                    new Item.Settings().maxCount(16),
+    public static final Item LIGHTNING_SPELL = registerItem("lightning_spell", new SpellGrantItem(
+                    itemSettings("lightning_spell").maxCount(16),
                     Identifier.of("bladebound", "lightning_strike"),
                     Formatting.BLUE,
                     List.of(
@@ -344,11 +300,8 @@ public class ModItems {
             )
     );
 
-    public static final Item MANA_BARRIER_SPELL = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "mana_barrier_spell"),
-            new SpellGrantItem(
-                    new Item.Settings().maxCount(16),
+    public static final Item MANA_BARRIER_SPELL = registerItem("mana_barrier_spell", new SpellGrantItem(
+                    itemSettings("mana_barrier_spell").maxCount(16),
                     Identifier.of("bladebound", "mana_barrier"),
                     Formatting.BLUE,
                     List.of(
@@ -363,11 +316,8 @@ public class ModItems {
             )
     );
 
-    public static final Item ZOLTRAAK_SPELL = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "zoltraak_spell"),
-            new SpellGrantItem(
-                    new Item.Settings().maxCount(16),
+    public static final Item ZOLTRAAK_SPELL = registerItem("zoltraak_spell", new SpellGrantItem(
+                    itemSettings("zoltraak_spell").maxCount(16),
                     Identifier.of("bladebound", "zoltraak"),
                     Formatting.GOLD,
                     List.of(
@@ -378,11 +328,8 @@ public class ModItems {
             )
     );
 
-    public static final Item PERFECT_HEAL_SPELL = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "perfect_heal_spell"),
-            new SpellGrantItem(
-                    new Item.Settings().maxCount(16),
+    public static final Item PERFECT_HEAL_SPELL = registerItem("perfect_heal_spell", new SpellGrantItem(
+                    itemSettings("perfect_heal_spell").maxCount(16),
                     Identifier.of("bladebound", "perfect_heal"),
                     Formatting.GOLD,
                     List.of(
@@ -393,11 +340,8 @@ public class ModItems {
             )
     );
 
-    public static final Item WORLD_REWRITE_SPELL = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "world_rewrite_spell"),
-            new SpellGrantItem(
-                    new Item.Settings().maxCount(1),
+    public static final Item WORLD_REWRITE_SPELL = registerItem("world_rewrite_spell", new SpellGrantItem(
+                    itemSettings("world_rewrite_spell").maxCount(1),
                     Identifier.of("bladebound", "world_rewrite"),
                     Formatting.RED,
                     List.of(
@@ -418,11 +362,8 @@ public class ModItems {
             )
     );
 
-    public static final Item BLACK_HOLE_SPELL = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "black_hole_spell"),
-            new SpellGrantItem(
-                    new Item.Settings().maxCount(1),
+    public static final Item BLACK_HOLE_SPELL = registerItem("black_hole_spell", new SpellGrantItem(
+                    itemSettings("black_hole_spell").maxCount(1),
                     Identifier.of("bladebound", "black_hole"),
                     Formatting.RED,
                     List.of(
@@ -445,11 +386,8 @@ public class ModItems {
     );
 
     // Spell Scrolls
-    public static final Item FIREBOLT_SCROLL = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "firebolt_scroll"),
-            new net.owen.bladebound.item.custom.SpellScrollItem(
-                    new Item.Settings()
+    public static final Item FIREBOLT_SCROLL = registerItem("firebolt_scroll", new net.owen.bladebound.item.custom.SpellScrollItem(
+                    itemSettings("firebolt_scroll")
                             .maxCount(64)
                             .component(DataComponentTypes.CUSTOM_NAME,
                                     Text.literal("Firebolt Scroll").formatted(Formatting.GREEN))
@@ -464,11 +402,8 @@ public class ModItems {
             )
     );
 
-    public static final Item FROST_RAY_SCROLL = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "frost_ray_scroll"),
-            new net.owen.bladebound.item.custom.SpellScrollItem(
-                    new Item.Settings()
+    public static final Item FROST_RAY_SCROLL = registerItem("frost_ray_scroll", new net.owen.bladebound.item.custom.SpellScrollItem(
+                    itemSettings("frost_ray_scroll")
                             .maxCount(64)
                             .component(DataComponentTypes.CUSTOM_NAME,
                                     Text.literal("Frost Ray Scroll").formatted(Formatting.GREEN))
@@ -483,11 +418,8 @@ public class ModItems {
             )
     );
 
-    public static final Item HEAL_SCROLL = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "heal_scroll"),
-            new net.owen.bladebound.item.custom.SpellScrollItem(
-                    new Item.Settings()
+    public static final Item HEAL_SCROLL = registerItem("heal_scroll", new net.owen.bladebound.item.custom.SpellScrollItem(
+                    itemSettings("heal_scroll")
                             .maxCount(64)
                             .component(DataComponentTypes.CUSTOM_NAME,
                                     Text.literal("Heal Scroll").formatted(Formatting.GREEN))
@@ -502,11 +434,8 @@ public class ModItems {
             )
     );
 
-    public static final Item STONE_DART_SCROLL = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "stone_dart_scroll"),
-            new net.owen.bladebound.item.custom.SpellScrollItem(
-                    new Item.Settings()
+    public static final Item STONE_DART_SCROLL = registerItem("stone_dart_scroll", new net.owen.bladebound.item.custom.SpellScrollItem(
+                    itemSettings("stone_dart_scroll")
                             .maxCount(64)
                             .component(DataComponentTypes.CUSTOM_NAME,
                                     Text.literal("Stone Dart Scroll").formatted(Formatting.GREEN))
@@ -521,11 +450,8 @@ public class ModItems {
             )
     );
 
-    public static final Item LIGHTNING_SCROLL = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "lightning_scroll"),
-            new net.owen.bladebound.item.custom.SpellScrollItem(
-                    new Item.Settings()
+    public static final Item LIGHTNING_SCROLL = registerItem("lightning_scroll", new net.owen.bladebound.item.custom.SpellScrollItem(
+                    itemSettings("lightning_scroll")
                             .maxCount(64)
                             .component(DataComponentTypes.CUSTOM_NAME,
                                     Text.literal("Lightning Strike Scroll").formatted(Formatting.AQUA))
@@ -540,11 +466,8 @@ public class ModItems {
             )
     );
 
-    public static final Item ZOLTRAAK_SCROLL = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "zoltraak_scroll"),
-            new net.owen.bladebound.item.custom.SpellScrollItem(
-                    new Item.Settings()
+    public static final Item ZOLTRAAK_SCROLL = registerItem("zoltraak_scroll", new net.owen.bladebound.item.custom.SpellScrollItem(
+                    itemSettings("zoltraak_scroll")
                             .maxCount(64)
                             .component(DataComponentTypes.CUSTOM_NAME,
                                     Text.literal("Zoltraak Scroll").formatted(Formatting.GOLD))
@@ -559,11 +482,8 @@ public class ModItems {
             )
     );
 
-    public static final Item PERFECT_HEAL_SCROLL = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "perfect_heal_scroll"),
-            new net.owen.bladebound.item.custom.SpellScrollItem(
-                    new Item.Settings()
+    public static final Item PERFECT_HEAL_SCROLL = registerItem("perfect_heal_scroll", new net.owen.bladebound.item.custom.SpellScrollItem(
+                    itemSettings("perfect_heal_scroll")
                             .maxCount(64)
                             .component(DataComponentTypes.CUSTOM_NAME,
                                     Text.literal("Perfect Heal Scroll").formatted(Formatting.GOLD))
@@ -582,69 +502,44 @@ public class ModItems {
 
     // Food Items
 
-    public static final FoodComponent ALWAYS_EDIBLE_APPLE = new FoodComponent.Builder()
-            .nutrition(4)
-            .saturationModifier(2.4f)
-            .alwaysEdible()
-            .build();
+    public static final FoodComponent ALWAYS_EDIBLE_APPLE = new FoodComponent(
+            4,
+            2.4f,
+            true
+    );
 
-    public static final Item MANA_APPLE = Registry.register(
-            Registries.ITEM,
-            Identifier.of(Bladebound.MOD_ID, "mana_apple"),
-            new ManaAppleItem(new Item.Settings().rarity(Rarity.RARE)
+    public static final Item MANA_APPLE = registerItem("mana_apple", new ManaAppleItem(itemSettings("mana_apple").rarity(Rarity.RARE)
                     .food(ALWAYS_EDIBLE_APPLE)
                     .maxCount(16),
                     50)
     );
 
-    public static final Item GREATER_MANA_APPLE = Registry.register(
-            Registries.ITEM,
-            Identifier.of(Bladebound.MOD_ID, "greater_mana_apple"),
-            new ManaAppleItem(new Item.Settings().rarity(Rarity.EPIC)
+    public static final Item GREATER_MANA_APPLE = registerItem("greater_mana_apple", new ManaAppleItem(itemSettings("greater_mana_apple").rarity(Rarity.EPIC)
                     .food(ALWAYS_EDIBLE_APPLE)
                     .maxCount(8),
                     100)
     );
 
-    public static final Item COOLDOWN_BRACELET = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "cooldown_bracelet"),
-            new CooldownBraceletItem(new Item.Settings().maxCount(1).rarity(Rarity.RARE))
+    public static final Item COOLDOWN_BRACELET = registerItem("cooldown_bracelet", new CooldownBraceletItem(itemSettings("cooldown_bracelet").maxCount(1).rarity(Rarity.RARE))
     );
 
-    public static final Item FIXED_COOLDOWN_BRACELET = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "fixed_cooldown_bracelet"),
-            new FixedCooldownBraceletItem(new Item.Settings().maxCount(1).rarity(Rarity.UNCOMMON))
+    public static final Item FIXED_COOLDOWN_BRACELET = registerItem("fixed_cooldown_bracelet", new FixedCooldownBraceletItem(itemSettings("fixed_cooldown_bracelet").maxCount(1).rarity(Rarity.UNCOMMON))
     );
 
     // Boss Items
-    public static final Item BOSS_KEY = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "boss_key"),
-            new Item(new Item.Settings())
+    public static final Item BOSS_KEY = registerItem("boss_key", new Item(itemSettings("boss_key"))
     );
 
     // Armor
-    public static final Item ARCHMAGE_HAT = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "archmage_hat"),
-            new net.owen.bladebound.item.custom.ArchmageHatItem(
-                    ArmorMaterials.NETHERITE,
-                    ArmorItem.Type.HELMET,
-                    new Item.Settings().maxCount(1).rarity(Rarity.EPIC)
-            )
-    );
+    public static final Item ARCHMAGE_HAT = registerItem("archmage_hat", new net.owen.bladebound.item.custom.ArchmageHatItem(
+            itemSettings("archmage_hat").maxCount(1).rarity(Rarity.EPIC)
+                    .armor(ArmorMaterials.NETHERITE, net.minecraft.item.equipment.EquipmentType.HELMET)
+    ));
 
-    public static final Item MAGIC_UPGRADE_SMITHING_TEMPLATE = Registry.register(
-            Registries.ITEM,
-            Identifier.of("bladebound", "magic_upgrade_smithing_template"),
-            new SmithingTemplateItem(
+    public static final Item MAGIC_UPGRADE_SMITHING_TEMPLATE = registerItem("magic_upgrade_smithing_template", new SmithingTemplateItem(
                     Text.translatable("item.bladebound.magic_upgrade_smithing_template.applies_to")
                             .formatted(Formatting.GRAY),
                     Text.translatable("item.bladebound.magic_upgrade_smithing_template.ingredients")
-                            .formatted(Formatting.GRAY),
-                    Text.translatable("item.bladebound.magic_upgrade_smithing_template.title")
                             .formatted(Formatting.GRAY),
                     Text.translatable("item.bladebound.magic_upgrade_smithing_template.base_slot_description")
                             .formatted(Formatting.BLUE),
@@ -655,7 +550,8 @@ public class ModItems {
                     ),
                     List.of(
                             Identifier.of("minecraft", "item/empty_slot_ingot")
-                    )
+                    ),
+                    itemSettings("magic_upgrade_smithing_template")
             )
     );
 

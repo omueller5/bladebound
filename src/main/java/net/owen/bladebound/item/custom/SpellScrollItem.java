@@ -11,7 +11,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.owen.bladebound.magic.StaffSpell;
@@ -42,15 +42,15 @@ public class SpellScrollItem extends Item {
     // Right click → cast spell → consume scroll
     // ------------------------------------------------------------
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getStackInHand(hand);
 
-        if (!world.isClient && world instanceof ServerWorld sw) {
+        if (!world.isClient() && world instanceof ServerWorld sw) {
 
             // Mana check (scrolls still consume mana, no cooldown)
             if (spell.manaCost > 0) {
                 if (!(user instanceof ManaHolder mana)) {
-                    return TypedActionResult.fail(stack);
+                    return ActionResult.FAIL;
                 }
 
                 int current = mana.bladebound$getMana();
@@ -60,7 +60,7 @@ public class SpellScrollItem extends Item {
                                     .formatted(Formatting.RED),
                             true
                     );
-                    return TypedActionResult.fail(stack);
+                    return ActionResult.FAIL;
                 }
 
                 mana.bladebound$setMana(current - spell.manaCost);
@@ -78,7 +78,7 @@ public class SpellScrollItem extends Item {
             }
         }
 
-        return TypedActionResult.success(stack, world.isClient);
+        return ActionResult.SUCCESS;
     }
 
     private static void playScrollUseFx(ServerWorld sw, PlayerEntity user) {

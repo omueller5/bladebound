@@ -3,7 +3,8 @@ package net.owen.bladebound.mixin;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.GameRules;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.rule.GameRules;
 import net.owen.bladebound.accessory.BladeboundAccessoryHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,7 +19,10 @@ public abstract class PlayerDropAccessoriesMixin {
         PlayerEntity self = (PlayerEntity) (Object) this;
 
         // Respect keepInventory gamerule
-        if (self.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) return;
+        if (self instanceof ServerPlayerEntity sp
+                && sp.getEntityWorld().getGameRules().getValue(GameRules.KEEP_INVENTORY)) {
+            return;
+        }
 
         if (!(self instanceof BladeboundAccessoryHolder holder)) return;
 

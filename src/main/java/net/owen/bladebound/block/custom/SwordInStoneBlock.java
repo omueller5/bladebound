@@ -13,7 +13,6 @@ import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -44,21 +43,21 @@ public class SwordInStoneBlock extends Block {
 
     @Override
     protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        return pullSword(state, world, pos, player) ? ActionResult.success(world.isClient) : ActionResult.PASS;
+        return pullSword(state, world, pos, player) ? ActionResult.SUCCESS : ActionResult.PASS;
     }
 
     @Override
-    protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos,
-                                             PlayerEntity player, Hand hand, BlockHitResult hit) {
+    protected ActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos,
+                                         PlayerEntity player, Hand hand, BlockHitResult hit) {
         return pullSword(state, world, pos, player)
-                ? ItemActionResult.success(world.isClient)
-                : ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                ? ActionResult.SUCCESS
+                : ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;
     }
 
     private boolean pullSword(BlockState state, World world, BlockPos pos, PlayerEntity player) {
         if (!state.get(SWORD)) return false; // already empty
 
-        if (!world.isClient) {
+        if (!world.isClient()) {
             ItemStack excalibur = new ItemStack(excaliburItem);
 
             if (!player.getInventory().insertStack(excalibur)) {

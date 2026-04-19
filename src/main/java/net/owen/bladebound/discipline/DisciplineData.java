@@ -11,7 +11,8 @@ public final class DisciplineData {
     private DisciplineData() {}
 
     private static final String ROOT = "bladebound_discipline";
-    private static final String OWNER = "Owner";
+    private static final String OWNER_MOST = "OwnerMost";
+    private static final String OWNER_LEAST = "OwnerLeast";
     private static final String POINTS = "Points";
     private static final String LAST_HIT_MS = "LastHitMs";
     private static final String LAST_HURT_MS = "LastHurtMs";
@@ -25,7 +26,7 @@ public final class DisciplineData {
             setCustomData(stack, full);
         }
 
-        return full.getCompound(ROOT);
+        return full.getCompoundOrEmpty(ROOT);
     }
 
     /** Call this after you modify the compound returned by root(). */
@@ -46,33 +47,41 @@ public final class DisciplineData {
     }
 
     public static boolean isBound(ItemStack stack) {
-        return root(stack).containsUuid(OWNER);
+        NbtCompound r = root(stack);
+        return r.contains(OWNER_MOST) && r.contains(OWNER_LEAST);
     }
 
     public static UUID getOwner(ItemStack stack) {
         NbtCompound r = root(stack);
-        return r.containsUuid(OWNER) ? r.getUuid(OWNER) : null;
+        if (!(r.contains(OWNER_MOST) && r.contains(OWNER_LEAST))) {
+            return null;
+        }
+
+        long most = r.getLong(OWNER_MOST).orElse(0L);
+        long least = r.getLong(OWNER_LEAST).orElse(0L);
+        return new UUID(most, least);
     }
 
     public static void bindTo(ItemStack stack, UUID owner) {
         NbtCompound r = root(stack);
-        r.putUuid(OWNER, owner);
+        r.putLong(OWNER_MOST, owner.getMostSignificantBits());
+        r.putLong(OWNER_LEAST, owner.getLeastSignificantBits());
         saveRoot(stack, r);
     }
 
     public static int getPoints(ItemStack stack) {
-        return root(stack).getInt(POINTS);
+        return root(stack).getInt(POINTS, 0);
     }
 
     public static void addPoints(ItemStack stack, int amount) {
         NbtCompound r = root(stack);
-        int now = Math.max(0, r.getInt(POINTS) + amount);
+        int now = Math.max(0, r.getInt(POINTS, 0) + amount);
         r.putInt(POINTS, now);
         saveRoot(stack, r);
     }
 
     public static long getLastHitMs(ItemStack stack) {
-        return root(stack).getLong(LAST_HIT_MS);
+        return root(stack).getLong(LAST_HIT_MS).orElse(0L);
     }
 
     public static void setLastHitMs(ItemStack stack, long ms) {
@@ -82,7 +91,7 @@ public final class DisciplineData {
     }
 
     public static long getLastHurtMs(ItemStack stack) {
-        return root(stack).getLong(LAST_HURT_MS);
+        return root(stack).getLong(LAST_HURT_MS).orElse(0L);
     }
 
     public static void setLastHurtMs(ItemStack stack, long ms) {

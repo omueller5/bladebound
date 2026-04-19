@@ -2,6 +2,7 @@ package net.owen.bladebound.magic;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -31,8 +32,6 @@ import net.owen.bladebound.magic.ancient.WorldRewriteSpell;
 import net.owen.bladebound.magic.worldrewrite.WorldRewriteZoneManager;
 
 import java.util.List;
-
-import static net.owen.bladebound.entity.ModEntities.BLACK_HOLE;
 
 public enum StaffSpell {
 
@@ -85,10 +84,6 @@ public enum StaffSpell {
     public final SpellRarity rarity;
     public final int manaCost;
 
-    /**
-     * NOTE: This value is currently treated as SECONDS in your project (e.g., Zoltraak = 65).
-     * Keep the name to avoid breaking other files that reference cooldownTicks.
-     */
     public final int cooldownTicks;
 
     private static final java.util.Map<Identifier, StaffSpell> BY_ID = new java.util.HashMap<>();
@@ -113,7 +108,7 @@ public enum StaffSpell {
         this.displayName = displayName;
         this.rarity = rarity;
         this.manaCost = manaCost;
-        this.cooldownTicks = cooldownSeconds; // yes, seconds (legacy name)
+        this.cooldownTicks = cooldownSeconds;
     }
 
     public enum SpellRarity {
@@ -123,22 +118,17 @@ public enum StaffSpell {
         ANCIENT
     }
 
-    // Dynamic + safe mapping: index aligns with enum order
     public static StaffSpell fromIndex(int idx) {
         StaffSpell[] v = values();
         if (idx < 0 || idx >= v.length) return v[0];
         return v[idx];
     }
 
-    /**
-     * Cast the spell.
-     * @return cooldown override in SECONDS; return <= 0 to use the default cooldownTicks (seconds).
-     */
     public int cast(World world, PlayerEntity user, double fireballSpeed) {
 
         // Block ALL spell casting inside an active World Rewrite zone (including the caster)
-        if (!world.isClient && world instanceof ServerWorld sw) {
-            if (WorldRewriteZoneManager.isInsideActiveZone(sw, user.getPos())) {
+        if (!world.isClient() && world instanceof ServerWorld sw) {
+            if (WorldRewriteZoneManager.isInsideActiveZone(sw, new Vec3d(user.getX(), user.getY(), user.getZ()))) {
                 user.sendMessage(Text.literal("Reality is frozen. You can't cast right now."), true);
                 return 0;
             }
@@ -162,7 +152,7 @@ public enum StaffSpell {
     // Stone Dart
     // -------------------------
     private static int castStoneDart(World world, PlayerEntity user) {
-        if (world.isClient) return 0;
+        if (world.isClient()) return 0;
         if (!(world instanceof net.minecraft.server.world.ServerWorld sw)) return 0;
 
         double range = 28.0;
@@ -243,7 +233,7 @@ public enum StaffSpell {
         // Apply damage on hit
         if (entityHit != null) {
             Entity target = entityHit.getEntity();
-            target.damage(world.getDamageSources().magic(), damage);
+            target.damage(sw, world.getDamageSources().magic(), damage);
         }
 
         return 0; // use your default cooldown from SpellCooldowns
@@ -272,8 +262,10 @@ public enum StaffSpell {
 
         if (entityHit != null) {
             Entity target = entityHit.getEntity();
-            strike(world, target.getBlockPos());
-            target.damage(world.getDamageSources().lightningBolt(), 6.0F);
+            if (world instanceof ServerWorld sw) {
+                strike(sw, target.getBlockPos());
+                target.damage(sw, world.getDamageSources().lightningBolt(), 6.0F);
+            }
             return;
         }
 
@@ -285,19 +277,13 @@ public enum StaffSpell {
                 user
         ));
 
-        if (blockHit.getType() != HitResult.Type.MISS) {
-            strike(world, BlockPos.ofFloored(blockHit.getPos()));
+        if (blockHit.getType() != HitResult.Type.MISS && world instanceof ServerWorld sw) {
+            strike(sw, BlockPos.ofFloored(blockHit.getPos()));
         }
     }
 
-    private static void strike(World world, BlockPos pos) {
-        if (world.isClient) return;
-
-        var bolt = net.minecraft.entity.EntityType.LIGHTNING_BOLT.create(world);
-        if (bolt == null) return;
-
-        bolt.refreshPositionAfterTeleport(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
-        world.spawnEntity(bolt);
+    private static void strike(ServerWorld world, BlockPos pos) {
+        net.minecraft.entity.EntityType.LIGHTNING_BOLT.spawn(world, pos, SpawnReason.TRIGGERED);
     }
 
     // -------------------------
@@ -312,7 +298,7 @@ public enum StaffSpell {
     // Zoltraak
     // -------------------------
     private static void castZoltraak(World world, PlayerEntity user) {
-        if (world.isClient) return;
+        if (world.isClient()) return;
         if (!(world instanceof ServerWorld sw)) return;
 
         double range = 65.0;
@@ -357,7 +343,7 @@ public enum StaffSpell {
             Entity hit = entityHit.getEntity();
             finalEnd = entityHit.getPos();
 
-            hit.damage(world.getDamageSources().magic(), damage);
+            hit.damage(sw, world.getDamageSources().magic(), damage);
 
             double shockRadius = 2.6;
             float knockbackStrength = 0.85f;
@@ -388,13 +374,13 @@ public enum StaffSpell {
                     ),
                     e -> e.isAlive() && e != user
             )) {
-                Vec3d dir = e.getPos().subtract(finalEnd).normalize();
+                Vec3d dir = new Vec3d(e.getX(), e.getY(), e.getZ()).subtract(finalEnd).normalize();
                 e.addVelocity(
                         dir.x * knockbackStrength,
                         0.25,
                         dir.z * knockbackStrength
                 );
-                e.velocityModified = true;
+                e.velocityDirty = true;
             }
         }
 
@@ -459,7 +445,7 @@ public enum StaffSpell {
     // Perfect Heal
     // -------------------------
     private static int castPerfectHeal(World world, PlayerEntity user) {
-        if (world.isClient) return 0;
+        if (world.isClient()) return 0;
         if (!(user instanceof ManaHolder mana)) return 0;
 
         int currentMana = mana.bladebound$getMana();
@@ -493,7 +479,7 @@ public enum StaffSpell {
     // World Rewrite (Ancient)
     // -------------------------
     private static int castWorldRewrite(World world, PlayerEntity user) {
-        if (world.isClient) return 0;
+        if (world.isClient()) return 0;
         if (!(world instanceof ServerWorld sw)) return 0;
         if (!(user instanceof ServerPlayerEntity sp)) return 0;
 
@@ -505,7 +491,7 @@ public enum StaffSpell {
     // Black Hole (Ancient)
     // -------------------------
     private static int castBlackHole(World world, PlayerEntity user) {
-        if (world.isClient) return 0;
+        if (world.isClient()) return 0;
         if (!(world instanceof ServerWorld sw)) return 0;
         if (!(user instanceof ServerPlayerEntity sp)) return 0;
 
@@ -532,13 +518,8 @@ public enum StaffSpell {
     private static void castFirebolt(World world, PlayerEntity user, double speed) {
         Vec3d look = user.getRotationVec(1.0F).normalize().multiply(speed);
 
-        SmallFireballEntity fireball = new SmallFireballEntity(
-                world,
-                user.getX(),
-                user.getEyeY() - 0.1,
-                user.getZ(),
-                look
-        );
+        SmallFireballEntity fireball = new SmallFireballEntity(world, user, look);
+        fireball.setPosition(user.getX(), user.getEyeY() - 0.1, user.getZ());
         fireball.setOwner(user);
         world.spawnEntity(fireball);
 

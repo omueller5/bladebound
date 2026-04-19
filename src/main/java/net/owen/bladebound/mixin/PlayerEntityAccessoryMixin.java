@@ -2,9 +2,10 @@ package net.owen.bladebound.mixin;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.inventory.Inventories;
+import net.minecraft.item.ItemStack;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.owen.bladebound.accessory.BladeboundAccessoryHolder;
 import net.owen.bladebound.accessory.BladeboundAccessoryInventory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,23 +25,15 @@ public abstract class PlayerEntityAccessoryMixin implements BladeboundAccessoryH
         return bladebound$accInv;
     }
 
-    @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
-    private void bladebound$writeAccessories(NbtCompound nbt, CallbackInfo ci) {
-        PlayerEntity self = (PlayerEntity) (Object) this;
-
-        NbtCompound acc = new NbtCompound();
-        Inventories.writeNbt(acc, bladebound$accInv.bladebound$stacks(), self.getRegistryManager());
-
-        nbt.put("BladeboundAccessories", acc);
+    @Inject(method = "writeCustomData", at = @At("TAIL"))
+    private void bladebound$writeAccessories(WriteView view, CallbackInfo ci) {
+        WriteView acc = view.get("BladeboundAccessories");
+        Inventories.writeData(acc, bladebound$accInv.bladebound$stacks(), true);
     }
 
-    @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
-    private void bladebound$readAccessories(NbtCompound nbt, CallbackInfo ci) {
-        if (!nbt.contains("BladeboundAccessories", NbtElement.COMPOUND_TYPE)) return;
-
-        PlayerEntity self = (PlayerEntity) (Object) this;
-
-        NbtCompound acc = nbt.getCompound("BladeboundAccessories");
-        Inventories.readNbt(acc, bladebound$accInv.bladebound$stacks(), self.getRegistryManager());
+    @Inject(method = "readCustomData", at = @At("TAIL"))
+    private void bladebound$readAccessories(ReadView view, CallbackInfo ci) {
+        view.getOptionalReadView("BladeboundAccessories")
+                .ifPresent(acc -> Inventories.readData(acc, bladebound$accInv.bladebound$stacks()));
     }
 }

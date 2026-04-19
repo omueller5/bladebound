@@ -6,10 +6,10 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.particle.TintedParticleEffect;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -115,7 +115,7 @@ public final class BlackFlash {
         if (attacker.getCommandTags().contains(TEST_TAG)) return true;
 
         // Only roll + mutate hot-window state on server
-        if (!(attacker.getWorld() instanceof ServerWorld sw)) {
+        if (!(attacker.getEntityWorld() instanceof ServerWorld sw)) {
             return false;
         }
 
@@ -173,7 +173,7 @@ public final class BlackFlash {
      * - Increase BF_SPEED_* to make the particles fly outward faster.
      */
     public static void spawnVanillaEffects(LivingEntity target) {
-        if (!(target.getWorld() instanceof ServerWorld sw)) return;
+        if (!(target.getEntityWorld() instanceof ServerWorld sw)) return;
 
         double x = target.getX();
         double y = target.getBodyY(0.6);
@@ -197,7 +197,7 @@ public final class BlackFlash {
         // =========================================================
 
         // Sharp impact flash (keep tight so it reads as a "hit frame")
-        sw.spawnParticles(ParticleTypes.FLASH, x, y, z, 2, 0, 0, 0, 0);
+        sw.spawnParticles(TintedParticleEffect.create(ParticleTypes.FLASH, 1.0f, 1.0f, 1.0f), x, y, z, 2, 0, 0, 0, 0);
 
         // Big vanilla crit burst
         sw.spawnParticles(ParticleTypes.CRIT, x, y, z,
@@ -213,8 +213,8 @@ public final class BlackFlash {
         );
 
         // Black + red “ink” accents (vanilla dust particles)
-        DustParticleEffect black = new DustParticleEffect(new Vector3f(0.05f, 0.05f, 0.05f), 2.0f);
-        DustParticleEffect darkRed = new DustParticleEffect(new Vector3f(0.65f, 0.05f, 0.05f), 2.0f);
+        DustParticleEffect black = new DustParticleEffect(0x0D0D0D, 2.0f);
+        DustParticleEffect darkRed = new DustParticleEffect(0xA60D0D, 2.0f);
 
         sw.spawnParticles(black, x, y, z,
                 80,
@@ -241,7 +241,7 @@ public final class BlackFlash {
                 BF_SPEED_SMOKE
         );
 
-        // Vanilla audio punch (coordinate overload works in 1.21.1)
+        // Vanilla audio punch (coordinate overload works in 1.21.11)
         sw.playSound(null, x, y, z,
                 SoundEvents.ENTITY_PLAYER_ATTACK_CRIT,
                 SoundCategory.PLAYERS,

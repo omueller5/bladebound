@@ -5,17 +5,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
-/**
- * Helper for granting BladeBound advancements safely (MC/Fabric 1.21.1).
- */
 public final class BladeboundAdvancements {
     private BladeboundAdvancements() {}
 
     private static AdvancementEntry getEntry(ServerPlayerEntity player, String path) {
-        MinecraftServer server = player.getServer();
+        MinecraftServer server = player.getCommandSource().getServer();
         if (server == null) return null;
 
-        // In 1.21.x the loader returns AdvancementEntry
         return server.getAdvancementLoader().get(Identifier.of("bladebound", path));
     }
 

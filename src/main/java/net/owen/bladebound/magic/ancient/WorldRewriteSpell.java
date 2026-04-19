@@ -77,7 +77,7 @@ public final class WorldRewriteSpell {
             mana.bladebound$setMana(currentMana - MANA_COST);
         }
 
-        WorldRewriteZoneManager.start(world, caster.getUuid(), caster.getPos(), RADIUS, DURATION_TICKS);
+        WorldRewriteZoneManager.start(world, caster.getUuid(), new net.minecraft.util.math.Vec3d(caster.getX(), caster.getY(), caster.getZ()), RADIUS, DURATION_TICKS);
 
         if (!exemptFromCosts) {
             NEXT_ALLOWED_TICK.put(caster.getUuid(), now + COOLDOWN_TICKS);

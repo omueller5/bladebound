@@ -1,57 +1,50 @@
 package net.owen.bladebound.loot;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtLong;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.PersistentState;
+import net.minecraft.world.PersistentStateType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class BossLockState extends PersistentState {
+
+    private static final Codec<BossLockState> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.LONG.listOf().optionalFieldOf("locks", List.of()).forGetter(BossLockState::locksAsList),
+            Codec.LONG.listOf().optionalFieldOf("claimed", List.of()).forGetter(BossLockState::claimedAsList)
+    ).apply(instance, BossLockState::new));
+
+    private static final PersistentStateType<BossLockState> TYPE =
+            new PersistentStateType<>("bladebound_boss_locks", BossLockState::new, CODEC, null);
 
     private final LongOpenHashSet locks = new LongOpenHashSet();
     private final LongOpenHashSet claimed = new LongOpenHashSet();
 
     public static BossLockState get(ServerWorld world) {
-        return world.getPersistentStateManager().getOrCreate(
-                new Type<>(
-                        BossLockState::new,
-                        BossLockState::fromNbt,
-                        null
-                ),
-                "bladebound_boss_locks"
-        );
+        return world.getPersistentStateManager().getOrCreate(TYPE);
     }
 
-    private static BossLockState fromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
-        BossLockState s = new BossLockState();
-
-        if (nbt.contains("locks", NbtElement.LIST_TYPE)) {
-            NbtList list = nbt.getList("locks", NbtElement.LONG_TYPE);
-            for (int i = 0; i < list.size(); i++) s.locks.add(((NbtLong) list.get(i)).longValue());
-        }
-
-        if (nbt.contains("claimed", NbtElement.LIST_TYPE)) {
-            NbtList list = nbt.getList("claimed", NbtElement.LONG_TYPE);
-            for (int i = 0; i < list.size(); i++) s.claimed.add(((NbtLong) list.get(i)).longValue());
-        }
-
-        return s;
+    public BossLockState() {
     }
 
-    @Override
-    public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
-        NbtList locksList = new NbtList();
-        for (long v : locks) locksList.add(NbtLong.of(v));
-        nbt.put("locks", locksList);
+    private BossLockState(List<Long> locks, List<Long> claimed) {
+        for (long v : locks) this.locks.add(v);
+        for (long v : claimed) this.claimed.add(v);
+    }
 
-        NbtList claimedList = new NbtList();
-        for (long v : claimed) claimedList.add(NbtLong.of(v));
-        nbt.put("claimed", claimedList);
+    private List<Long> locksAsList() {
+        List<Long> out = new ArrayList<>(locks.size());
+        for (long v : locks) out.add(v);
+        return out;
+    }
 
-        return nbt;
+    private List<Long> claimedAsList() {
+        List<Long> out = new ArrayList<>(claimed.size());
+        for (long v : claimed) out.add(v);
+        return out;
     }
 
     public void addLock(long pos) {

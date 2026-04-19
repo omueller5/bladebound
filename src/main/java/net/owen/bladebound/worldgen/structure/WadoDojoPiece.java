@@ -41,12 +41,12 @@ public class WadoDojoPiece extends StructurePiece {
     public WadoDojoPiece(StructureContext context, NbtCompound nbt) {
         super(BladeboundStructures.WADO_DOJO_PIECE, nbt);
 
-        this.origin = new BlockPos(nbt.getInt("ox"), nbt.getInt("oy"), nbt.getInt("oz"));
-        this.entitiesPlaced = nbt.getBoolean("entitiesPlaced");
+        this.origin = new BlockPos(nbt.getInt("ox", 0), nbt.getInt("oy", 0), nbt.getInt("oz", 0));
+        this.entitiesPlaced = nbt.getBoolean("entitiesPlaced", false);
 
-        this.baseLocked = nbt.getBoolean("baseLocked");
+        this.baseLocked = nbt.getBoolean("baseLocked", false);
         if (baseLocked) {
-            this.lockedBase = new BlockPos(nbt.getInt("bx"), nbt.getInt("by"), nbt.getInt("bz"));
+            this.lockedBase = new BlockPos(nbt.getInt("bx", 0), nbt.getInt("by", 0), nbt.getInt("bz", 0));
         } else {
             this.lockedBase = null;
         }

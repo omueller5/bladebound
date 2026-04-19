@@ -1,7 +1,10 @@
 package net.owen.bladebound.client.screen;
 
+import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -14,38 +17,30 @@ import net.minecraft.util.Identifier;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class CodexScreen extends Screen {
 
     private static final Identifier BG = Identifier.of("bladebound", "textures/gui/codex.png");
     private static final int BG_W = 570;
     private static final int BG_H = 420;
 
-    // Your front-page icon: assets/bladebound/textures/icon.png
     private static final Identifier FRONT_ICON = Identifier.of("bladebound", "icon.png");
 
-    // Layout (book-space coords)
     private static final int PAGE_MARGIN_X = 28;
     private static final int PAGE_TOP_Y = 28;
-    private static final int PAGE_BOTTOM_PAD = 44; // keep away from nav buttons/bottom edge
+    private static final int PAGE_BOTTOM_PAD = 44;
     private static final int LINE_H = 11;
 
-    // Left page item layout
     private static final int LEFT_IMAGE_TOP_Y = 90;
     private static final int LEFT_ITEM_BOX = 160;
     private static final int LEFT_NAME_GAP = 10;
 
-    // Right page text area top
     private static final int RIGHT_TEXT_TOP = 60;
 
-    // Center body text too (you wanted everything centered)
     private static final boolean CENTER_BODY_TEXT = true;
 
-    // Front page icon size (book-space)
     private static final int FRONT_ICON_SIZE = 44;
     private static final int FRONT_ICON_GAP = 10;
 
-    // Nav buttons (book-space)
     private static final int BTN_W = 70;
     private static final int BTN_H = 20;
     private static final int BTN_Y = BG_H - 28;
@@ -54,7 +49,6 @@ public class CodexScreen extends Screen {
     private int spreadIndex = 0;
     private final List<Spread> spreads = buildSpreads();
 
-    // Computed each render (screen-space)
     private float bookScale = 1.0f;
     private int bookX = 0;
     private int bookY = 0;
@@ -63,15 +57,16 @@ public class CodexScreen extends Screen {
         super(Text.literal("Bladebound Codex"));
     }
 
-    // Keep blur disabled for this screen
     @Override
-    protected void applyBlur(float delta) { }
+    protected void applyBlur(DrawContext context) {
+    }
+
     @Override
-    public void blur() { }
+    public void blur() {
+    }
 
     @Override
     protected void init() {
-        // We draw our own scaled buttons; no widgets needed
     }
 
     private void goSpread(int delta) {
@@ -81,33 +76,46 @@ public class CodexScreen extends Screen {
         spreadIndex = n;
     }
 
-    private boolean canPrev() { return spreadIndex > 0; }
-    private boolean canNext() { return spreadIndex < spreads.size() - 1; }
+    private boolean canPrev() {
+        return spreadIndex > 0;
+    }
+
+    private boolean canNext() {
+        return spreadIndex < spreads.size() - 1;
+    }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 263) { if (canPrev()) goSpread(-1); return true; } // left arrow
-        if (keyCode == 262) { if (canNext()) goSpread(1);  return true; } // right arrow
-        return super.keyPressed(keyCode, scanCode, modifiers);
+    public boolean keyPressed(KeyInput input) {
+        if (input.isLeft()) {
+            if (canPrev()) goSpread(-1);
+            return true;
+        }
+        if (input.isRight()) {
+            if (canNext()) goSpread(1);
+            return true;
+        }
+        return super.keyPressed(input);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if (verticalAmount < 0) { if (canNext()) goSpread(1); }
-        else if (verticalAmount > 0) { if (canPrev()) goSpread(-1); }
+        if (verticalAmount < 0) {
+            if (canNext()) goSpread(1);
+        } else if (verticalAmount > 0) {
+            if (canPrev()) goSpread(-1);
+        }
         return true;
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        double bx = toBookX(mouseX);
-        double by = toBookY(mouseY);
+    public boolean mouseClicked(Click click, boolean doubled) {
+        double bx = toBookX(click.x());
+        double by = toBookY(click.y());
 
         if (bx < 0 || by < 0 || bx > BG_W || by > BG_H) {
-            return super.mouseClicked(mouseX, mouseY, button);
+            return super.mouseClicked(click, doubled);
         }
 
-        // Prev
         int prevX = BTN_PAD_X;
         int prevY = BTN_Y;
         if (bx >= prevX && bx <= prevX + BTN_W && by >= prevY && by <= prevY + BTN_H) {
@@ -115,7 +123,6 @@ public class CodexScreen extends Screen {
             return true;
         }
 
-        // Next
         int nextX = BG_W - BTN_PAD_X - BTN_W;
         int nextY = BTN_Y;
         if (bx >= nextX && bx <= nextX + BTN_W && by >= nextY && by <= nextY + BTN_H) {
@@ -123,7 +130,7 @@ public class CodexScreen extends Screen {
             return true;
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
     @Override
@@ -135,11 +142,11 @@ public class CodexScreen extends Screen {
         double bx = toBookX(mouseX);
         double by = toBookY(mouseY);
 
-        context.getMatrices().push();
-        context.getMatrices().translate(bookX, bookY, 0);
-        context.getMatrices().scale(bookScale, bookScale, 1.0f);
+        context.getMatrices().pushMatrix();
+        context.getMatrices().translate((float) bookX, (float) bookY);
+        context.getMatrices().scale(bookScale, bookScale);
 
-        context.drawTexture(BG, 0, 0, 0, 0, BG_W, BG_H, BG_W, BG_H);
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, BG, 0, 0, 0.0f, 0.0f, BG_W, BG_H, BG_W, BG_H);
 
         Spread spread = spreads.get(spreadIndex);
 
@@ -152,7 +159,7 @@ public class CodexScreen extends Screen {
         drawRightPageText(context, spread);
         drawNavButtons(context, bx, by);
 
-        context.getMatrices().pop();
+        context.getMatrices().popMatrix();
 
         super.render(context, mouseX, mouseY, delta);
     }
@@ -185,7 +192,6 @@ public class CodexScreen extends Screen {
     }
 
     private void drawNavButtons(DrawContext ctx, double bx, double by) {
-        // Prev
         int prevX = BTN_PAD_X;
         int prevY = BTN_Y;
         boolean prevHover = bx >= prevX && bx <= prevX + BTN_W && by >= prevY && by <= prevY + BTN_H;
@@ -199,7 +205,6 @@ public class CodexScreen extends Screen {
         int prevColor = (!canPrev()) ? 0xFF888888 : 0xFFE6D5B8;
         ctx.drawText(this.textRenderer, prevText, ptx, pty, prevColor, false);
 
-        // Next
         int nextX = BG_W - BTN_PAD_X - BTN_W;
         int nextY = BTN_Y;
         boolean nextHover = bx >= nextX && bx <= nextX + BTN_W && by >= nextY && by <= nextY + BTN_H;
@@ -221,7 +226,6 @@ public class CodexScreen extends Screen {
         int leftX1 = spineX - PAGE_MARGIN_X;
         int leftW = leftX1 - leftX0;
 
-        // INTRO: centered + icon.png
         if (spread.isIntro) {
             List<Line> lines = new ArrayList<>();
 
@@ -250,7 +254,7 @@ public class CodexScreen extends Screen {
             int iconX = leftX0 + (leftW - FRONT_ICON_SIZE) / 2;
             int iconY = startY;
 
-            context.drawTexture(FRONT_ICON, iconX, iconY, 0, 0,
+            context.drawTexture(RenderPipelines.GUI_TEXTURED, FRONT_ICON, iconX, iconY, 0.0f, 0.0f,
                     FRONT_ICON_SIZE, FRONT_ICON_SIZE,
                     FRONT_ICON_SIZE, FRONT_ICON_SIZE);
 
@@ -267,7 +271,6 @@ public class CodexScreen extends Screen {
             return;
         }
 
-        // Normal item spread: original left-side layout (unchanged)
         if (spread.leftItem != null && !spread.leftItem.isEmpty()) {
             int boxX = leftX0 + (leftW - LEFT_ITEM_BOX) / 2;
             int boxY = LEFT_IMAGE_TOP_Y;
@@ -376,14 +379,14 @@ public class CodexScreen extends Screen {
     private void drawItemInBox(DrawContext context, int x, int y, int boxSize, ItemStack stack) {
         float scale = boxSize / 16.0f;
 
-        context.getMatrices().push();
-        context.getMatrices().translate(x, y, 200);
-        context.getMatrices().scale(scale, scale, scale);
+        context.getMatrices().pushMatrix();
+        context.getMatrices().translate((float) x, (float) y);
+        context.getMatrices().scale(scale, scale);
 
-        context.drawItem(stack, 0, 0);
-        context.drawItemInSlot(this.textRenderer, stack, 0, 0);
+        context.drawItemWithoutEntity(stack, 0, 0, 0);
+        context.drawStackOverlay(this.textRenderer, stack, 0, 0);
 
-        context.getMatrices().pop();
+        context.getMatrices().popMatrix();
     }
 
     private static ItemStack stack(String id) {
@@ -403,7 +406,6 @@ public class CodexScreen extends Screen {
                         "Use this codex to learn what each item does, how to obtain it, and the rules that keep it balanced."
         ));
 
-        // Mana Apple
         s.add(Spread.item(
                 stack("bladebound:mana_apple"),
                 "Mana Apple",
@@ -416,7 +418,6 @@ public class CodexScreen extends Screen {
                 Rarity.RARE
         ));
 
-        // Greater Mana Apple
         s.add(Spread.item(
                 stack("bladebound:greater_mana_apple"),
                 "Greater Mana Apple",
@@ -429,7 +430,6 @@ public class CodexScreen extends Screen {
                 Rarity.LEGENDARY
         ));
 
-        // Cursed Kitetsu Shard
         s.add(Spread.item(
                 stack("bladebound:cursed-kitetsu-shard"),
                 "Cursed Kitetsu Shard",
@@ -441,7 +441,6 @@ public class CodexScreen extends Screen {
                 Rarity.RARE
         ));
 
-        // Steel Ingot
         s.add(Spread.item(
                 stack("bladebound:steel_ingot"),
                 "Steel Ingot",
@@ -454,8 +453,6 @@ public class CodexScreen extends Screen {
                 Rarity.UNCOMMON
         ));
 
-
-        // Murasame Gauntlets
         s.add(Spread.item(
                 stack("bladebound:murasame-gauntlets"),
                 "Gauntlets",
@@ -467,7 +464,6 @@ public class CodexScreen extends Screen {
                 Rarity.RARE
         ));
 
-        // Cooldown Bracelet
         s.add(Spread.item(
                 stack("bladebound:cooldown_bracelet"),
                 "Bracelet",
@@ -480,7 +476,6 @@ public class CodexScreen extends Screen {
                 Rarity.RARE
         ));
 
-        // Grimoires (single page, future-proof)
         s.add(Spread.item(
                 stack("bladebound:zoltraak_spell"),
                 "Grimoires",
@@ -503,7 +498,6 @@ public class CodexScreen extends Screen {
                 Rarity.LEGENDARY
         ));
 
-        // Spell Scrolls (single page)
         s.add(Spread.item(
                 stack("bladebound:firebolt_scroll"),
                 "Spell Scrolls",
@@ -523,8 +517,6 @@ public class CodexScreen extends Screen {
                 Rarity.RARE
         ));
 
-
-        // Sandai Kitetsu
         s.add(Spread.item(
                 stack("bladebound:sandai-kitetsu"),
                 "Sandai Kitetsu",
@@ -535,7 +527,6 @@ public class CodexScreen extends Screen {
                 Rarity.UNCOMMON
         ));
 
-        // Stark's Axe
         s.add(Spread.item(
                 stack("bladebound:stark-axe"),
                 "Stark's Axe",
@@ -548,7 +539,6 @@ public class CodexScreen extends Screen {
                 Rarity.RARE
         ));
 
-        // Zenitsu's Sword
         s.add(Spread.item(
                 stack("bladebound:zenitsu-nichirin"),
                 "Zenitsu's Nichirin Sword",
@@ -561,7 +551,6 @@ public class CodexScreen extends Screen {
                 Rarity.RARE
         ));
 
-        // Wado Ichimonji
         s.add(Spread.item(
                 stack("bladebound:wado-ichimonji"),
                 "Wado Ichimonji",
@@ -575,7 +564,6 @@ public class CodexScreen extends Screen {
                 Rarity.RARE
         ));
 
-        // Soul Split Katana
         s.add(Spread.item(
                 stack("bladebound:split-soul-katana"),
                 "Split Soul Katana",
@@ -588,8 +576,6 @@ public class CodexScreen extends Screen {
                 Rarity.LEGENDARY
         ));
 
-
-        // Murasame
         s.add(Spread.item(
                 stack("bladebound:murasame"),
                 "Murasame",
@@ -603,7 +589,6 @@ public class CodexScreen extends Screen {
                 Rarity.LEGENDARY
         ));
 
-        // Excalibur
         s.add(Spread.item(
                 stack("bladebound:excalibur"),
                 "Excalibur",
@@ -616,7 +601,6 @@ public class CodexScreen extends Screen {
                 Rarity.LEGENDARY
         ));
 
-        // Frieren Staff
         s.add(Spread.item(
                 stack("bladebound:frieren-staff"),
                 "Frieren's Staff",

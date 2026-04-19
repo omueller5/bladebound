@@ -4,10 +4,11 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
-import net.minecraft.item.ToolMaterials;
+import net.minecraft.item.ToolMaterial;
 import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.EntityTypeTags;
@@ -20,18 +21,20 @@ import net.owen.bladebound.BladeboundConfig;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.Set;
 
-public class ExcaliburItem extends SwordItem {
+public class ExcaliburItem extends Item {
 
     private static final float UNDEAD_BONUS_DAMAGE = 6.0f;
 
     public ExcaliburItem(Settings settings) {
-        super(ToolMaterials.NETHERITE, settings);
+        super(settings);
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
+    public void appendTooltip(ItemStack stack, Item.TooltipContext context, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
+        List<Text> tooltip = new java.util.ArrayList<>();
         tooltip.add(Text.literal("LEGENDARY").formatted(Formatting.GOLD, Formatting.BOLD));
         tooltip.add(Text.literal("Blessed: Deals bonus damage to undead.").formatted(Formatting.AQUA));
         tooltip.add(Text.literal("A holy blade that answers only the worthy.").formatted(Formatting.YELLOW, Formatting.ITALIC));
@@ -39,15 +42,17 @@ public class ExcaliburItem extends SwordItem {
 
         tooltip.add(Text.literal(" "));
         BladeboundBind.appendBindTooltip(stack, tooltip);
+
+        tooltip.forEach(textConsumer);
     }
 
     // Only Unbreaking + Mending allowed
     private static void enforceEnchantRules(ServerWorld world, ItemStack stack) {
         if (!BladeboundConfig.DATA.enforceAllowedEnchantments) return;
 
-        var enchantReg = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
-        RegistryEntry<?> unbreaking = enchantReg.entryOf(Enchantments.UNBREAKING);
-        RegistryEntry<?> mending = enchantReg.entryOf(Enchantments.MENDING);
+        var enchantReg = world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
+        RegistryEntry<?> unbreaking = enchantReg.getEntry(enchantReg.getValueOrThrow(Enchantments.UNBREAKING));
+        RegistryEntry<?> mending = enchantReg.getEntry(enchantReg.getValueOrThrow(Enchantments.MENDING));
 
         Set<RegistryEntry<?>> allowed = new HashSet<>();
         allowed.add((RegistryEntry<?>) unbreaking);
@@ -59,10 +64,11 @@ public class ExcaliburItem extends SwordItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, net.minecraft.world.World world,
-                              net.minecraft.entity.Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, net.minecraft.server.world.ServerWorld world,
+                              net.minecraft.entity.Entity entity, net.minecraft.entity.EquipmentSlot slot) {
+        boolean selected = slot == EquipmentSlot.MAINHAND;
 
-        if (!world.isClient
+        if (!world.isClient()
                 && selected
                 && entity instanceof ServerPlayerEntity player
                 && world instanceof ServerWorld sw) {
@@ -79,25 +85,23 @@ public class ExcaliburItem extends SwordItem {
             BladeboundBind.allowUseOrPunish(stack, player);
         }
 
-        super.inventoryTick(stack, world, entity, slot, selected);
+        super.inventoryTick(stack, world, entity, slot);
     }
 
     @Override
-    public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 
-        if (!attacker.getWorld().isClient() && attacker instanceof ServerPlayerEntity player) {
+        if (!attacker.getEntityWorld().isClient() && attacker instanceof ServerPlayerEntity player) {
 
-            // Bind on first combat use too (in case)
             BladeboundBind.bindIfUnbound(stack, player);
 
-            // If not owner, block all special behavior (but vanilla hit already happened)
             if (!BladeboundBind.allowUseOrPunish(stack, player)) {
-                return super.postHit(stack, target, attacker);
+                super.postHit(stack, target, attacker);
+                return;
             }
 
-            // Your special undead bonus
             if (target.getType().isIn(EntityTypeTags.UNDEAD)) {
-                target.damage(attacker.getDamageSources().magic(), UNDEAD_BONUS_DAMAGE);
+                target.damage((ServerWorld) attacker.getEntityWorld(), attacker.getDamageSources().magic(), UNDEAD_BONUS_DAMAGE);
             }
 
             // Durability loss
@@ -106,6 +110,6 @@ public class ExcaliburItem extends SwordItem {
             }
         }
 
-        return super.postHit(stack, target, attacker);
+        super.postHit(stack, target, attacker);
     }
 }

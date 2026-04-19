@@ -30,18 +30,6 @@ public class ClientPackets {
             });
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(ManaSyncPayload.ID, (payload, context) -> {
-            context.client().execute(() -> {
-                if (context.client().player == null) return;
-
-                if (context.client().player instanceof ManaHolder mh) {
-                    // payload.maxMana() is BASE max mana
-                    mh.bladebound$setMaxMana(payload.maxMana());
-                    mh.bladebound$setMana(payload.mana());
-                }
-            });
-        });
-
         // -----------------------
         // S2C spell state sync (learned IDs + selected ID)
         // -----------------------
