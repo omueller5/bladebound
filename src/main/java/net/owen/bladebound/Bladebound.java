@@ -68,7 +68,6 @@ public class Bladebound implements ModInitializer {
         BlackHoleWardenDropHandler.init();
 
         Payloads.register();
-        ClientPackets.register();
         ServerPackets.register();
         PlayerRespawnCopy.register();
 
