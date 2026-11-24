@@ -193,6 +193,8 @@ public class BladeboundClient implements ClientModInitializer {
                 }
             }
         });
+
+        ClientPackets.register();
     }
 
     private static String formatCooldownMmSs(int ticksLeft) {
